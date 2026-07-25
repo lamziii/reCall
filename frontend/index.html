@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0A0A0B" />
+    <script>
+      // Blocking (classic, synchronous) script — must run before first paint to avoid a
+      // flash of the wrong theme. Mirrors ThemeProvider's resolution logic exactly
+      // (src/app/theme/theme-provider.tsx): same storage key, same fallback order.
+      ;(function () {
+        try {
+          var STORAGE_KEY = 'recall-theme'
+          var stored = localStorage.getItem(STORAGE_KEY)
+          var preference = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system'
+          var resolved =
+            preference === 'system'
+              ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+              : preference
+          document.documentElement.setAttribute('data-theme', resolved)
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark')
+        }
+      })()
+    </script>
+    <title>Recall — Conversations become knowledge</title>
+    <meta
+      name="description"
+      content="Recall transforms meetings into structured decisions, tasks, insights, and searchable organizational knowledge."
+    />
+    <!-- Placeholder: real production domain not yet assigned. -->
+    <link rel="canonical" href="https://recall.example.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Recall" />
+    <meta property="og:title" content="Recall — Conversations become knowledge" />
+    <meta
+      property="og:description"
+      content="Recall transforms meetings into structured decisions, tasks, insights, and searchable organizational knowledge."
+    />
+    <meta property="og:image" content="https://recall.example.com/og-image.png" />
+    <meta property="og:url" content="https://recall.example.com/" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Recall — Conversations become knowledge" />
+    <meta
+      name="twitter:description"
+      content="Recall transforms meetings into structured decisions, tasks, insights, and searchable organizational knowledge."
+    />
+    <meta name="twitter:image" content="https://recall.example.com/og-image.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
