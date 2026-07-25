@@ -3,6 +3,7 @@ import { Divider } from '@/components/data-display/divider'
 import { Timeline, TimelineItem } from '@/components/data-display/timeline'
 import { TimestampLink } from '@/components/recall/timestamp-link'
 import { InsightLabel } from '@/components/recall/insight-label'
+import { QuestionList } from '@/components/recall/question-list'
 import { Avatar } from '@/components/data-display/avatar'
 import { Body, Caption, H3, Small } from '@/components/typography'
 import { EmptyState } from '@/components/feedback/empty-state'
@@ -49,18 +50,7 @@ export function SessionOverview({ session, onApproveDecision, onRejectDecision, 
 
         <section className="flex flex-col gap-3">
           <H3>Open questions</H3>
-          {session.questions.length === 0 ? (
-            <EmptyState title="No open questions" className="py-6" />
-          ) : (
-            <div className="flex flex-col divide-y divide-border-subtle">
-              {session.questions.map((q) => (
-                <div key={q.id} className="flex flex-col gap-1 py-3">
-                  <Small className="font-medium text-foreground">{q.title}</Small>
-                  <Caption className="text-subtle-foreground">{[q.ownerName, q.projectName, q.timestampLabel].filter(Boolean).join(' · ')}</Caption>
-                </div>
-              ))}
-            </div>
-          )}
+          <QuestionList questions={session.questions} />
         </section>
       </div>
 
