@@ -1,5 +1,10 @@
 # Person C — Database & Error Handling
 
+> ⚠️ **STALE:** This doc only covers a single `boards` table for the 2-page kanban MVP.
+> Person A's doc now targets the full Recall workspace app — schema is needed for Sessions,
+> Projects, Tasks, and Calendar data, plus auth/workspace tables. This needs a rewrite — see
+> the [2026-07-25 entry](CONTRACT_CHANGES.md) in `CONTRACT_CHANGES.md`.
+
 ## Responsibilities
 Person C owns persistence and reliability: the Supabase schema, the functions that save and
 load boards, and making sure failures anywhere in the app (AI extraction, saving, loading,

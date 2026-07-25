@@ -1,5 +1,10 @@
 # Contracts
 
+> ⚠️ **STALE:** These contracts describe the old 2-page kanban MVP (a single Task object).
+> Person A's doc now targets the full Recall workspace app (Sessions, Projects, Tasks,
+> Calendar, a 10-section Session Review). Person B and Person C need to rewrite this file to
+> match — see the [2026-07-25 entry](CONTRACT_CHANGES.md) in `CONTRACT_CHANGES.md`.
+
 > **This file is the single source of truth for the data shapes connecting Person A, Person
 > B, and Person C's work.** Nobody changes a field name, type, or shape here without first
 > logging the change in [`CONTRACT_CHANGES.md`](CONTRACT_CHANGES.md) and notifying the rest

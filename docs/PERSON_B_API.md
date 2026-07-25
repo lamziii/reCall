@@ -1,5 +1,11 @@
 # Person B — API / AI Calling
 
+> ⚠️ **STALE:** This doc only covers the old `extract-tasks` endpoint for the 2-page kanban
+> MVP. Person A's doc now targets the full Recall workspace app — Session Review alone needs
+> AI generation for Executive Summary, Discussion Topics, Decisions, Tasks, Timeline,
+> Insights, Risks, and Questions. This needs a rewrite — see the
+> [2026-07-25 entry](CONTRACT_CHANGES.md) in `CONTRACT_CHANGES.md`.
+
 ## Responsibilities
 Person B owns the "intelligence" layer: the Edge Function that receives raw notes, calls the
 Claude API, and returns clean, structured task data matching the contract Person A and
