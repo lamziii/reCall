@@ -1,0 +1,88 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@import './colors.css';
+@import './typography.css';
+@import './radius.css';
+@import './shadows.css';
+@import './motion.css';
+@import './z-index.css';
+@import './layout.css';
+@import '../animations/keyframes.css';
+
+/* Dark-first: this app ships one theme. No .light variant exists yet. */
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-muted);
+    color: var(--color-foreground);
+  }
+
+  /* Thin, unobtrusive scrollbars that match the surface, not the default UA chrome. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-strong);
+    border-radius: var(--radius-full);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Single source for the focus-visible treatment every interactive component shares. */
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow: var(--focus-ring);
+  }
+
+  .transition-fast {
+    transition-duration: var(--duration-fast);
+    transition-timing-function: var(--ease-standard);
+  }
+
+  .transition-base {
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-standard);
+  }
+}

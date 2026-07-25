@@ -1,0 +1,12 @@
+/** Motion tokens — fast and subtle. No bounce, no dramatic animation. */
+
+:root {
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;   /* hover: 120-180ms */
+  --duration-base: 200ms;   /* page transitions: 180-250ms */
+  --duration-slow: 320ms;
+}

@@ -1,0 +1,13 @@
+/** Layout tokens — container widths and the shared focus ring. */
+
+:root {
+  --container-content: 42rem;   /* max readable width for long-form text */
+  --container-page: 75rem;      /* default workspace/page width */
+  --container-wide: 90rem;      /* wide dashboards / data tables */
+
+  --sidebar-width: 15.5rem;
+  --sidebar-width-collapsed: 3.5rem;
+  --header-height: 3.5rem;
+
+  --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-focus-ring);
+}
