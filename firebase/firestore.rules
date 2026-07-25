@@ -1,0 +1,97 @@
+// Firestore Security Rules for Recall.
+// Cloud Storage access control lives in a separate file: firebase/storage.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper: check if user is a member of a workspace
+    function isWorkspaceMember(workspaceId) {
+      return exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
+    }
+
+    // Helper: check if user is an owner of a workspace
+    function isWorkspaceOwner(workspaceId) {
+      return get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.role == 'owner';
+    }
+
+    // ========================================================================
+    // workspaces
+    // ========================================================================
+    // Members can read their workspace; only the owner can update/delete;
+    // any signed-in user can create a workspace (auto-enroll as owner via trigger).
+    match /workspaces/{workspaceId} {
+      allow read: if isWorkspaceMember(workspaceId);
+      allow create: if request.auth != null && request.auth.uid != null;
+      allow update, delete: if isWorkspaceOwner(workspaceId);
+
+      // ====================================================================
+      // workspaces/{workspaceId}/members
+      // ====================================================================
+      // Members can see the roster; only the owner can invite/remove/change roles.
+      match /members/{userId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create, update, delete: if isWorkspaceOwner(workspaceId);
+      }
+    }
+
+    // ========================================================================
+    // sessions
+    // ========================================================================
+    // Members of the parent workspace can CRUD.
+    match /sessions/{sessionId} {
+      allow read: if isWorkspaceMember(resource.data.workspace_id);
+      allow create: if isWorkspaceMember(request.resource.data.workspace_id);
+      allow update, delete: if isWorkspaceMember(resource.data.workspace_id);
+    }
+
+    // ========================================================================
+    // session_reviews
+    // ========================================================================
+    // Document ID is the session ID (see FIREBASE_SCHEMA.md), so {sessionId} here doubles as
+    // both the wildcard and the lookup key into sessions/ for the parent workspace check.
+    match /session_reviews/{sessionId} {
+      allow read, create, update, delete: if isWorkspaceMember(
+        get(/databases/$(database)/documents/sessions/$(sessionId)).data.workspace_id
+      );
+    }
+
+    // ========================================================================
+    // documents
+    // ========================================================================
+    // Members of the workspace can CRUD.
+    match /documents/{documentId} {
+      allow read: if isWorkspaceMember(resource.data.workspace_id);
+      allow create: if isWorkspaceMember(request.resource.data.workspace_id);
+      allow update, delete: if isWorkspaceMember(resource.data.workspace_id);
+    }
+
+    // ========================================================================
+    // projects
+    // ========================================================================
+    // Members of the workspace can CRUD.
+    match /projects/{projectId} {
+      allow read: if isWorkspaceMember(resource.data.workspace_id);
+      allow create: if isWorkspaceMember(request.resource.data.workspace_id);
+      allow update, delete: if isWorkspaceMember(resource.data.workspace_id);
+    }
+
+    // ========================================================================
+    // tasks
+    // ========================================================================
+    // Members of the workspace can CRUD.
+    match /tasks/{taskId} {
+      allow read: if isWorkspaceMember(resource.data.workspace_id);
+      allow create: if isWorkspaceMember(request.resource.data.workspace_id);
+      allow update, delete: if isWorkspaceMember(resource.data.workspace_id);
+    }
+
+    // ========================================================================
+    // notifications
+    // ========================================================================
+    // Users can read their own notifications; any workspace member can create/update/delete.
+    match /notifications/{notificationId} {
+      allow read: if request.auth.uid == resource.data.user_id;
+      allow create: if isWorkspaceMember(request.resource.data.workspace_id);
+      allow update, delete: if isWorkspaceMember(resource.data.workspace_id);
+    }
+  }
+}

@@ -1,9 +1,17 @@
 # Person C — Database & Error Handling
 
-> ⚠️ **STALE:** This doc only covers a single `boards` table for the 2-page kanban MVP.
-> Person A's doc now targets the full Recall workspace app — schema is needed for Sessions,
-> Projects, Tasks, and Calendar data, plus auth/workspace tables. This needs a rewrite — see
-> the [2026-07-25 entry](CONTRACT_CHANGES.md) in `CONTRACT_CHANGES.md`.
+> ℹ️ **Superseded below:** the single-`boards`-table plan described in this doc (checklist
+> included) was for the old 2-page kanban MVP. The real schema — `workspaces`,
+> `workspace_members`, `sessions`, `session_reviews`, `documents`, `projects`, `tasks`,
+> `notifications`, Security Rules, Cloud Storage, and Firestore's built-in realtime listeners —
+> is implemented on **Firebase/Firestore** in
+> [`firebase/FIREBASE_SCHEMA.md`](../firebase/FIREBASE_SCHEMA.md), and the
+> `extractSessionReview` Cloud Function is in
+> [`firebase/functions/src/extractSessionReview.ts`](../firebase/functions/src/extractSessionReview.ts).
+> (The backend was originally built on Supabase/Postgres and migrated to Firebase — see the
+> [2026-07-25 entries](CONTRACT_CHANGES.md) in `CONTRACT_CHANGES.md`; the old `supabase/`
+> directory is stale.) Field contracts are documented in [`CONTRACTS.md`](CONTRACTS.md). The
+> checklist below still reflects the old MVP scope and needs a rewrite to match.
 
 ## Responsibilities
 Person C owns persistence and reliability: the Supabase schema, the functions that save and
