@@ -1,0 +1,21 @@
+// Cloud Storage Security Rules for Recall.
+// Files must be uploaded under a `workspaces/<workspace_id>/...` path so the second path
+// segment can be checked against workspace membership.
+//   e.g. workspaces/<workspace_id>/recordings/<sessionId>.webm
+//        workspaces/<workspace_id>/documents/<documentId>/<filename>
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isWorkspaceMember(workspaceId) {
+      return firestore.exists(/databases/(default)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
+    }
+
+    match /workspaces/{workspaceId}/recordings/{allPaths=**} {
+      allow read, write: if request.auth != null && isWorkspaceMember(workspaceId);
+    }
+
+    match /workspaces/{workspaceId}/documents/{allPaths=**} {
+      allow read, write: if request.auth != null && isWorkspaceMember(workspaceId);
+    }
+  }
+}
