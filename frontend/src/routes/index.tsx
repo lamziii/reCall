@@ -7,6 +7,7 @@ import { RecallShell } from '@/app/shell/recall-shell'
 import { ForceTheme } from '@/app/theme/force-theme'
 import { AppHomePage } from '@/pages/app/home'
 import { SessionsPage } from '@/pages/app/sessions'
+import { SessionReviewPage } from '@/pages/app/session-detail'
 import { ProjectsPage } from '@/pages/app/projects'
 import { TasksPage } from '@/pages/app/tasks'
 import { CalendarPage } from '@/pages/app/calendar'
@@ -28,6 +29,7 @@ export function AppRoutes() {
       <Route path="/app" element={<RecallShell />}>
         <Route index element={<AppHomePage />} />
         <Route path="sessions" element={<SessionsPage />} />
+        <Route path="sessions/:sessionId" element={<SessionReviewPage />} />
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="calendar" element={<CalendarPage />} />

@@ -5,6 +5,7 @@ import { SegmentedControl } from '@/components/forms/segmented-control'
 import { Label, Small } from '@/components/typography'
 import { useTheme } from '@/app/theme/theme-provider'
 import type { ThemePreference } from '@/app/theme/theme-provider'
+import { DeveloperToolsSection } from './developer-tools-section'
 
 const APPEARANCE_OPTIONS = [
   { value: 'light', label: 'Light', icon: <Sun /> },
@@ -30,6 +31,8 @@ export function SettingsPage() {
           className="mt-1.5 w-fit"
         />
       </div>
+
+      {import.meta.env.DEV && <DeveloperToolsSection />}
 
       <div className="flex flex-1 items-center justify-center">
         <EmptyState
