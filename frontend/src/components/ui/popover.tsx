@@ -3,6 +3,7 @@ import {
   createContext,
   isValidElement,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -49,10 +50,10 @@ export function PopoverTrigger({ children }: { children: ReactElement<Record<str
   const { open, setOpen, triggerRef } = usePopoverContext('PopoverTrigger')
   if (!isValidElement(children)) return children
 
-  const child = children as ReactElement<Record<string, unknown>> & { ref?: React.Ref<HTMLElement> }
+  const child = children as ReactElement<Record<string, unknown> & { ref?: React.Ref<HTMLElement> }>
 
   return cloneElement(child, {
-    ref: mergeRefs(triggerRef, child.ref),
+    ref: mergeRefs(triggerRef, child.props.ref),
     'aria-expanded': open,
     'aria-haspopup': true,
     onClick: (event: React.MouseEvent) => {
@@ -93,6 +94,13 @@ export function PopoverContent({
   useClickOutside([triggerRef, contentRef], close, open)
   useEscapeKey(close, open)
   useFocusTrap(contentRef, open && trapFocus)
+
+  // Independent of trapFocus (which also cycles Tab inside the content): closing should
+  // always hand focus back to whatever opened it, or keyboard users lose their place.
+  useEffect(() => {
+    if (open) return
+    triggerRef.current?.focus()
+  }, [open, triggerRef])
 
   return (
     <Portal>

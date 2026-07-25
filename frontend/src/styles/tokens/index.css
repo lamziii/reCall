@@ -10,7 +10,13 @@
 @import './layout.css';
 @import '../animations/keyframes.css';
 
-/* Dark-first: this app ships one theme. No .light variant exists yet. */
+/*
+ * Light + dark. `data-theme` is set on <html> by the blocking script in
+ * index.html (before first paint) and kept in sync by ThemeProvider
+ * (src/app/theme/theme-provider.tsx). `color-scheme: dark` here is only the
+ * pre-hydration fallback — [data-theme='light']/[data-theme='dark'] in
+ * colors.css set it explicitly once a theme is applied.
+ */
 @layer base {
   html {
     color-scheme: dark;
@@ -64,6 +70,27 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /*
+   * Smooth color crossfade when switching theme — background/text/border/
+   * shadow only, never layout. Gated behind [data-theme-ready], which
+   * ThemeProvider adds one frame after mount, so the very first paint never
+   * transitions in from an unstyled or wrong-theme state. The reduced-motion
+   * block above already zeroes this out (transition-duration: 0.01ms !important
+   * applies to every element unconditionally).
+   */
+  [data-theme-ready],
+  [data-theme-ready] *,
+  [data-theme-ready] *::before,
+  [data-theme-ready] *::after {
+    transition:
+      background-color var(--duration-base) var(--ease-standard),
+      border-color var(--duration-base) var(--ease-standard),
+      color var(--duration-base) var(--ease-standard),
+      fill var(--duration-base) var(--ease-standard),
+      stroke var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard);
+  }
 }
 
 @layer utilities {
@@ -84,5 +111,19 @@
   .transition-base {
     transition-duration: var(--duration-base);
     transition-timing-function: var(--ease-standard);
+  }
+
+  /*
+   * No official light-mode logo asset exists yet (branding assets are
+   * white-on-transparent only — see assets/branding/README.md). The mark is
+   * pure monochrome + transparency, so inverting it is lossless; swap this
+   * for a real light export if one is ever added and drop the filter.
+   */
+  .theme-invert-on-light {
+    filter: none;
+  }
+
+  [data-theme='light'] .theme-invert-on-light {
+    filter: invert(1);
   }
 }

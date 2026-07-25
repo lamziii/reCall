@@ -48,7 +48,10 @@ export function SearchShell({ open, onOpenChange, query, onQueryChange, onKeyDow
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.98, y: -8 }}
           transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-          style={{ position: 'fixed', top: '15vh', left: '50%', transform: 'translateX(-50%)' }}
+          // No `transform` here on purpose: Framer Motion owns `transform` for the scale/y
+          // animation and silently overwrites a hand-set translateX, which was pushing this
+          // off-center. `left/right: 0` + auto margins center it without touching transform.
+          style={{ position: 'fixed', top: '15vh', left: 0, right: 0, marginInline: 'auto' }}
           className={cn(
             'm-0 w-full max-w-lg overflow-hidden rounded-xl border border-border bg-surface-overlay p-0 shadow-xl',
             'backdrop:bg-neutral-950/70',

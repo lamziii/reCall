@@ -14,7 +14,7 @@ export function AppShell({ sidebar, header, children, className }: AppShellProps
     <div className={cn('grid h-dvh grid-cols-[auto_1fr] grid-rows-[auto_1fr]', className)}>
       <div className="row-span-2">{sidebar}</div>
       {header}
-      <div className="min-h-0 overflow-hidden">{children}</div>
+      <div className="flex min-h-0 flex-col overflow-hidden">{children}</div>
     </div>
   )
 }

@@ -37,12 +37,12 @@ export function Tooltip({ children, content, placement = 'top', delay = 300 }: T
   }, [open, placement])
 
   if (!isValidElement(children)) return children
-  const child = children as ReactElement<Record<string, unknown>> & { ref?: React.Ref<HTMLElement> }
+  const child = children as ReactElement<Record<string, unknown> & { ref?: React.Ref<HTMLElement> }>
 
   return (
     <>
       {cloneElement(child, {
-        ref: mergeRefs(triggerRef, child.ref),
+        ref: mergeRefs(triggerRef, child.props.ref),
         onMouseEnter: show,
         onMouseLeave: hide,
         onFocus: show,

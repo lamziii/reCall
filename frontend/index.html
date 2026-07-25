@@ -6,6 +6,25 @@
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0A0A0B" />
+    <script>
+      // Blocking (classic, synchronous) script — must run before first paint to avoid a
+      // flash of the wrong theme. Mirrors ThemeProvider's resolution logic exactly
+      // (src/app/theme/theme-provider.tsx): same storage key, same fallback order.
+      ;(function () {
+        try {
+          var STORAGE_KEY = 'recall-theme'
+          var stored = localStorage.getItem(STORAGE_KEY)
+          var preference = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system'
+          var resolved =
+            preference === 'system'
+              ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+              : preference
+          document.documentElement.setAttribute('data-theme', resolved)
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark')
+        }
+      })()
+    </script>
     <title>Recall — Conversations become knowledge</title>
     <meta
       name="description"

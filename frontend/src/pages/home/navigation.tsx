@@ -52,7 +52,7 @@ export function Navigation() {
         </ul>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
             Sign in
           </Button>
           <Button size="sm" onClick={() => navigate('/onboarding')}>
@@ -78,7 +78,9 @@ export function Navigation() {
               ))}
             </ul>
             <div className="mt-6 flex flex-col gap-2">
-              <Button variant="secondary">Sign in</Button>
+              <Button variant="secondary" onClick={() => navigate('/login')}>
+                Sign in
+              </Button>
               <Button onClick={() => navigate('/onboarding')}>Start free</Button>
             </div>
           </SheetContent>
