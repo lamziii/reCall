@@ -6,54 +6,54 @@ import { SESSION_IDS } from './sample-sessions'
 import { DECISION_IDS } from './sample-decisions'
 
 export function generateSampleActivity(): Omit<ActivityItem, '_sample'>[] {
-  const { sarah, alex, taylor } = PERSON_IDS
-  const { onboarding } = PROJECT_IDS
-  const { customerDiscovery } = SESSION_IDS
+  const { uvejs, backendEng } = PERSON_IDS
+  const { recall } = PROJECT_IDS
+  const { recallProductPlanning } = SESSION_IDS
 
   return [
     {
-      id: 'activity-jordan-updated-onboarding',
-      actorId: PERSON_IDS.jordan,
+      id: 'activity-uvejs-updated-recall',
+      actorId: uvejs,
       action: 'updated-project',
       entityType: 'project',
-      entityId: onboarding,
-      entityLabel: 'Onboarding Redesign',
+      entityId: recall,
+      entityLabel: 'Recall',
       timestamp: hoursFromNow(-3).toISOString(),
     },
     {
-      id: 'activity-alex-completed-fallback-monitoring',
-      actorId: alex,
+      id: 'activity-backend-completed-indexeddb-audio',
+      actorId: backendEng,
       action: 'completed-task',
       entityType: 'task',
-      entityId: 'task-add-fallback-monitoring',
-      entityLabel: 'Add fallback monitoring',
+      entityId: 'task-save-audio-indexeddb',
+      entityLabel: 'Save recorded audio Blob to IndexedDB',
       timestamp: hoursFromNow(-22).toISOString(),
     },
     {
-      id: 'activity-risk-identified-growth-review',
-      actorId: taylor,
+      id: 'activity-risk-identified-dental-plus',
+      actorId: backendEng,
       action: 'identified-risk',
       entityType: 'risk',
-      entityId: 'risk-pricing-tax-handling',
-      entityLabel: 'Growth Experiment Review',
+      entityId: 'risk-dental-plus-conflicting-slots',
+      entityLabel: 'Dental Plus Client Review',
       timestamp: hoursFromNow(-26).toISOString(),
     },
     {
-      id: 'activity-extracted-tasks-customer-discovery',
-      actorId: alex,
+      id: 'activity-extracted-tasks-recall-planning',
+      actorId: uvejs,
       action: 'extracted-tasks',
       entityType: 'session',
-      entityId: customerDiscovery,
-      entityLabel: 'Customer Discovery — Acme Corp',
+      entityId: recallProductPlanning,
+      entityLabel: 'Recall Product Planning',
       timestamp: hoursFromNow(-47).toISOString(),
     },
     {
-      id: 'activity-sarah-approved-strategy-decision',
-      actorId: sarah,
+      id: 'activity-uvejs-approved-session-review-decision',
+      actorId: uvejs,
       action: 'approved-decision',
       entityType: 'decision',
-      entityId: DECISION_IDS.shipOnboardingFirst,
-      entityLabel: 'Q3 Product Strategy Sync',
+      entityId: DECISION_IDS.shipSessionReviewFirst,
+      entityLabel: 'Recall Product Planning',
       timestamp: hoursFromNow(-48).toISOString(),
     },
   ]

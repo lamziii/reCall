@@ -72,12 +72,10 @@ export function AppHomePage() {
             description="Record your first session or generate sample data to see how Recall organizes decisions, tasks, and knowledge."
             action={
               <div className="flex items-center gap-2">
-                <Button onClick={() => navigate('/app/sessions')}>Record a session</Button>
-                {import.meta.env.DEV && (
-                  <Button variant="secondary" loading={generating} onClick={handleGenerateSample}>
-                    Generate sample data
-                  </Button>
-                )}
+                <Button onClick={() => navigate('/app/record')}>Record a session</Button>
+                <Button variant="secondary" loading={generating} onClick={handleGenerateSample}>
+                  Generate sample data
+                </Button>
               </div>
             }
           />
@@ -99,7 +97,7 @@ export function AppHomePage() {
         <motion.div variants={reduceMotion ? undefined : homeItemVariants}>
           <HomeHeader
             greeting={data.greeting}
-            onRecordSession={() => navigate('/app/sessions')}
+            onRecordSession={() => navigate('/app/record')}
             onImportRecording={() => navigate('/app/sessions')}
           />
         </motion.div>

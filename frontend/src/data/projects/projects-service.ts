@@ -40,6 +40,7 @@ export function getProjectsListData(): ProjectsListData | null {
       teamNames: [...teamIds].map((id) => personName(people, id)).filter((n): n is string => Boolean(n)),
       progressPct: p.progressPct,
       targetDateLabel: formatDateLabel(p.targetDate),
+      targetDateRaw: p.targetDate,
       updatedLabel: formatDateLabel(updatedRaw),
       updatedRaw,
       sessionsCount: projectSessions.length,

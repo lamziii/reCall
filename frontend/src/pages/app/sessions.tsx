@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
-import { Mic, Search as SearchIcon, Upload } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronRight, Mic, Search as SearchIcon, Upload } from 'lucide-react'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
 import { Skeleton } from '@/components/feedback/skeleton'
 import { List } from '@/components/data-display/list'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Caption } from '@/components/typography'
 import { useToast } from '@/components/feedback/toast'
 import { useSessionsListData } from '@/data/sessions/use-sessions-list-data'
@@ -31,6 +33,7 @@ function withinDateFilter(rawDate: string, filter: SessionDateFilter): boolean {
 }
 
 export function SessionsPage() {
+  const navigate = useNavigate()
   const { toast } = useToast()
   const { state, refetch } = useSessionsListData()
   const [search, setSearch] = useState('')
@@ -101,7 +104,7 @@ export function SessionsPage() {
       <Button variant="ghost" leftIcon={<Upload />} onClick={() => placeholderAction('Import recording')}>
         Import recording
       </Button>
-      <Button leftIcon={<Mic />} onClick={() => placeholderAction('Record a session')}>
+      <Button leftIcon={<Mic />} onClick={() => navigate('/app/record')}>
         Record a session
       </Button>
     </>
@@ -183,16 +186,37 @@ export function SessionsPage() {
         />
       ) : groups ? (
         <div className="flex flex-col gap-6">
-          {Array.from(groups.entries()).map(([key, sessions]) => (
-            <div key={key} className="flex flex-col gap-1">
-              <Caption className="px-1 font-medium uppercase tracking-wide text-subtle-foreground">{GROUP_LABEL[key]}</Caption>
-              <List>
-                {sessions.map((session) => (
-                  <SessionRow key={session.id} session={session} />
-                ))}
-              </List>
-            </div>
-          ))}
+          {Array.from(groups.entries()).map(([key, sessions]) =>
+            key === 'upcoming' ? (
+              <Collapsible key={key} defaultOpen={false}>
+                <CollapsibleTrigger>
+                  <button
+                    type="button"
+                    className="focus-ring group flex items-center gap-1 rounded px-1 text-caption font-medium uppercase tracking-wide text-subtle-foreground transition-fast hover:text-foreground"
+                  >
+                    <ChevronRight className="size-3 shrink-0 transition-transform group-aria-expanded:rotate-90" />
+                    {GROUP_LABEL[key]}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="flex flex-col gap-1 pt-1">
+                  <List>
+                    {sessions.map((session) => (
+                      <SessionRow key={session.id} session={session} />
+                    ))}
+                  </List>
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              <div key={key} className="flex flex-col gap-1">
+                <Caption className="px-1 font-medium uppercase tracking-wide text-subtle-foreground">{GROUP_LABEL[key]}</Caption>
+                <List>
+                  {sessions.map((session) => (
+                    <SessionRow key={session.id} session={session} />
+                  ))}
+                </List>
+              </div>
+            ),
+          )}
         </div>
       ) : (
         <List>

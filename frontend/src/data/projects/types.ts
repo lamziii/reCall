@@ -15,6 +15,7 @@ export interface ProjectListItem {
   teamNames: string[]
   progressPct: number
   targetDateLabel: string
+  targetDateRaw: string
   updatedLabel: string
   updatedRaw: string
   sessionsCount: number

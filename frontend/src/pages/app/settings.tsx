@@ -32,7 +32,7 @@ export function SettingsPage() {
         />
       </div>
 
-      {import.meta.env.DEV && <DeveloperToolsSection />}
+      <DeveloperToolsSection />
 
       <div className="flex flex-1 items-center justify-center">
         <EmptyState

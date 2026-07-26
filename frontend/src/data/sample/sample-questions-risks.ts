@@ -4,119 +4,119 @@ import { PROJECT_IDS } from './sample-projects'
 import { SESSION_IDS } from './sample-sessions'
 
 export function generateSampleQuestions(): Omit<Question, 'createdAt'>[] {
-  const { alex, jordan } = PERSON_IDS
-  const { onboarding, reliability, billing, migration } = PROJECT_IDS
-  const { reliabilityRetro, growthReview, customerDiscovery, planningSync } = SESSION_IDS
+  const { uvejs, backendEng } = PERSON_IDS
+  const { recall, eDiaspora, dentalPlus, studo } = PROJECT_IDS
+  const { recallRecordingArchitecture, recallProductPlanning, eDiasporaWeeklyPlanning, dentalPlusClientReview, studoFeaturePlanning } = SESSION_IDS
 
   return [
     {
       id: 'question-transcription-fallback-owner',
-      title: 'Who owns the transcription-provider fallback?',
+      title: 'Who owns the live-transcription browser fallback?',
       severity: 'medium',
-      projectId: reliability,
-      sourceSessionId: reliabilityRetro,
+      projectId: recall,
+      sourceSessionId: recallRecordingArchitecture,
       status: 'open',
-      nextAction: 'Assign an owner before enterprise launch.',
+      nextAction: 'Assign an owner before the demo.',
     },
     {
-      id: 'question-legal-review-pricing',
-      title: 'Does Legal need to review the annual pricing change?',
+      id: 'question-ediaspora-multilanguage',
+      title: 'Does eDiaspora need multi-language support at launch?',
       severity: 'high',
-      projectId: billing,
-      sourceSessionId: growthReview,
+      projectId: eDiaspora,
+      sourceSessionId: eDiasporaWeeklyPlanning,
       status: 'open',
-      nextAction: 'Loop in Legal this week.',
+      nextAction: 'Confirm with the community team.',
     },
     {
-      id: 'question-storage-limits-imported-recordings',
-      title: 'Should imported recordings count toward storage limits?',
-      severity: 'low',
-      projectId: migration,
-      sourceSessionId: customerDiscovery,
-      status: 'open',
-    },
-    {
-      id: 'question-migration-without-admin-access',
-      title: 'Can customer migration run without admin access?',
+      id: 'question-ai-reviews-blocks-demo',
+      title: 'Should the AI Reviews page block the hackathon demo?',
       severity: 'medium',
-      ownerId: alex,
-      projectId: migration,
-      sourceSessionId: customerDiscovery,
+      projectId: recall,
+      sourceSessionId: recallProductPlanning,
       status: 'open',
     },
     {
-      id: 'question-usability-testing-blocks-launch',
-      title: 'Should onboarding usability testing block the launch date?',
+      id: 'question-dental-plus-double-confirmation',
+      title: 'Can Dental Plus bookings run without double-confirmation?',
       severity: 'medium',
-      ownerId: jordan,
-      projectId: onboarding,
-      sourceSessionId: planningSync,
+      ownerId: backendEng,
+      projectId: dentalPlus,
+      sourceSessionId: dentalPlusClientReview,
       status: 'open',
     },
     {
-      id: 'question-nav-rollout-rollback-plan',
-      title: "What's the rollback plan if the phased navigation rollout fails?",
+      id: 'question-studo-grading-timing',
+      title: "Should Studo's grading feature ship before or after beta?",
       severity: 'medium',
-      ownerId: jordan,
-      projectId: onboarding,
-      sourceSessionId: planningSync,
+      ownerId: uvejs,
+      projectId: studo,
+      sourceSessionId: studoFeaturePlanning,
+      status: 'open',
+    },
+    {
+      id: 'question-indexeddb-rollback-plan',
+      title: "What's the rollback plan if IndexedDB audio storage fails?",
+      severity: 'medium',
+      ownerId: backendEng,
+      projectId: recall,
+      sourceSessionId: recallRecordingArchitecture,
       status: 'resolved',
-      nextAction: 'Documented in the rollout plan.',
+      nextAction: 'Documented — falls back to an in-memory blob for the session.',
     },
   ]
 }
 
 export function generateSampleRisks(): Omit<Risk, 'createdAt'>[] {
-  const { alex, casey, taylor, jordan } = PERSON_IDS
-  const { onboarding, reliability, billing, migration } = PROJECT_IDS
-  const { reliabilityRetro, customerDiscovery, growthReview, planningSync, strategySync } = SESSION_IDS
+  const { uvejs, frontendDev, backendEng, teamMember } = PERSON_IDS
+  const { recall, eDiaspora, dentalPlus, gameZone } = PROJECT_IDS
+  const { recallRecordingArchitecture, recallProductPlanning, eDiasporaWeeklyPlanning, dentalPlusClientReview, gameZoneCoordination } = SESSION_IDS
 
   return [
     {
-      id: 'risk-transcription-reliability-below-target',
-      title: 'Enterprise transcription reliability remains below target.',
+      id: 'risk-transcription-reliability-varies',
+      title: 'Live transcription reliability varies across browsers.',
       severity: 'high',
-      ownerId: alex,
-      projectId: reliability,
-      sourceSessionId: reliabilityRetro,
+      ownerId: uvejs,
+      projectId: recall,
+      sourceSessionId: recallRecordingArchitecture,
       status: 'open',
-      nextAction: 'Ship fallback provider before enterprise launch.',
+      nextAction: 'Add a fallback for browsers without SpeechRecognition support before the demo.',
     },
     {
-      id: 'risk-migration-audit-coverage',
-      title: 'Customer migration tooling has incomplete audit coverage.',
+      id: 'risk-dental-plus-conflicting-slots',
+      title: 'Dental Plus booking system risks conflicting appointment slots.',
       severity: 'high',
-      ownerId: casey,
-      projectId: migration,
-      sourceSessionId: customerDiscovery,
+      ownerId: backendEng,
+      projectId: dentalPlus,
+      sourceSessionId: dentalPlusClientReview,
       status: 'open',
-      nextAction: 'Close audit gaps before rollout week.',
+      nextAction: 'Add slot-locking before go-live.',
     },
     {
-      id: 'risk-pricing-tax-handling',
-      title: 'Pricing launch depends on unresolved tax handling.',
+      id: 'risk-ediaspora-translation-scope',
+      title: 'eDiaspora launch depends on unresolved translation scope.',
       severity: 'medium',
-      ownerId: taylor,
-      projectId: billing,
-      sourceSessionId: growthReview,
+      ownerId: frontendDev,
+      projectId: eDiaspora,
+      sourceSessionId: eDiasporaWeeklyPlanning,
       status: 'open',
     },
     {
-      id: 'risk-onboarding-usability-delay',
-      title: 'Onboarding launch may slip if usability testing is delayed.',
+      id: 'risk-hackathon-demo-timing',
+      title: "Hackathon demo may slip if the Session Review page isn't finished in time.",
       severity: 'medium',
-      ownerId: jordan,
-      projectId: onboarding,
-      sourceSessionId: planningSync,
+      ownerId: uvejs,
+      projectId: recall,
+      sourceSessionId: recallProductPlanning,
       status: 'open',
     },
     {
-      id: 'risk-fallback-provider-not-contracted',
-      title: 'Fallback transcription provider not yet contracted.',
+      id: 'risk-game-zone-undocumented-logic',
+      title: 'Game Zone matchmaking logic is undocumented outside the archived session notes.',
       severity: 'low',
-      ownerId: alex,
-      projectId: reliability,
-      sourceSessionId: strategySync,
+      ownerId: teamMember,
+      projectId: gameZone,
+      sourceSessionId: gameZoneCoordination,
       status: 'open',
     },
   ]

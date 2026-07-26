@@ -31,38 +31,38 @@ describe('SessionsPage', () => {
 
   it('renders sample sessions', async () => {
     renderSessionsPage()
-    expect(await screen.findByText('Platform Reliability Retrospective')).toBeInTheDocument()
-    expect(screen.getByText('Q3 Product Strategy Sync')).toBeInTheDocument()
+    expect(await screen.findByText('Recall Recording Architecture')).toBeInTheDocument()
+    expect(screen.getByText('Recall Product Planning')).toBeInTheDocument()
   })
 
   it('search filters sessions', async () => {
     const user = userEvent.setup()
     renderSessionsPage()
-    await screen.findByText('Platform Reliability Retrospective')
+    await screen.findByText('Recall Recording Architecture')
 
-    await user.type(screen.getByPlaceholderText('Search sessions, projects, people...'), 'Reliability Retrospective')
+    await user.type(screen.getByPlaceholderText('Search sessions, projects, people...'), 'Recording Architecture')
 
-    expect(screen.getByText('Platform Reliability Retrospective')).toBeInTheDocument()
-    expect(screen.queryByText('Q3 Product Strategy Sync')).not.toBeInTheDocument()
+    expect(screen.getByText('Recall Recording Architecture')).toBeInTheDocument()
+    expect(screen.queryByText('Recall Product Planning')).not.toBeInTheDocument()
   })
 
   it('status filter narrows the list', async () => {
     const user = userEvent.setup()
     renderSessionsPage()
-    await screen.findByText('Weekly Engineering Standup')
+    await screen.findByText('eDiaspora Weekly Planning')
 
     await user.selectOptions(screen.getByLabelText('Filter by status'), 'ready')
 
-    expect(screen.queryByText('Weekly Engineering Standup')).not.toBeInTheDocument()
-    expect(screen.getByText('Platform Reliability Retrospective')).toBeInTheDocument()
+    expect(screen.queryByText('eDiaspora Weekly Planning')).not.toBeInTheDocument()
+    expect(screen.getByText('Recall Recording Architecture')).toBeInTheDocument()
   })
 
   it('opens the session detail route when a row is clicked', async () => {
     const user = userEvent.setup()
     renderSessionsPage()
-    await screen.findByText('Platform Reliability Retrospective')
+    await screen.findByText('Recall Recording Architecture')
 
-    await user.click(screen.getByText('Platform Reliability Retrospective'))
+    await user.click(screen.getByText('Recall Recording Architecture'))
 
     expect(await screen.findByText('Session detail placeholder')).toBeInTheDocument()
   })

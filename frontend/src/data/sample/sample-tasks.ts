@@ -1,3 +1,5 @@
+import type { TaskStatusValue } from '@/components/recall/task-status'
+import type { Priority } from '@/components/data-display/priority-badge'
 import type { Task } from '../types'
 import { daysFromNow } from './date-helpers'
 import { PERSON_IDS } from './sample-people'
@@ -5,188 +7,191 @@ import { PROJECT_IDS } from './sample-projects'
 import { SESSION_IDS } from './sample-sessions'
 import { DECISION_IDS } from './sample-decisions'
 
+const TASK_VERBS = ['Draft', 'Review', 'Update', 'Finalize', 'Investigate', 'Document', 'Test', 'Ship', 'Audit', 'Follow up on', 'Prepare', 'Sync on']
+const TASK_SUBJECTS = [
+  'session review copy',
+  'booking edge cases',
+  'events calendar schema',
+  'inventory sync',
+  'grading feature',
+  'album permissions',
+  'matchmaking logic',
+  'design tokens',
+  'homepage copy',
+  'client feedback',
+  'release notes',
+  'security review',
+  'analytics events',
+  'onboarding flow',
+]
+
+const BULK_STATUS_CYCLE: TaskStatusValue[] = ['todo', 'todo', 'in-progress', 'todo', 'done', 'in-progress', 'blocked', 'todo', 'done', 'backlog']
+const BULK_PRIORITY_CYCLE: Priority[] = ['medium', 'low', 'high', 'medium', 'urgent', 'medium', 'high', 'low']
+
+/** Procedural volume on top of the hand-authored tasks above — deterministic, not random, so the seed is stable across regenerations. */
+function generateBulkTasks(count: number): Task[] {
+  const projectIds = Object.values(PROJECT_IDS)
+  const personIds = Object.values(PERSON_IDS)
+  const sessionIds = Object.values(SESSION_IDS)
+
+  return Array.from({ length: count }, (_, i) => {
+    const verb = TASK_VERBS[i % TASK_VERBS.length]
+    const subject = TASK_SUBJECTS[(i * 7) % TASK_SUBJECTS.length]
+    const status = BULK_STATUS_CYCLE[i % BULK_STATUS_CYCLE.length]
+    const priority = BULK_PRIORITY_CYCLE[i % BULK_PRIORITY_CYCLE.length]
+    const projectId = projectIds[i % projectIds.length]
+    const assigneeId = personIds[(i * 3) % personIds.length]
+    const dueOffset = ((i * 5) % 45) - 15 // spread from 15 days overdue to 30 days out
+    const hasSession = i % 3 === 0
+    const isDone = status === 'done'
+
+    return {
+      id: `task-bulk-${i}`,
+      title: `${verb} ${subject}`,
+      projectId,
+      assigneeId,
+      dueDate: isDone ? undefined : daysFromNow(dueOffset).toISOString(),
+      sourceSessionId: hasSession ? sessionIds[i % sessionIds.length] : undefined,
+      status,
+      priority,
+      completedAt: isDone ? daysFromNow(Math.min(dueOffset, -1)).toISOString() : undefined,
+      blocker: status === 'blocked' ? 'Waiting on input from a client.' : undefined,
+    }
+  })
+}
+
 export function generateSampleTasks(): Task[] {
-  const { sarah, alex, jordan, taylor, casey, morgan } = PERSON_IDS
-  const { onboarding, reliability, billing, migration } = PROJECT_IDS
-  const { customerDiscovery, reliabilityRetro, growthReview, planningSync } = SESSION_IDS
+  const { uvejs, productDesigner, frontendDev, backendEng, teamMember } = PERSON_IDS
+  const { recall, eDiaspora, dentalPlus, studo, albumi, gameZone, labenFurniture } = PROJECT_IDS
+  const { recallProductPlanning, recallDashboardReview, eDiasporaWeeklyPlanning, dentalPlusClientReview, studoFeaturePlanning, albumiDesignReview, gameZoneCoordination, labenFurnitureWebsiteReview } =
+    SESSION_IDS
 
   return [
     {
-      id: 'task-finalize-onboarding-empty-states',
-      title: 'Finalize onboarding empty states',
-      projectId: onboarding,
-      assigneeId: jordan,
-      dueDate: daysFromNow(-2).toISOString(),
-      sourceSessionId: planningSync,
+      id: 'task-finish-session-review-page',
+      title: 'Finish the Session Review page layout',
+      projectId: recall,
+      assigneeId: uvejs,
+      dueDate: daysFromNow(-1).toISOString(),
+      sourceSessionId: recallProductPlanning,
       status: 'in-progress',
-      priority: 'high',
+      priority: 'urgent',
+      relatedDecisionId: DECISION_IDS.shipSessionReviewFirst,
     },
     {
-      id: 'task-review-migration-audit-findings',
-      title: 'Review migration audit findings',
-      projectId: migration,
-      assigneeId: casey,
+      id: 'task-wire-recent-sessions-widget',
+      title: 'Wire up the recent sessions dashboard widget',
+      projectId: recall,
+      assigneeId: frontendDev,
       dueDate: daysFromNow(0).toISOString(),
-      sourceSessionId: customerDiscovery,
-      status: 'todo',
-      priority: 'urgent',
-      relatedDecisionId: DECISION_IDS.keepMigrationWindow,
-    },
-    {
-      id: 'task-add-transcription-fallback-monitoring',
-      title: 'Add transcription fallback monitoring',
-      projectId: reliability,
-      assigneeId: morgan,
-      dueDate: daysFromNow(1).toISOString(),
-      sourceSessionId: reliabilityRetro,
+      sourceSessionId: recallDashboardReview,
       status: 'todo',
       priority: 'high',
-      relatedDecisionId: DECISION_IDS.fallbackProvider,
+      relatedDecisionId: DECISION_IDS.prioritizeDashboardWidgets,
     },
     {
-      id: 'task-update-billing-architecture-doc',
-      title: 'Update billing architecture document',
-      projectId: billing,
-      assigneeId: taylor,
-      dueDate: daysFromNow(4).toISOString(),
-      sourceSessionId: growthReview,
-      status: 'in-progress',
-      priority: 'medium',
-    },
-    {
-      id: 'task-prepare-enterprise-rollout-checklist',
-      title: 'Prepare enterprise rollout checklist',
-      projectId: reliability,
-      assigneeId: alex,
-      dueDate: daysFromNow(10).toISOString(),
-      sourceSessionId: reliabilityRetro,
-      status: 'todo',
-      priority: 'medium',
-    },
-    {
-      id: 'task-validate-customer-import-edge-cases',
-      title: 'Validate customer import edge cases',
-      projectId: migration,
-      assigneeId: casey,
-      dueDate: daysFromNow(2).toISOString(),
-      sourceSessionId: customerDiscovery,
-      status: 'blocked',
-      priority: 'high',
-      blocker: 'Waiting on an updated audit export from the Data team.',
-    },
-    {
-      id: 'task-confirm-legal-review-pricing',
-      title: 'Confirm legal review for pricing changes',
-      projectId: billing,
-      assigneeId: taylor,
-      dueDate: daysFromNow(1).toISOString(),
-      sourceSessionId: growthReview,
-      status: 'blocked',
-      priority: 'urgent',
-      blocker: "Legal hasn't confirmed tax handling scope yet.",
-      relatedDecisionId: DECISION_IDS.delayAnnualBilling,
-    },
-    {
-      id: 'task-schedule-onboarding-usability-test',
-      title: 'Schedule onboarding usability test',
-      projectId: onboarding,
-      assigneeId: jordan,
-      dueDate: daysFromNow(5).toISOString(),
-      sourceSessionId: planningSync,
-      status: 'todo',
-      priority: 'medium',
-    },
-    {
-      id: 'task-draft-onboarding-empty-state-copy',
-      title: 'Draft onboarding empty-state copy',
-      projectId: onboarding,
-      assigneeId: sarah,
-      dueDate: daysFromNow(-1).toISOString(),
-      sourceSessionId: planningSync,
-      status: 'in-progress',
-      priority: 'medium',
-    },
-    {
-      id: 'task-migrate-legacy-workspace-settings',
-      title: 'Migrate legacy workspace settings script',
-      projectId: migration,
-      assigneeId: alex,
-      dueDate: daysFromNow(6).toISOString(),
-      status: 'todo',
-      priority: 'medium',
-    },
-    {
-      id: 'task-set-up-latency-alerting',
-      title: 'Set up transcription latency alerting',
-      projectId: reliability,
-      assigneeId: morgan,
-      dueDate: daysFromNow(-1).toISOString(),
-      sourceSessionId: reliabilityRetro,
-      status: 'todo',
-      priority: 'urgent',
-    },
-    {
-      id: 'task-write-billing-upgrade-emails',
-      title: 'Write billing upgrade email sequence',
-      projectId: billing,
-      assigneeId: taylor,
-      dueDate: daysFromNow(12).toISOString(),
-      status: 'todo',
-      priority: 'low',
-    },
-    {
-      id: 'task-audit-onboarding-funnel-dropoff',
-      title: 'Audit onboarding funnel drop-off',
-      projectId: onboarding,
-      assigneeId: jordan,
+      id: 'task-save-audio-indexeddb',
+      title: 'Save recorded audio Blob to IndexedDB',
+      projectId: recall,
+      assigneeId: backendEng,
+      dueDate: daysFromNow(-2).toISOString(),
       status: 'done',
-      priority: 'medium',
+      priority: 'urgent',
       completedAt: daysFromNow(-2).toISOString(),
     },
     {
-      id: 'task-fix-duplicate-participant-bug',
-      title: 'Fix duplicate participant bug in session import',
-      projectId: migration,
-      assigneeId: casey,
-      status: 'done',
-      priority: 'high',
-      completedAt: daysFromNow(-1).toISOString(),
-    },
-    {
-      id: 'task-add-fallback-monitoring',
-      title: 'Add fallback monitoring',
-      projectId: reliability,
-      assigneeId: alex,
-      sourceSessionId: reliabilityRetro,
-      status: 'done',
-      priority: 'high',
-      completedAt: daysFromNow(-1).toISOString(),
-    },
-    {
-      id: 'task-confirm-participant-availability',
-      title: 'Confirm participant availability for billing review',
-      projectId: billing,
-      assigneeId: taylor,
-      dueDate: daysFromNow(2).toISOString(),
-      status: 'todo',
-      priority: 'low',
-    },
-    {
-      id: 'task-review-onboarding-copy',
-      title: 'Review onboarding copy',
-      projectId: onboarding,
-      assigneeId: sarah,
-      dueDate: daysFromNow(3).toISOString(),
+      id: 'task-events-api-timezones',
+      title: 'Resolve timezone handling in the events API',
+      projectId: eDiaspora,
+      assigneeId: backendEng,
+      dueDate: daysFromNow(4).toISOString(),
+      sourceSessionId: eDiasporaWeeklyPlanning,
       status: 'todo',
       priority: 'medium',
     },
     {
-      id: 'task-prep-leadership-weekly-agenda',
-      title: 'Prepare Leadership Weekly agenda',
-      assigneeId: sarah,
+      id: 'task-events-calendar-design',
+      title: 'Prioritize events calendar design over listings',
+      projectId: eDiaspora,
+      assigneeId: productDesigner,
+      dueDate: daysFromNow(6).toISOString(),
+      status: 'todo',
+      priority: 'medium',
+      relatedDecisionId: DECISION_IDS.prioritizeEventsCalendar,
+    },
+    {
+      id: 'task-extend-booking-window',
+      title: 'Extend Dental Plus booking window to 30 days',
+      projectId: dentalPlus,
+      assigneeId: backendEng,
+      dueDate: daysFromNow(1).toISOString(),
+      sourceSessionId: dentalPlusClientReview,
+      status: 'in-progress',
+      priority: 'high',
+      relatedDecisionId: DECISION_IDS.extendBookingWindow,
+    },
+    {
+      id: 'task-fix-booking-conflicts',
+      title: 'Fix reported booking conflicts',
+      projectId: dentalPlus,
+      assigneeId: backendEng,
+      dueDate: daysFromNow(-1).toISOString(),
+      status: 'blocked',
+      priority: 'urgent',
+      blocker: 'Waiting on a repro case from the client.',
+    },
+    {
+      id: 'task-add-grading-feature',
+      title: 'Add grading feature to Studo',
+      projectId: studo,
+      assigneeId: uvejs,
+      dueDate: daysFromNow(8).toISOString(),
+      sourceSessionId: studoFeaturePlanning,
+      status: 'todo',
+      priority: 'medium',
+      relatedDecisionId: DECISION_IDS.addGradingFeature,
+    },
+    {
+      id: 'task-album-sharing-permissions',
+      title: 'Implement per-album sharing permissions',
+      projectId: albumi,
+      assigneeId: productDesigner,
+      dueDate: daysFromNow(5).toISOString(),
+      sourceSessionId: albumiDesignReview,
+      status: 'todo',
+      priority: 'medium',
+      relatedDecisionId: DECISION_IDS.perAlbumSharing,
+    },
+    {
+      id: 'task-document-matchmaking-logic',
+      title: 'Document matchmaking logic before archiving Game Zone',
+      projectId: gameZone,
+      assigneeId: teamMember,
+      status: 'done',
+      priority: 'low',
+      sourceSessionId: gameZoneCoordination,
+      completedAt: daysFromNow(-9).toISOString(),
+      relatedDecisionId: DECISION_IDS.archiveGameZone,
+    },
+    {
+      id: 'task-confirm-inventory-sync',
+      title: 'Confirm inventory sync before Laben Furniture launch',
+      projectId: labenFurniture,
+      assigneeId: backendEng,
+      dueDate: daysFromNow(2).toISOString(),
+      sourceSessionId: labenFurnitureWebsiteReview,
+      status: 'in-progress',
+      priority: 'high',
+      relatedDecisionId: DECISION_IDS.shipLabenStorefront,
+    },
+    {
+      id: 'task-prep-demo-script',
+      title: 'Prepare the hackathon demo script',
+      assigneeId: uvejs,
       dueDate: daysFromNow(1).toISOString(),
       status: 'todo',
-      priority: 'low',
+      priority: 'urgent',
     },
+    ...generateBulkTasks(24),
   ]
 }

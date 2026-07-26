@@ -154,7 +154,11 @@ function buildDetail(session: SessionRecord, data: WorkspaceData): SessionDetail
     risks: riskItems,
     insights: session.insights,
     timeline: buildTimeline(session),
-    transcript: generateTranscript(session, people, participantNames, sessionDecisions, sessionTasks, sessionQuestions),
+    transcript:
+      session.transcript && session.transcript.length > 0
+        ? session.transcript
+        : generateTranscript(session, people, participantNames, sessionDecisions, sessionTasks, sessionQuestions),
+    audio: session.audio,
   }
 }
 

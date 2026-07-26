@@ -29,7 +29,13 @@ export function SessionOverview({ session, onApproveDecision, onRejectDecision, 
             <H3>Executive summary</H3>
             <Caption className="text-subtle-foreground">AI-generated summary</Caption>
           </div>
-          <Body className="max-w-[65ch] leading-relaxed text-foreground">{session.summary}</Body>
+          {session.summary ? (
+            <Body className="max-w-[65ch] leading-relaxed text-foreground">{session.summary}</Body>
+          ) : (
+            <Body className="max-w-[65ch] leading-relaxed text-subtle-foreground italic">
+              Structured meeting insights are still being prepared.
+            </Body>
+          )}
         </section>
 
         <Divider />

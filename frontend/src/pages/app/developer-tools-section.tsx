@@ -7,7 +7,7 @@ import { Label, Small } from '@/components/typography'
 import { seedDummyData, clearSampleData, hasSampleData } from '@/data/sample/sample-data-service'
 import { APP_BASE } from '@/app/shell/nav-config'
 
-/** Dev-only workspace seeding for exercising the Home dashboard with realistic data. Never rendered in production — see the import.meta.env.DEV guard in SettingsPage. */
+/** Workspace seeding for exercising the app with realistic data. Ships in production too — the deployed demo needs a way to populate itself. */
 export function DeveloperToolsSection() {
   const navigate = useNavigate()
   const { toast } = useToast()

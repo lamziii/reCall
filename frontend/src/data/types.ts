@@ -11,11 +11,25 @@ export interface SampleMeta {
   createdAt: string
 }
 
+export type PersonStatus = 'active' | 'away' | 'offline'
+
 export interface Person {
   id: string
   name: string
   role: string
   email: string
+  department: string
+  status: PersonStatus
+  teamId?: string
+  _sample?: SampleMeta
+}
+
+export interface Team {
+  id: string
+  name: string
+  description: string
+  memberIds: string[]
+  createdAt: string
   _sample?: SampleMeta
 }
 
@@ -39,6 +53,22 @@ export interface TimelineEvent {
   offsetMinutes: number
 }
 
+/** Shape-compatible with sessions/types.ts's TranscriptEntry — kept separate to avoid a circular import between the two type modules. */
+export interface RecordedTranscriptSegment {
+  id: string
+  speakerName: string
+  timestampLabel: string
+  offsetMinutes: number
+  text: string
+}
+
+export type SessionSource = 'sample-data' | 'live-recording' | 'import'
+
+export interface SessionAudioMeta {
+  mimeType: string
+  durationSeconds: number
+}
+
 export interface SessionRecord {
   id: string
   title: string
@@ -54,6 +84,16 @@ export interface SessionRecord {
   riskIds: string[]
   insights: string[]
   timeline: TimelineEvent[]
+  /** Only meaningful when status is 'needs-review' — powers the Reviews queue. Defaults to 'pending'. */
+  reviewStatus?: 'pending' | 'approved' | 'needs-edits'
+  reviewConfidence?: number
+  /** Present on sessions saved from the live-recording flow — absent on sample/imported sessions. */
+  transcript?: RecordedTranscriptSegment[]
+  source?: SessionSource
+  createdBy?: string
+  language?: string
+  /** Set when a recording's audio Blob was saved to IndexedDB (see data/recording/audio-storage-service), keyed by session id. */
+  audio?: SessionAudioMeta
   _sample?: SampleMeta
 }
 
@@ -133,6 +173,29 @@ export interface ActivityItem {
   _sample?: SampleMeta
 }
 
+export type NotificationType =
+  | 'session-processed'
+  | 'task-assigned'
+  | 'decision-approved'
+  | 'mention'
+  | 'project-update'
+  | 'review-required'
+
+export type NotificationRefType = 'session' | 'task' | 'project' | 'decision'
+
+export interface Notification {
+  id: string
+  type: NotificationType
+  title: string
+  description: string
+  timestamp: string
+  read: boolean
+  actorId?: string
+  refType?: NotificationRefType
+  refId?: string
+  _sample?: SampleMeta
+}
+
 export interface Workspace {
   id: string
   name: string
@@ -148,6 +211,7 @@ export interface Workspace {
 export interface WorkspaceData {
   workspace: Workspace
   people: Person[]
+  teams: Team[]
   projects: Project[]
   sessions: SessionRecord[]
   tasks: Task[]
@@ -155,4 +219,5 @@ export interface WorkspaceData {
   questions: Question[]
   risks: Risk[]
   activity: ActivityItem[]
+  notifications: Notification[]
 }

@@ -1,4 +1,5 @@
 import type { WorkspaceData } from './types'
+import { SAMPLE_DATA_VERSION } from './sample/generate-sample-workspace'
 
 const STORAGE_KEY = 'recall:workspace-data'
 
@@ -8,7 +9,15 @@ export function getWorkspaceData(): WorkspaceData | null {
   const raw = window.localStorage.getItem(STORAGE_KEY)
   if (!raw) return null
   try {
-    return JSON.parse(raw) as WorkspaceData
+    const data = JSON.parse(raw) as WorkspaceData
+    // A sample workspace saved by an older SAMPLE_DATA_VERSION may be missing fields/wiring
+    // features added since (e.g. review status, notifications) — treat it as absent so every
+    // page falls back to its empty state instead of silently rendering a stale, half-shaped workspace.
+    if (data.workspace._sample && data.workspace._sample.sampleDataVersion !== SAMPLE_DATA_VERSION) {
+      window.localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
+    return data
   } catch {
     return null
   }
@@ -45,6 +54,7 @@ export function clearSampleRecords(): WorkspaceData | null {
   const cleaned: WorkspaceData = {
     workspace: data.workspace,
     people: data.people.filter((r) => !r._sample),
+    teams: data.teams.filter((r) => !r._sample),
     projects: data.projects.filter((r) => !r._sample),
     sessions: data.sessions.filter((r) => !r._sample),
     tasks: data.tasks.filter((r) => !r._sample),
@@ -52,6 +62,7 @@ export function clearSampleRecords(): WorkspaceData | null {
     questions: data.questions.filter((r) => !r._sample),
     risks: data.risks.filter((r) => !r._sample),
     activity: data.activity.filter((r) => !r._sample),
+    notifications: data.notifications.filter((r) => !r._sample),
   }
   saveWorkspaceData(cleaned)
   return cleaned

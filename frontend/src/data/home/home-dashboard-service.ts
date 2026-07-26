@@ -27,7 +27,7 @@ function sessionTitle(sessions: SessionRecord[], id?: string): string | undefine
 const sessionHref = (id: string) => `/app/sessions/${id}`
 const transcriptHref = (id: string) => `/app/sessions/${id}?tab=transcript`
 const taskHref = (id: string) => `/app/tasks?task=${id}`
-const projectHref = (id: string) => `/app/projects?project=${id}`
+const projectHref = (id: string) => `/app/projects/${id}`
 
 function buildPrimaryAttention(data: WorkspaceData): PrimaryAttention | null {
   const { sessions, tasks, people, projects, decisions } = data

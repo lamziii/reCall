@@ -16,7 +16,7 @@ export function WorkspaceForm({
           <Input
             {...field}
             className={FIELD_SIZE}
-            placeholder="Acme Inc."
+            placeholder="majaLab"
             value={data.workspaceName}
             onChange={(e) => onChange({ workspaceName: e.target.value })}
           />
@@ -28,7 +28,7 @@ export function WorkspaceForm({
           <Input
             {...field}
             className={FIELD_SIZE}
-            placeholder="Acme Inc."
+            placeholder="majaLab"
             value={data.companyName}
             onChange={(e) => onChange({ companyName: e.target.value })}
           />

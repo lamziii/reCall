@@ -102,4 +102,6 @@ export interface SessionDetailData {
   insights: string[]
   timeline: SessionTimelineItem[]
   transcript: TranscriptEntry[]
+  /** Present only for sessions saved from the live-recording flow. */
+  audio?: { mimeType: string; durationSeconds: number }
 }

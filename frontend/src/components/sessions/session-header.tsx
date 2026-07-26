@@ -7,11 +7,13 @@ import { SessionStatus } from '@/components/recall/session-status'
 import { Avatar, AvatarGroup } from '@/components/data-display/avatar'
 import { Body, H2 } from '@/components/typography'
 import { useToast } from '@/components/feedback/toast'
+import { useSessionAudioUrl } from '@/data/recording/use-session-audio-url'
 import type { SessionDetailData } from '@/data/sessions/types'
 
 export function SessionHeader({ session }: { session: SessionDetailData }) {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const audioUrl = useSessionAudioUrl(session.id, Boolean(session.audio))
 
   return (
     <div className="flex flex-col gap-5 pb-6">
@@ -68,6 +70,12 @@ export function SessionHeader({ session }: { session: SessionDetailData }) {
           </DropdownMenu>
         </div>
       </div>
+
+      {session.audio && (
+        <audio controls src={audioUrl ?? undefined} className="h-10 w-full max-w-md" aria-label={`Recording audio for ${session.title}`}>
+          Your browser doesn&apos;t support audio playback.
+        </audio>
+      )}
     </div>
   )
 }

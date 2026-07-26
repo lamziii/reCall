@@ -30,6 +30,7 @@ export async function seedDummyData(): Promise<WorkspaceData> {
   const merged: WorkspaceData = {
     workspace: withoutOldSample.workspace,
     people: [...withoutOldSample.people, ...sample.people],
+    teams: [...withoutOldSample.teams, ...sample.teams],
     projects: [...withoutOldSample.projects, ...sample.projects],
     sessions: [...withoutOldSample.sessions, ...sample.sessions],
     tasks: [...withoutOldSample.tasks, ...sample.tasks],
@@ -37,6 +38,7 @@ export async function seedDummyData(): Promise<WorkspaceData> {
     questions: [...withoutOldSample.questions, ...sample.questions],
     risks: [...withoutOldSample.risks, ...sample.risks],
     activity: [...withoutOldSample.activity, ...sample.activity],
+    notifications: [...withoutOldSample.notifications, ...sample.notifications],
   }
   saveWorkspaceData(merged)
   return merged

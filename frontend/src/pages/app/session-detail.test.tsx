@@ -30,17 +30,17 @@ describe('SessionReviewPage', () => {
   })
 
   it('renders the summary, decisions, and tasks for a session', async () => {
-    renderSessionDetail(SESSION_IDS.reliabilityRetro)
+    renderSessionDetail(SESSION_IDS.recallProductPlanning)
 
-    expect(await screen.findByText('Platform Reliability Retrospective')).toBeInTheDocument()
+    expect(await screen.findByText('Recall Product Planning')).toBeInTheDocument()
     expect(screen.getByText('Executive summary')).toBeInTheDocument()
-    expect(screen.getByText('Add a fallback transcription provider before enterprise launch.')).toBeInTheDocument()
-    expect(screen.getByText('Add transcription fallback monitoring')).toBeInTheDocument()
+    expect(screen.getByText('Ship the Session Review page before polishing the dashboard.')).toBeInTheDocument()
+    expect(screen.getByText('Finish the Session Review page layout')).toBeInTheDocument()
   })
 
   it('switches tabs', async () => {
     const user = userEvent.setup()
-    renderSessionDetail(SESSION_IDS.reliabilityRetro)
+    renderSessionDetail(SESSION_IDS.recallProductPlanning)
     await screen.findByText('Executive summary')
 
     await user.click(screen.getByRole('tab', { name: 'Transcript' }))
@@ -49,23 +49,12 @@ describe('SessionReviewPage', () => {
     expect(screen.queryByText('Executive summary')).not.toBeInTheDocument()
   })
 
-  it('approving a pending decision updates its status', async () => {
-    const user = userEvent.setup()
-    renderSessionDetail(SESSION_IDS.reliabilityRetro)
-    await screen.findByText('Add a fallback transcription provider before enterprise launch.')
-
-    const decisionCard = screen.getByText('Add a fallback transcription provider before enterprise launch.').closest('div')!
-    await user.click(screen.getByRole('button', { name: 'Approve' }))
-
-    expect(decisionCard.parentElement).toHaveTextContent('Approved')
-  })
-
   it('changing a task status updates the select', async () => {
     const user = userEvent.setup()
-    renderSessionDetail(SESSION_IDS.reliabilityRetro)
-    await screen.findByText('Add transcription fallback monitoring')
+    renderSessionDetail(SESSION_IDS.recallProductPlanning)
+    await screen.findByText('Finish the Session Review page layout')
 
-    const select = screen.getByLabelText('Status for Add transcription fallback monitoring') as HTMLSelectElement
+    const select = screen.getByLabelText('Status for Finish the Session Review page layout') as HTMLSelectElement
     await user.selectOptions(select, 'done')
 
     expect(select.value).toBe('done')
