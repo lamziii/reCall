@@ -16,6 +16,7 @@ import { useToast } from '@/components/feedback/toast'
 import { useTasksListData } from '@/data/tasks/use-tasks-list-data'
 import { TasksToolbar } from '@/components/tasks/tasks-toolbar'
 import { TaskDetailPanel } from '@/components/tasks/task-detail-panel'
+import { NewTaskDialog } from '@/components/tasks/new-task-dialog'
 import type { TaskAssigneeFilter, TaskListItem, TaskPriorityFilter, TaskSortOption, TaskStatusFilter } from '@/data/tasks/types'
 
 const PRIORITY_WEIGHT: Record<TaskListItem['priority'], number> = { urgent: 3, high: 2, medium: 1, low: 0 }
@@ -30,6 +31,7 @@ export function TasksPage() {
   const [assignee, setAssignee] = useState<TaskAssigneeFilter>('all')
   const [sort, setSort] = useState<TaskSortOption>('due-soonest')
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [newTaskOpen, setNewTaskOpen] = useState(false)
 
   const hasActiveFilters = search.trim() !== '' || status !== 'all' || priority !== 'all' || assignee !== 'all'
 
@@ -75,12 +77,8 @@ export function TasksPage() {
     toast({ title: 'Task updated', variant: 'success' })
   }
 
-  function placeholderAction(label: string) {
-    toast({ title: label, description: "This is a placeholder for the hackathon demo — it's not wired up to a backend yet." })
-  }
-
   const actions = (
-    <Button leftIcon={<Plus />} onClick={() => placeholderAction('New task')}>
+    <Button leftIcon={<Plus />} onClick={() => setNewTaskOpen(true)}>
       New Task
     </Button>
   )
@@ -112,8 +110,9 @@ export function TasksPage() {
       <PageContainer>
         <PageHeader title="Tasks" description="Everything that came out of your conversations." actions={actions} />
         <div className="flex flex-1 items-center justify-center">
-          <EmptyState icon={<CheckSquare />} title="No tasks yet" description="Tasks generated from your sessions will show up here." />
+          <EmptyState icon={<CheckSquare />} title="No tasks yet" description="Tasks extracted from your meetings will appear here — or create one manually." />
         </div>
+        <NewTaskDialog open={newTaskOpen} onOpenChange={setNewTaskOpen} />
       </PageContainer>
     )
   }
@@ -213,6 +212,7 @@ export function TasksPage() {
       )}
 
       <TaskDetailPanel taskId={selectedTaskId} onOpenChange={(open) => !open && setSelectedTaskId(null)} onStatusChange={handleStatusChange} />
+      <NewTaskDialog open={newTaskOpen} onOpenChange={setNewTaskOpen} />
     </PageContainer>
   )
 }

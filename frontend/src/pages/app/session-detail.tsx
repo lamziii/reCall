@@ -13,6 +13,13 @@ import { useSessionDetailData } from '@/data/sessions/use-session-detail-data'
 import { DecisionList, SessionHeader, SessionOverview, SessionTaskList, TranscriptView } from '@/components/sessions'
 import type { SessionTimelineItem } from '@/data/sessions/types'
 import type { TaskStatusValue } from '@/components/recall/task-status'
+import { isLiveMode } from '@/data/live/data-mode'
+import { LiveSessionReviewPage } from './session-review-live'
+
+export function SessionReviewPage() {
+  // Live mode reads the real session + AI review from Firestore; demo mode uses sample data.
+  return isLiveMode ? <LiveSessionReviewPage /> : <DemoSessionReviewPage />
+}
 
 const TASK_FILTERS = [
   { value: 'all', label: 'All' },
@@ -20,7 +27,7 @@ const TASK_FILTERS = [
   { value: 'done', label: 'Completed' },
 ]
 
-export function SessionReviewPage() {
+function DemoSessionReviewPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()

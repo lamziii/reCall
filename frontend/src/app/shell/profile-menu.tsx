@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { LogOut, Settings } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import type { Placement } from '@/lib/utils'
+import { useAuth } from '@/lib/auth/auth-context'
 import { APP_BASE } from './nav-config'
 
 export interface ProfileMenuProps {
@@ -13,6 +14,12 @@ export interface ProfileMenuProps {
 /** Shared account menu — same items whether opened from the sidebar footer or the topbar. */
 export function ProfileMenu({ trigger, placement = 'bottom-end' }: ProfileMenuProps) {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
+
+  async function handleLogout() {
+    await signOut()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <DropdownMenu>
@@ -22,7 +29,7 @@ export function ProfileMenu({ trigger, placement = 'bottom-end' }: ProfileMenuPr
           Settings
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem icon={<LogOut />} danger>
+        <DropdownMenuItem icon={<LogOut />} danger onSelect={handleLogout}>
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

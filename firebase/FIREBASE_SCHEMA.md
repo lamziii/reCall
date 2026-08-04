@@ -54,6 +54,24 @@ Session recording metadata. Scoped to a workspace via `workspace_id`.
 - `status` — exactly one of `"live"` or `"completed"`.
 - `ended_at`, `recording_url`, `transcript` — optional, populated when the session ends.
 
+**Added fields (live vertical slice):**
+- `review_status` — `"processing" | "completed" | "failed"`, optional. The AI review-generation
+  state, distinct from the session-lifecycle `status`. Set by the `extractSessionReview` Cloud
+  Function (processing on entry, completed/failed on exit) and read by the Session Review page's
+  realtime listener to drive the processing / failed UI.
+- `project_name` — string or null, optional. Denormalized project label captured at creation
+  (the demo doesn't require a full `projects` join).
+- `participants` — array of display-name strings, optional. Entered at session creation.
+- `created_by` — auth uid of the creator, optional.
+- `session_type` — string, optional (Meeting, Investor Conversation, Client Call, …).
+- `notes` — string or null, optional. Free-text notes entered before recording.
+- `segments` — array of `{ id, speakerId, speakerLabel, startMs, endMs, text, confidence? }`,
+  optional. Raw transcript segments (browser Web Speech today; a diarizing provider later).
+- `speakers` — array of `{ id, label, displayName: string|null, participantId?: string|null }`,
+  optional. Speaker roster + label→name mapping. `recording_url` holds the Storage object path
+  `workspaces/{workspace_id}/recordings/{sessionId}.webm`; `audio` holds `{ mimeType, durationSeconds }`.
+  See RECORDING_ARCHITECTURE.md.
+
 **Indexes:**
 - Composite: `workspace_id` (Ascending), `status` (Ascending)
 - Single: `workspace_id`
@@ -155,6 +173,12 @@ Actionable task on the workspace task board. Distinct from `session_reviews.task
 - `priority` — exactly one of `"red"`, `"amber"`, `"gray"` (the display color).
 - `status` — exactly one of `"todo"`, `"in_progress"`, `"done"`.
 
+**Added fields (task promotion source linkage):** when a task is promoted from a Session
+Review candidate, it also carries `source_review_id` (string or null — the `session_reviews`
+doc id) and `source_candidate_index` (number or null — the candidate's index in
+`session_reviews.tasks`). Promotion uses a deterministic task doc id (`<sessionId>-t<index>`)
+so repeated promotions of the same candidate are idempotent (no duplicate board tasks).
+
 **Indexes:**
 - Composite: `workspace_id` (Ascending), `status` (Ascending)
 - Composite: `workspace_id` (Ascending), `project_id` (Ascending)
@@ -204,6 +228,13 @@ Firestore supports real-time listeners natively via `onSnapshot()`. The frontend
 When a new workspace is created, a Cloud Function trigger (`onCreate` on `workspaces/{workspaceId}`) automatically:
 1. Creates a member document at `workspaces/{workspaceId}/members/{owner_id}` with `role: 'owner'`
 2. Sets created_at to now
+
+**Client-side owner self-enrollment (belt-and-suspenders).** `firestore.rules` also lets the
+workspace's own owner create their own `owner` member doc (narrowly: only when
+`request.auth.uid == userId`, the workspace's `owner_id` matches, and `role == 'owner'`). The
+frontend `bootstrapWorkspace` writes this membership itself so the first session write can't
+race the trigger; the trigger remains as a redundant backstop. Workspace ids are derived
+deterministically from the owner uid (`ws-<uid>`), so bootstrap is idempotent across refreshes.
 
 ## Updated-at Timestamps
 

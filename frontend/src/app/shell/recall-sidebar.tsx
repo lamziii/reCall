@@ -8,7 +8,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { NotificationsMenu } from './notifications-menu'
 import { ProfileMenu } from './profile-menu'
 import { APP_BASE, MAIN_NAV, WORKSPACE_NAV } from './nav-config'
-import { getWorkspaceData } from '@/data/workspace-repository'
+import { useWorkspaceName } from '@/data/live/use-workspace-name'
+import { useAuth } from '@/lib/auth/auth-context'
 import { cn } from '@/lib/utils'
 
 export interface RecallSidebarProps {
@@ -21,7 +22,8 @@ export interface RecallSidebarProps {
 /** The one permanent left-hand nav — same instance whether it's rendered inline (desktop/tablet) or inside a Sheet (mobile). */
 export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle = true }: RecallSidebarProps) {
   const navigate = useNavigate()
-  const workspace = getWorkspaceData()?.workspace
+  const workspaceName = useWorkspaceName()
+  const { user } = useAuth()
 
   return (
     <Sidebar collapsed={collapsed}>
@@ -42,7 +44,7 @@ export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle
         <div className="px-2 pb-2">
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <UserMenuTrigger name={workspace?.name ?? 'majaLab'} subtitle={workspace?.plan ?? 'Free plan'} />
+              <UserMenuTrigger name={workspaceName} subtitle={user?.email ?? 'Workspace'} />
             </DropdownMenuTrigger>
             <DropdownMenuContent width={208}>
               <DropdownMenuLabel>Workspace</DropdownMenuLabel>

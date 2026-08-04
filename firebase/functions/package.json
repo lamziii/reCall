@@ -11,13 +11,19 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "test:anthropic": "npm run build && node lib/scripts/test-anthropic-local.js",
+    "check:transcription": "npm run build && node lib/scripts/check-transcription-env.js",
+    "test:transcription": "npm run build && node lib/transcription/language-metrics.test.js && node lib/transcription/supported-languages.js && node lib/correctTranscript.js && node lib/transcription/workspace-vocabulary.js",
+    "backfill:tasks": "npm run build && node lib/scripts/backfill-tasks.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
     "firebase-admin": "^12.1.0",
     "firebase-functions": "^5.0.0"
   },
   "devDependencies": {
+    "dotenv": "^16.4.5",
     "typescript": "^5.4.0"
   },
   "private": true

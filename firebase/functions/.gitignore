@@ -1,0 +1,9 @@
+# Build output
+lib/
+node_modules/
+
+# Local environment — NEVER commit real secrets (Anthropic key lives here in local dev)
+.env
+.env.local
+.env.*
+!.env.example

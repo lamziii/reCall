@@ -13,10 +13,18 @@ import { createRecordedSession } from '@/data/recording/create-recorded-session'
 import { getWorkspaceData } from '@/data/workspace-repository'
 import { AudioVisualizer, LiveTranscript, RecordingControls, RecordingHeader, RecordingSetup } from '@/components/recording'
 import type { RecordingSetupValues } from '@/data/recording/recording-types'
+import { isLiveMode } from '@/data/live/data-mode'
+import { LiveRecordSessionPage } from './record-live'
 
 const ACTIVE_STATUSES = new Set(['requesting-permission', 'recording', 'paused', 'stopping'])
 
 export function RecordSessionPage() {
+  // Live mode: paste-transcript New Session flow (the reliable AI demo path). Demo mode keeps
+  // the existing localStorage-backed audio recording experience.
+  return isLiveMode ? <LiveRecordSessionPage /> : <DemoRecordSessionPage />
+}
+
+function DemoRecordSessionPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const recorder = useAudioRecorder()
@@ -84,7 +92,7 @@ export function RecordSessionPage() {
           <EmptyState
             icon={<Home />}
             title="No workspace yet"
-            description="Generate sample data from Home before recording a session."
+            description="Return to Home to set up your workspace before recording a session."
             action={
               <Button variant="secondary" onClick={() => navigate('/app')}>
                 Go to Home

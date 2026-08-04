@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/feedback/skeleton'
 import { List } from '@/components/data-display/list'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Caption } from '@/components/typography'
-import { useToast } from '@/components/feedback/toast'
 import { useSessionsListData } from '@/data/sessions/use-sessions-list-data'
 import { SessionRow, SessionsToolbar } from '@/components/sessions'
 import type { SessionDateFilter, SessionDateGroup, SessionListItem, SessionSortOption, SessionStatusFilter } from '@/data/sessions/types'
@@ -34,7 +33,6 @@ function withinDateFilter(rawDate: string, filter: SessionDateFilter): boolean {
 
 export function SessionsPage() {
   const navigate = useNavigate()
-  const { toast } = useToast()
   const { state, refetch } = useSessionsListData()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<SessionStatusFilter>('all')
@@ -49,10 +47,6 @@ export function SessionsPage() {
     setStatus('all')
     setProjectId('all')
     setDateFilter('all')
-  }
-
-  function placeholderAction(label: string) {
-    toast({ title: label, description: "This is a placeholder for the hackathon demo — it's not wired up to a backend yet." })
   }
 
   const filteredSorted = useMemo(() => {
@@ -101,7 +95,7 @@ export function SessionsPage() {
 
   const actions = (
     <>
-      <Button variant="ghost" leftIcon={<Upload />} onClick={() => placeholderAction('Import recording')}>
+      <Button variant="ghost" leftIcon={<Upload />} onClick={() => navigate('/app/record', { state: { import: true } })}>
         Import recording
       </Button>
       <Button leftIcon={<Mic />} onClick={() => navigate('/app/record')}>

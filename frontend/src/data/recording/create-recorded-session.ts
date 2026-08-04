@@ -59,7 +59,7 @@ function buildDummyFollowUps(sessionId: string, ownerId: string, createdAt: stri
 /** Saves a completed live recording as a real session in the workspace repository. Returns the new session id. */
 export async function createRecordedSession(input: CreateRecordedSessionInput): Promise<string> {
   const data = getWorkspaceData()
-  if (!data) throw new Error('No workspace found. Generate sample data first.')
+  if (!data) throw new Error('No workspace found.')
 
   const id = crypto.randomUUID()
   const now = new Date()

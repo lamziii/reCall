@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Home } from 'lucide-react'
@@ -18,23 +17,11 @@ import {
   homeItemVariants,
 } from '@/components/home'
 import { useHomeDashboardData } from '@/data/home/use-home-dashboard-data'
-import { seedDummyData } from '@/data/sample/sample-data-service'
 
 export function AppHomePage() {
   const navigate = useNavigate()
   const { state, refetch } = useHomeDashboardData()
   const reduceMotion = useReducedMotion()
-  const [generating, setGenerating] = useState(false)
-
-  async function handleGenerateSample() {
-    setGenerating(true)
-    try {
-      await seedDummyData()
-      refetch()
-    } finally {
-      setGenerating(false)
-    }
-  }
 
   if (state.status === 'loading') {
     return (
@@ -69,15 +56,8 @@ export function AppHomePage() {
           <EmptyState
             icon={<Home />}
             title="Start building your team's memory"
-            description="Record your first session or generate sample data to see how Recall organizes decisions, tasks, and knowledge."
-            action={
-              <div className="flex items-center gap-2">
-                <Button onClick={() => navigate('/app/record')}>Record a session</Button>
-                <Button variant="secondary" loading={generating} onClick={handleGenerateSample}>
-                  Generate sample data
-                </Button>
-              </div>
-            }
+            description="Record your first session to see how Recall organizes decisions, tasks, and knowledge."
+            action={<Button onClick={() => navigate('/app/record')}>Record a session</Button>}
           />
         </div>
       </PageContainer>

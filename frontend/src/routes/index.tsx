@@ -3,8 +3,11 @@ import { HomePage } from '@/pages/home'
 import { LoginPage } from '@/pages/login'
 import { OnboardingPage } from '@/pages/onboarding'
 import { DesignSystemPage } from '@/pages/dev/design'
+import { TranscriptionBenchmarkPage } from '@/pages/dev/transcription-benchmark'
 import { RecallShell } from '@/app/shell/recall-shell'
 import { ForceTheme } from '@/app/theme/force-theme'
+import { RequireAuth, RedirectIfAuthed } from '@/lib/auth/require-auth'
+import { WorkspaceProvider } from '@/data/live/workspace-context'
 import { AppHomePage } from '@/pages/app/home'
 import { SessionsPage } from '@/pages/app/sessions'
 import { SessionReviewPage } from '@/pages/app/session-detail'
@@ -27,11 +30,22 @@ export function AppRoutes() {
     <Routes>
       {/* Public/pre-auth surfaces are always dark — only the /app dashboard responds to the appearance toggle. */}
       <Route path="/" element={<ForceTheme theme="dark"><HomePage /></ForceTheme>} />
-      <Route path="/login" element={<ForceTheme theme="dark"><LoginPage /></ForceTheme>} />
+      <Route path="/login" element={<ForceTheme theme="dark"><RedirectIfAuthed><LoginPage /></RedirectIfAuthed></ForceTheme>} />
       <Route path="/onboarding" element={<ForceTheme theme="dark"><OnboardingPage /></ForceTheme>} />
       <Route path="/dev/design" element={<DesignSystemPage />} />
+      {/* Internal transcription benchmark tool — auth-gated (needs an ID token to call the function). */}
+      <Route path="/dev/transcription-benchmark" element={<RequireAuth><TranscriptionBenchmarkPage /></RequireAuth>} />
 
-      <Route path="/app" element={<RecallShell />}>
+      <Route
+        path="/app"
+        element={
+          <RequireAuth>
+            <WorkspaceProvider>
+              <RecallShell />
+            </WorkspaceProvider>
+          </RequireAuth>
+        }
+      >
         <Route index element={<AppHomePage />} />
         <Route path="sessions" element={<SessionsPage />} />
         <Route path="sessions/:sessionId" element={<SessionReviewPage />} />
