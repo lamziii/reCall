@@ -211,7 +211,11 @@ export function TasksPage() {
         </Table>
       )}
 
-      <TaskDetailPanel taskId={selectedTaskId} onOpenChange={(open) => !open && setSelectedTaskId(null)} onStatusChange={handleStatusChange} />
+      <TaskDetailPanel
+        task={data.tasks.find((t) => t.id === selectedTaskId) ?? null}
+        onOpenChange={(open) => !open && setSelectedTaskId(null)}
+        onStatusChange={handleStatusChange}
+      />
       <NewTaskDialog open={newTaskOpen} onOpenChange={setNewTaskOpen} />
     </PageContainer>
   )

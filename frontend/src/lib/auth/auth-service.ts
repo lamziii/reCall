@@ -7,6 +7,11 @@ import {
   updateProfile,
   signOut,
   onAuthStateChanged,
+  sendEmailVerification,
+  reload,
+  multiFactor,
+  TotpMultiFactorGenerator,
+  type TotpSecret,
   type User,
 } from 'firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase/auth'
@@ -129,6 +134,95 @@ export function authErrorMessage(err: unknown, fallback: string): string {
 export async function signOutUser(): Promise<void> {
   if (forceDemoMode) return
   await signOut(getFirebaseAuth())
+}
+
+// ---- Account security (email verification + 2FA) ----------------------------
+
+/** The provider the current user signed in with, for onboarding branching. */
+export function currentAuthProvider(): 'google' | 'password' | null {
+  if (forceDemoMode) return 'password'
+  const u = getFirebaseAuth().currentUser
+  if (!u) return null
+  const ids = u.providerData.map((p) => p.providerId)
+  if (ids.includes('google.com')) return 'google'
+  if (ids.includes('password')) return 'password'
+  return null
+}
+
+/** True when the signed-in user's email is verified (Google accounts are verified by the provider). */
+export function isEmailVerified(): boolean {
+  if (forceDemoMode) return true
+  return getFirebaseAuth().currentUser?.emailVerified ?? false
+}
+
+/** Sends a verification email to the current user. No-op in demo mode. */
+export async function sendVerificationEmail(): Promise<void> {
+  if (forceDemoMode) return
+  const user = getFirebaseAuth().currentUser
+  if (!user) throw new Error('You need to be signed in to verify your email.')
+  await sendEmailVerification(user)
+}
+
+/** Re-fetches the user record and returns the fresh emailVerified flag. */
+export async function refreshEmailVerified(): Promise<boolean> {
+  if (forceDemoMode) return true
+  const user = getFirebaseAuth().currentUser
+  if (!user) return false
+  await reload(user)
+  return user.emailVerified
+}
+
+/** Thrown when TOTP 2FA can't be started because the project hasn't enabled Identity Platform /
+ *  multi-factor auth in the Firebase Console. The UI maps this to a "pending configuration" state. */
+export class TwoFactorUnavailableError extends Error {
+  constructor() {
+    super('Two-factor authentication is not enabled for this project yet.')
+    this.name = 'TwoFactorUnavailableError'
+  }
+}
+
+export interface TotpEnrollmentStart {
+  secret: TotpSecret
+  /** The shared secret key the user can type into their authenticator app manually. */
+  sharedSecretKey: string
+  /** otpauth:// URI (for a QR code or "open in app" link). */
+  otpauthUri: string
+}
+
+/**
+ * Begins real TOTP 2FA enrollment. Requires the project to have Identity Platform + multi-factor
+ * enabled (a Firebase Console / GCP change that can't be made from the repo). When that isn't
+ * configured, Firebase rejects `generateSecret` — we surface TwoFactorUnavailableError so the UI
+ * can honestly mark 2FA "pending configuration" instead of faking an enabled state.
+ */
+export async function startTotpEnrollment(accountName: string): Promise<TotpEnrollmentStart> {
+  if (forceDemoMode) throw new TwoFactorUnavailableError()
+  const user = getFirebaseAuth().currentUser
+  if (!user) throw new Error('You need to be signed in to set up two-factor authentication.')
+  try {
+    const session = await multiFactor(user).getSession()
+    const secret = await TotpMultiFactorGenerator.generateSecret(session)
+    return {
+      secret,
+      sharedSecretKey: secret.secretKey,
+      otpauthUri: secret.generateQrCodeUrl(accountName || user.email || 'Recall', 'Recall'),
+    }
+  } catch (err) {
+    const code = (err as { code?: string }).code ?? ''
+    // operation-not-allowed / admin-restricted-operation ⇒ MFA/Identity Platform not enabled.
+    if (code.includes('operation-not-allowed') || code.includes('admin-restricted') || code.includes('unsupported')) {
+      throw new TwoFactorUnavailableError()
+    }
+    throw err
+  }
+}
+
+/** Completes TOTP enrollment with the 6-digit code from the user's authenticator app. */
+export async function finalizeTotpEnrollment(secret: TotpSecret, verificationCode: string): Promise<void> {
+  const user = getFirebaseAuth().currentUser
+  if (!user) throw new Error('You need to be signed in to finish setting up two-factor authentication.')
+  const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, verificationCode.trim())
+  await multiFactor(user).enroll(assertion, 'Authenticator app')
 }
 
 /**

@@ -1,5 +1,10 @@
 # reCall — Project Context
 
+> ⚠️ **PARTLY STALE — see [`PROJECT_STATUS.md`](PROJECT_STATUS.md) for the current state.** This
+> brief (2026-08-02) predates the live wiring: it says the frontend and backend "are not connected
+> yet," but Firebase is now installed and the record → review → tasks slice runs against a live
+> backend. Kept for narrative context; trust `PROJECT_STATUS.md` where they disagree.
+
 > A catch-up brief for an AI assistant. Read this to understand what reCall is, how it's
 > built today, and where we're taking it. Written 2026-08-02.
 
