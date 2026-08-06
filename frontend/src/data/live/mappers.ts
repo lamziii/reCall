@@ -189,9 +189,16 @@ export function liveSessionStatus(session: LiveSessionDoc): SessionStatusValue {
   return 'processing' // transcript ready, analysis pending/in-flight
 }
 
+/** Recorded length in whole minutes. Prefers the primary `duration_seconds` field (written at
+ *  creation in record-live.tsx); falls back to the legacy `audio.durationSeconds`. */
+export function sessionDurationMinutes(session: LiveSessionDoc): number {
+  const seconds = session.duration_seconds ?? session.audio?.durationSeconds
+  return seconds ? Math.max(1, Math.round(seconds / 60)) : 0
+}
+
 function sessionListItem(session: LiveSessionDoc): SessionListItem {
   const iso = tsToIso(session.created_at)
-  const durationMinutes = session.audio?.durationSeconds ? Math.max(1, Math.round(session.audio.durationSeconds / 60)) : 0
+  const durationMinutes = sessionDurationMinutes(session)
   const status = liveSessionStatus(session)
   const summary = session.review_summary?.trim() || session.notes?.trim() || ''
   return {

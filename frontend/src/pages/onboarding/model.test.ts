@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { INITIAL_FORM, STEPS, hydrateForm, mapFormToProfile, mapFormToWorkspace, stepIndexById, type OnboardingForm } from './types'
+import { INITIAL_FORM, STEPS, hydrateForm, mapFormToProfile, mapFormToWorkspace, stepIndexById, visibleSteps, type OnboardingForm } from './types'
 import { LANGUAGE_OPTIONS } from './options'
 import { COUNTRIES, countryName, isValidCountryCode } from './countries'
 
@@ -28,7 +28,14 @@ describe('steps', () => {
   it('starts with the account step and ends with review', () => {
     expect(STEPS[0].id).toBe('account')
     expect(STEPS[STEPS.length - 1].id).toBe('review')
-    expect(stepIndexById('workspace')).toBe(4)
+    expect(stepIndexById('workspace', STEPS)).toBe(5)
+  })
+
+  it('visibleSteps drops the workspace step for Recall Pro but keeps it for Teams', () => {
+    expect(visibleSteps('pro').map((s) => s.id)).not.toContain('workspace')
+    expect(visibleSteps('teams').map((s) => s.id)).toContain('workspace')
+    expect(visibleSteps('pro').length).toBe(STEPS.length - 1)
+    expect(visibleSteps('teams').length).toBe(STEPS.length)
   })
 })
 

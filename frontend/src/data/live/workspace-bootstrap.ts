@@ -1,6 +1,7 @@
 import { doc, getDoc, serverTimestamp, setDoc, type DocumentReference } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase/firestore'
 import type { AuthUser } from '@/lib/auth/auth-service'
+import { DEFAULT_PLAN } from '@/data/plans'
 
 /** The deterministic workspace id for a user. Deterministic ⇒ bootstrap and onboarding always
  *  resolve to the SAME document, so a workspace can never be duplicated across refreshes/tabs. */
@@ -50,6 +51,7 @@ export async function ensureWorkspace(user: AuthUser): Promise<string> {
     await setDoc(wsRef, {
       name: pendingName || `${user.name}'s Workspace`,
       owner_id: user.id,
+      plan: DEFAULT_PLAN,
       onboarding_completed: false,
       created_at: serverTimestamp(),
       updated_at: serverTimestamp(),

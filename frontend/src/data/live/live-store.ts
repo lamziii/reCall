@@ -14,6 +14,7 @@ import {
 import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { getDb } from '@/lib/firebase/firestore'
 import { getFirebaseStorage } from '@/lib/firebase/storage'
+import type { PlanTier } from '@/data/plans'
 import type { CandidateTask } from './review'
 import { candidateToTaskInput } from './mappers'
 import type { LiveSessionDoc, LiveTaskDoc, SessionReviewDoc, SessionSpeaker, TranscriptSegment, TranscriptionStatus } from './types'
@@ -35,6 +36,8 @@ export interface CreateSessionInput {
   transcriptionStatus?: TranscriptionStatus
   /** Expected meeting languages (soft transcription hints, e.g. ['sq','en']). */
   expectedLanguages?: string[]
+  /** Recorded audio length, captured client-side when the mic recording stops. Powers monthly hour-limit enforcement. */
+  durationSeconds?: number
 }
 
 /** Creates a session, generating its Firestore doc id first so the same id is used for the
@@ -56,6 +59,7 @@ export async function createSession(input: CreateSessionInput): Promise<string> 
     speakers: input.speakers ?? [],
     transcription_status: input.transcriptionStatus ?? 'none',
     expected_languages: input.expectedLanguages ?? ['sq', 'en'],
+    duration_seconds: input.durationSeconds ?? null,
     transcription_provider: null,
     transcription_model: null,
     transcription_error: null,
@@ -123,6 +127,12 @@ export interface LiveWorkspaceDoc {
   id: string
   name?: string
   owner_id?: string
+  plan?: PlanTier
+}
+
+/** Updates the workspace's subscription plan (Settings' plan switcher). */
+export async function setWorkspacePlan(workspaceId: string, plan: PlanTier): Promise<void> {
+  await updateDoc(doc(getDb(), 'workspaces', workspaceId), { plan, updated_at: serverTimestamp() })
 }
 
 /** Subscribes to the workspace doc — used to show the real workspace name in the shell. */

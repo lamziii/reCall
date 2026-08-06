@@ -7,11 +7,15 @@ import { Button } from '@/components/ui/button'
 import { H2, Small } from '@/components/typography'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ErrorState } from '@/components/feedback/error-state'
+import { Alert } from '@/components/feedback'
 import { useToast } from '@/components/feedback/toast'
 import { AudioVisualizer, RecordingControls, RecordingHeader } from '@/components/recording'
 import { useAudioRecorder } from '@/data/recording/use-audio-recorder'
 import { useAuth } from '@/lib/auth/auth-context'
 import { useWorkspace } from '@/data/live/workspace-context'
+import { useWorkspacePlan } from '@/data/live/use-workspace-plan'
+import { useMonthlyUsageMinutes } from '@/data/live/use-monthly-usage'
+import { PLANS } from '@/data/plans'
 import { createSession, setTranscriptionStatus } from '@/data/live/live-store'
 import { putLocalAudio } from '@/data/live/local-audio'
 import { pipelineLog } from '@/lib/diagnostics'
@@ -32,6 +36,10 @@ export function LiveRecordSessionPage() {
   const { user } = useAuth()
   const { workspaceId } = useWorkspace()
   const recorder = useAudioRecorder()
+  const plan = useWorkspacePlan()
+  const usedMinutes = useMonthlyUsageMinutes()
+  const limitMinutes = PLANS[plan].maxHoursPerMonth * 60
+  const overLimit = usedMinutes >= limitMinutes
 
   const [step, setStep] = useState<Step>((location.state as { import?: boolean } | null)?.import ? 'import' : 'info')
   const [title, setTitle] = useState('')
@@ -72,6 +80,7 @@ export function LiveRecordSessionPage() {
   }
 
   async function handleStartRecording() {
+    if (overLimit) return
     setError(null)
     saveExpectedLanguages(expectedLanguages) // remember for next session
     const ok = await recorder.start()
@@ -111,6 +120,7 @@ export function LiveRecordSessionPage() {
         createdBy: user?.id ?? 'unknown',
         transcriptionStatus: hasAudio ? 'pending' : 'failed',
         expectedLanguages,
+        durationSeconds: result?.durationSeconds,
       })
 
       if (result?.blob) {
@@ -314,8 +324,16 @@ export function LiveRecordSessionPage() {
 
         {infoFields}
 
+        {overLimit && (
+          <Alert
+            variant="warning"
+            title={`You've used all ${PLANS[plan].maxHoursPerMonth} hrs on ${PLANS[plan].label} this month`}
+            description="Upgrade your plan in Settings, or wait until next month to record again."
+          />
+        )}
+
         <div className="flex flex-col gap-3">
-          <Button leftIcon={<Mic />} onClick={handleStartRecording} fullWidth className="h-[52px]">
+          <Button leftIcon={<Mic />} onClick={handleStartRecording} disabled={overLimit} fullWidth className="h-[52px]">
             Start Recording
           </Button>
           <div className="flex items-center justify-center gap-2 text-small text-muted-foreground">

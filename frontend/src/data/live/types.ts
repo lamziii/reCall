@@ -64,6 +64,8 @@ export interface LiveSessionDoc {
   /** Storage object path of the uploaded recording, e.g. workspaces/{ws}/recordings/{id}.webm */
   recording_url?: string | null
   audio?: { mimeType: string; durationSeconds: number } | null
+  /** Recorded length in seconds, written directly at session creation (record-live.tsx). Primary source for duration; `audio.durationSeconds` (Storage upload path) is legacy/unused. */
+  duration_seconds?: number | null
   /** Raw transcript segments (temporary browser turns until OpenAI overwrites them). */
   segments?: TranscriptSegment[]
   /** Speaker roster + label→name mapping for this session. */

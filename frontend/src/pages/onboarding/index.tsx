@@ -25,6 +25,7 @@ import { OnboardingStep } from './onboarding-step'
 import { CreateAccountStep } from './steps/create-account'
 import { SecureAccountStep } from './steps/secure-account'
 import { UseCaseStep } from './steps/use-case-step'
+import { PlanStep } from './steps/plan-step'
 import { WorkspaceStep } from './steps/workspace-step'
 import { RegionalStep } from './steps/regional-step'
 import { InviteStep } from './steps/invite-step'
@@ -35,11 +36,11 @@ import {
   INITIAL_FORM,
   mapFormToProfile,
   mapFormToWorkspace,
-  STEP_COUNT,
-  STEPS,
   stepIndexById,
+  visibleSteps,
   type OnboardingForm,
   type StepId,
+  type StepMeta,
 } from './types'
 
 const itemVariants = {
@@ -48,13 +49,15 @@ const itemVariants = {
 }
 
 /** True when the given step's required fields are filled and the user may advance. */
-function canContinue(step: number, form: OnboardingForm, authed: boolean): boolean {
-  const id = STEPS[step - 1]?.id
+function canContinue(step: number, form: OnboardingForm, authed: boolean, steps: StepMeta[]): boolean {
+  const id = steps[step - 1]?.id
   switch (id) {
     case 'account':
       return authed // the account form drives its own submit; Continue only shows once authenticated
     case 'use-cases':
       return form.useCases.length > 0
+    case 'plan':
+      return Boolean(form.plan)
     case 'workspace':
       return Boolean(form.workspaceName.trim() && form.workspaceType && form.teamSize)
     case 'regional':
@@ -79,7 +82,8 @@ export function OnboardingPage() {
   const initedForUser = useRef<string | null>(null)
 
   const update = useCallback((patch: Partial<OnboardingForm>) => setForm((f) => ({ ...f, ...patch })), [])
-  const meta = STEPS[step - 1]
+  const steps = useMemo(() => visibleSteps(form.plan), [form.plan])
+  const meta = steps[step - 1]
 
   // Demo mode has no onboarding — the app is entered directly.
   useEffect(() => {
@@ -113,9 +117,14 @@ export function OnboardingPage() {
       const workspace = await loadWorkspaceFields(wsId)
       if (cancelled) return
       setWorkspaceId(wsId)
-      setForm((f) => hydrateForm({ ...f, authProvider: provider }, { user, profile, workspace }))
-      const resume = Math.min(Math.max(profile?.onboarding_step ?? FIRST_POST_AUTH_STEP, FIRST_POST_AUTH_STEP), STEP_COUNT)
-      setStep(resume)
+      // Read the latest form via the updater (avoids a stale closure without adding `form` to this
+      // effect's deps, which would re-run it on every keystroke while a signed-out visitor types).
+      setForm((f) => {
+        const hydrated = hydrateForm({ ...f, authProvider: provider }, { user, profile, workspace })
+        const resume = Math.min(Math.max(profile?.onboarding_step ?? FIRST_POST_AUTH_STEP, FIRST_POST_AUTH_STEP), visibleSteps(hydrated.plan).length)
+        setStep(resume)
+        return hydrated
+      })
       setPhase('ready')
     }
 
@@ -157,7 +166,7 @@ export function OnboardingPage() {
     await completeOnboarding({
       uid: user.id,
       workspaceId,
-      finalStep: STEP_COUNT,
+      finalStep: steps.length,
       profile: {
         ...mapFormToProfile(form),
         display_name: form.fullName.trim() || null,
@@ -177,14 +186,14 @@ export function OnboardingPage() {
   }
 
   async function handleContinue() {
-    if (!canContinue(step, form, Boolean(user))) return
+    if (!canContinue(step, form, Boolean(user), steps)) return
     // Default an untouched 2FA choice to "skipped" so we always store an explicit status.
-    if (STEPS[step - 1].id === 'secure' && form.twoFactorStatus === null) update({ twoFactorStatus: 'skipped' })
+    if (meta.id === 'secure' && form.twoFactorStatus === null) update({ twoFactorStatus: 'skipped' })
 
     setSaving(true)
     setSaveError(null)
     try {
-      if (step === STEP_COUNT) {
+      if (step === steps.length) {
         await finish()
       } else {
         const next = step + 1
@@ -241,7 +250,7 @@ export function OnboardingPage() {
         <OnboardingHeader />
 
         <div className="mt-12">
-          <OnboardingProgress step={step} />
+          <OnboardingProgress step={step} total={steps.length} />
         </div>
 
         <motion.div
@@ -250,14 +259,15 @@ export function OnboardingPage() {
           initial={reduceMotion ? undefined : 'initial'}
           animate={reduceMotion ? undefined : 'animate'}
         >
-          <OnboardingStep step={step}>
+          <OnboardingStep step={step} meta={meta}>
             {meta.id === 'account' && <CreateAccountStep form={form} update={update} authedUser={user} onAuthenticated={onAuthenticated} />}
             {meta.id === 'secure' && <SecureAccountStep form={form} update={update} />}
             {meta.id === 'use-cases' && <UseCaseStep form={form} update={update} />}
+            {meta.id === 'plan' && <PlanStep form={form} update={update} />}
             {meta.id === 'workspace' && <WorkspaceStep form={form} update={update} firstName={firstName} />}
             {meta.id === 'regional' && <RegionalStep form={form} update={update} />}
             {meta.id === 'invite' && <InviteStep form={form} update={update} currentUserEmail={user?.email ?? form.email} />}
-            {meta.id === 'review' && <ReviewStep form={form} onEdit={(id: StepId) => setStep(stepIndexById(id))} />}
+            {meta.id === 'review' && <ReviewStep form={form} onEdit={(id: StepId) => setStep(stepIndexById(id, steps))} />}
           </OnboardingStep>
         </motion.div>
 
@@ -265,8 +275,8 @@ export function OnboardingPage() {
 
         {showFooter && (
           <div className="mt-10 flex flex-col items-center gap-3">
-            <Button size="lg" fullWidth loading={saving} disabled={!canContinue(step, form, Boolean(user))} onClick={handleContinue}>
-              {step === STEP_COUNT ? 'Create workspace' : 'Continue'}
+            <Button size="lg" fullWidth loading={saving} disabled={!canContinue(step, form, Boolean(user), steps)} onClick={handleContinue}>
+              {step === steps.length ? 'Create workspace' : 'Continue'}
             </Button>
             {isSkippable && (
               <Button variant="text" size="sm" onClick={handleContinue} disabled={saving}>

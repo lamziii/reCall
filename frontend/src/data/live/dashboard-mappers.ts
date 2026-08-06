@@ -13,7 +13,7 @@ import type {
 import type { CalendarDay, CalendarDeadlineItem, CalendarListItem, CalendarMonthData, CalendarSessionPill } from '@/data/calendar/types'
 import { formatDateLabel, formatDueLabel, formatFullDateTime, formatRelativeTime, formatTimeLabel } from '@/data/home/format'
 import type { LiveSessionDoc, LiveTaskDoc } from './types'
-import { liveSessionStatus, tsToIso } from './mappers'
+import { liveSessionStatus, sessionDurationMinutes, tsToIso } from './mappers'
 
 const sessionHref = (id: string) => `/app/sessions/${id}`
 const taskHref = (id: string) => `/app/tasks?task=${id}`
@@ -24,7 +24,7 @@ const dueMs = (t: LiveTaskDoc) => (t.deadline ? new Date(t.deadline).getTime() :
 const isSameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString()
 
 function durationLabel(s: LiveSessionDoc): string {
-  const mins = s.audio?.durationSeconds ? Math.max(1, Math.round(s.audio.durationSeconds / 60)) : 0
+  const mins = sessionDurationMinutes(s)
   return mins ? `${mins} min` : ''
 }
 
