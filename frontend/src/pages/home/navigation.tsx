@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Menu } from 'lucide-react'
 import { Wordmark } from '@/components/branding/logo'
 import { Button, IconButton } from '@/components/ui/button'
@@ -9,9 +10,23 @@ import { cn } from '@/lib/utils'
 const LINKS = [
   { label: 'Product', href: '#capabilities' },
   { label: 'How it works', href: '#workflow' },
+  { label: 'Pricing', href: '/plans' },
   { label: 'Security', href: '#' },
   { label: 'Resources', href: '#' },
 ]
+
+/** Renders a route (client-side) for app paths, a plain anchor for in-page scroll targets. */
+function NavLink({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
+  return href.startsWith('/') ? (
+    <Link to={href} className={className}>
+      {children}
+    </Link>
+  ) : (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  )
+}
 
 export function Navigation() {
   const navigate = useNavigate()
@@ -41,12 +56,12 @@ export function Navigation() {
         <ul className="hidden items-center gap-1 md:flex">
           {LINKS.map((link) => (
             <li key={link.label}>
-              <a
+              <NavLink
                 href={link.href}
                 className="focus-ring block rounded-md px-3 py-1.5 text-small text-muted-foreground transition-fast hover:text-foreground"
               >
                 {link.label}
-              </a>
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -68,12 +83,12 @@ export function Navigation() {
             <ul className="flex flex-col gap-1">
               {LINKS.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <NavLink
                     href={link.href}
                     className="focus-ring block rounded-md px-3 py-2.5 text-body text-foreground transition-fast hover:bg-surface-hover"
                   >
                     {link.label}
-                  </a>
+                  </NavLink>
                 </li>
               ))}
             </ul>
