@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { HomePage } from '@/pages/home'
+import { PlansPage } from '@/pages/plans'
 import { LoginPage } from '@/pages/login'
 import { OnboardingPage } from '@/pages/onboarding'
 import { DesignSystemPage } from '@/pages/dev/design'
@@ -31,6 +32,7 @@ export function AppRoutes() {
     <Routes>
       {/* Public/pre-auth surfaces are always dark — only the /app dashboard responds to the appearance toggle. */}
       <Route path="/" element={<ForceTheme theme="dark"><HomePage /></ForceTheme>} />
+      <Route path="/plans" element={<ForceTheme theme="dark"><PlansPage /></ForceTheme>} />
       <Route path="/login" element={<ForceTheme theme="dark"><RedirectIfAuthed><LoginPage /></RedirectIfAuthed></ForceTheme>} />
       <Route path="/onboarding" element={<ForceTheme theme="dark"><OnboardingPage /></ForceTheme>} />
       <Route path="/dev/design" element={<DesignSystemPage />} />
