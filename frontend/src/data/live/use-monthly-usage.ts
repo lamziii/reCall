@@ -14,6 +14,16 @@ function isThisMonth(iso: string): boolean {
 
 /** Sum of recorded minutes across the workspace's sessions created in the current calendar month. */
 export function useMonthlyUsageMinutes(): number {
+  return useMonthlyUsageStats().minutes
+}
+
+export interface MonthlyUsageStats {
+  minutes: number
+  sessionCount: number
+}
+
+/** Minutes used and session count for the workspace's sessions created in the current calendar month. */
+export function useMonthlyUsageStats(): MonthlyUsageStats {
   const { workspaceId } = useWorkspace()
   const [sessions, setSessions] = useState<LiveSessionDoc[]>([])
 
@@ -24,9 +34,11 @@ export function useMonthlyUsageMinutes(): number {
 
   if (isDemoMode) {
     const data = getWorkspaceData()
-    if (!data) return 0
-    return data.sessions.filter((s) => isThisMonth(s.date)).reduce((sum, s) => sum + s.durationMinutes, 0)
+    if (!data) return { minutes: 0, sessionCount: 0 }
+    const thisMonth = data.sessions.filter((s) => isThisMonth(s.date))
+    return { minutes: thisMonth.reduce((sum, s) => sum + s.durationMinutes, 0), sessionCount: thisMonth.length }
   }
 
-  return sessions.filter((s) => isThisMonth(tsToIso(s.created_at))).reduce((sum, s) => sum + sessionDurationMinutes(s), 0)
+  const thisMonth = sessions.filter((s) => isThisMonth(tsToIso(s.created_at)))
+  return { minutes: thisMonth.reduce((sum, s) => sum + sessionDurationMinutes(s), 0), sessionCount: thisMonth.length }
 }

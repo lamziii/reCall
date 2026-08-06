@@ -16,7 +16,7 @@ import { ProjectsPage } from '@/pages/app/projects'
 import { ProjectDetailPage } from '@/pages/app/project-detail'
 import { TasksPage } from '@/pages/app/tasks'
 import { CalendarPage } from '@/pages/app/calendar'
-import { SearchPage } from '@/pages/app/search'
+import { UsagePage } from '@/pages/app/usage'
 import { ReviewsPage } from '@/pages/app/reviews'
 import { PeoplePage } from '@/pages/app/people'
 import { PersonDetailPage } from '@/pages/app/person-detail'
@@ -60,7 +60,7 @@ export function AppRoutes() {
         <Route path="projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="search" element={<SearchPage />} />
+        <Route path="usage" element={<UsagePage />} />
         <Route path="reviews" element={<ReviewsPage />} />
         <Route path="people" element={<PeoplePage />} />
         <Route path="people/:personId" element={<PersonDetailPage />} />
