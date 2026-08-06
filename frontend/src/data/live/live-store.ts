@@ -3,6 +3,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   onSnapshot,
   orderBy,
   query,
@@ -128,11 +129,21 @@ export interface LiveWorkspaceDoc {
   name?: string
   owner_id?: string
   plan?: PlanTier
+  /** Extra minutes purchased on top of the plan's included monthly hours (see data/plans.ts USAGE_PACKS). */
+  bonus_minutes?: number
 }
 
 /** Updates the workspace's subscription plan (Settings' plan switcher). */
 export async function setWorkspacePlan(workspaceId: string, plan: PlanTier): Promise<void> {
   await updateDoc(doc(getDb(), 'workspaces', workspaceId), { plan, updated_at: serverTimestamp() })
+}
+
+/** Adds minutes from a purchased usage pack (Usage page "buy more usage") on top of the current total. */
+export async function addWorkspaceBonusMinutes(workspaceId: string, minutes: number): Promise<void> {
+  await updateDoc(doc(getDb(), 'workspaces', workspaceId), {
+    bonus_minutes: increment(minutes),
+    updated_at: serverTimestamp(),
+  })
 }
 
 /** Subscribes to the workspace doc — used to show the real workspace name in the shell. */

@@ -201,6 +201,8 @@ export interface Workspace {
   id: string
   name: string
   plan: PlanTier
+  /** Extra minutes purchased on top of the plan's included monthly hours (see data/plans.ts USAGE_PACKS). */
+  bonusMinutes?: number
   industry: string
   teamSize: number
   timezone: string
