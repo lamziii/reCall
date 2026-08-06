@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
+  refreshAuthUser,
   signInWithGoogle as svcSignInWithGoogle,
   signOutUser,
   subscribeToAuth,
@@ -11,6 +12,9 @@ export interface AuthState {
   loading: boolean
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
+  /** Re-reads the current user after an in-app profile edit (e.g. Settings → personal info) so
+   *  `user` reflects it immediately. `demoPatch` is only applied in demo mode (no persisted identity). */
+  refreshUser: (demoPatch?: Partial<AuthUser>) => Promise<void>
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -35,6 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await svcSignInWithGoogle()
       },
       signOut: signOutUser,
+      refreshUser: async (demoPatch) => {
+        const next = await refreshAuthUser(demoPatch)
+        if (next) setUser(next)
+      },
     }),
     [user, loading],
   )

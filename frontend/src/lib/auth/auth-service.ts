@@ -47,6 +47,19 @@ export function toAuthUser(user: User): AuthUser {
   }
 }
 
+/**
+ * Re-reads the current user so callers holding onto AuthContext.user (sidebar avatar, Settings)
+ * reflect an in-app profile edit immediately, without waiting for a full reload. Demo mode has no
+ * persisted identity — `demoPatch` is applied in-memory only, on top of the fixed DEMO_USER.
+ */
+export async function refreshAuthUser(demoPatch?: Partial<AuthUser>): Promise<AuthUser | null> {
+  if (forceDemoMode) return demoPatch ? { ...DEMO_USER, ...demoPatch } : DEMO_USER
+  const user = getFirebaseAuth().currentUser
+  if (!user) return null
+  await reload(user)
+  return toAuthUser(user)
+}
+
 // Errors that mean "the user closed the popup" — treated as a cancel, not a failure.
 const CANCEL_CODES = new Set([
   'auth/popup-closed-by-user',
