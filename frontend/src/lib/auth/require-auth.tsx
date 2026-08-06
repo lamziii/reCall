@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './auth-context'
+import { useUserProfile } from '@/data/live/use-user-profile'
 
 /** Full-screen loading while auth state resolves. Dark to match the pre-auth surfaces. */
 function AuthLoading() {
@@ -21,10 +22,30 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-/** Inverse gate for /login and /onboarding — sends already-signed-in users to the app. */
+/**
+ * Gate for the /app tree: the user must be signed in AND have finished onboarding. An authenticated
+ * user who hasn't completed onboarding is sent to /onboarding to resume. In demo mode onboarding is
+ * bypassed (useUserProfile reports completed).
+ *
+ * No redirect loop: /app → /onboarding only when incomplete; /onboarding → /app only when complete.
+ */
+export function RequireOnboarded({ children }: { children: ReactNode }) {
+  const { user, loading: authLoading } = useAuth()
+  const location = useLocation()
+  const { loading: profileLoading, onboardingCompleted } = useUserProfile()
+
+  if (authLoading || (user && profileLoading)) return <AuthLoading />
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  if (!onboardingCompleted) return <Navigate to="/onboarding" replace />
+  return <>{children}</>
+}
+
+/** Inverse gate for /login — sends signed-in users onward (to /onboarding if unfinished, else /app). */
 export function RedirectIfAuthed({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth()
-  if (loading) return <AuthLoading />
-  if (user) return <Navigate to="/app" replace />
+  const { user, loading: authLoading } = useAuth()
+  const { loading: profileLoading, onboardingCompleted } = useUserProfile()
+
+  if (authLoading || (user && profileLoading)) return <AuthLoading />
+  if (user) return <Navigate to={onboardingCompleted ? '/app' : '/onboarding'} replace />
   return <>{children}</>
 }

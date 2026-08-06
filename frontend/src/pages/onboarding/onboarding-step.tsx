@@ -2,11 +2,11 @@ import type { ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { DURATION, EASE_STANDARD } from '@/styles/animations/presets'
 import { Title, Body } from '@/components/typography'
-import { STEP_META } from './types'
+import { STEPS } from './types'
 
 export function OnboardingStep({ step, children }: { step: number; children: ReactNode }) {
   const reduceMotion = useReducedMotion()
-  const meta = STEP_META[step - 1]
+  const meta = STEPS[step - 1]
 
   return (
     <AnimatePresence mode="wait" initial={false}>

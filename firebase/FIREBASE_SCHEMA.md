@@ -4,17 +4,69 @@ Recall's data model mapped to Firestore collections and documents. **This is the
 
 ## Collection Structure
 
+### users/{uid}
+Canonical per-account profile. **The document ID is the Firebase Auth uid.** A user can only read or
+write their own profile (see `firestore.rules`). Created idempotently by `ensureWorkspace` and
+enriched by onboarding (see [docs/ONBOARDING_ARCHITECTURE.md](../docs/ONBOARDING_ARCHITECTURE.md)).
+
+```json
+{
+  "uid": "auth-uid-string",
+  "display_name": "Ada Lovelace",
+  "first_name": "Ada",
+  "last_name": "Lovelace",
+  "email": "ada@acme.com",
+  "photo_url": "https://…",
+  "workspace_id": "ws-<uid>",
+  "role": "owner",
+  "auth_provider": "google | password",
+  "onboarding_status": "not_started | in_progress | completed",
+  "onboarding_step": 4,
+  "onboarding_completed": false,
+  "tutorial_completed": false,
+  "preferred_language": "sq",
+  "language_label": "Shqip",
+  "country_code": "AL",
+  "timezone": "Europe/Tirane",
+  "date_format": "DD/MM/YYYY",
+  "time_format": "12h | 24h",
+  "use_cases": ["meeting-notes", "sales-calls"],
+  "custom_use_case": null,
+  "two_factor_status": "enabled | skipped | unavailable | null",
+  "created_at": "2026-08-04T00:00:00Z",
+  "updated_at": "2026-08-04T00:00:00Z"
+}
+```
+
+**Field rules:**
+- `preferred_language` — one of the four supported codes `sq | en | de | fr` (never a fifth).
+- `two_factor_status` — `"unavailable"` means the user chose 2FA but the project hasn't enabled
+  Identity Platform MFA (pending config); it is **not** a false "enabled". See
+  [docs/AUTHENTICATION.md](../docs/AUTHENTICATION.md). Passwords are NEVER stored here.
+- `onboarding_step` — 1-based resume pointer into the onboarding step list.
+
 ### workspaces/{workspaceId}
-One document per workspace. Owner auto-enrolled as a member via Cloud Function trigger.
+One document per workspace. The ID is deterministic (`ws-<owner-uid>`) so onboarding and the `/app`
+fallback bootstrap never create competing documents. Owner auto-enrolled as a member via Cloud
+Function trigger (and a client self-enroll rule).
 
 ```json
 {
   "name": "Acme Corp",
   "owner_id": "auth-uid-string",
+  "type": "startup",
+  "team_size": "2-5",
+  "industry": "software",
+  "custom_industry": null,
+  "onboarding_completed": true,
   "created_at": "2026-07-25T00:00:00Z",
   "updated_at": "2026-07-25T00:00:00Z"
 }
 ```
+
+**Field rules:**
+- `type`, `team_size`, `industry`, `custom_industry`, `onboarding_completed` — set by onboarding
+  (optional/null before then). `custom_industry` is only populated when `industry == "other"`.
 
 **Indexes:**
 - Composite: `owner_id` (Ascending), `created_at` (Descending)
@@ -70,7 +122,7 @@ Session recording metadata. Scoped to a workspace via `workspace_id`.
 - `speakers` — array of `{ id, label, displayName: string|null, participantId?: string|null }`,
   optional. Speaker roster + label→name mapping. `recording_url` holds the Storage object path
   `workspaces/{workspace_id}/recordings/{sessionId}.webm`; `audio` holds `{ mimeType, durationSeconds }`.
-  See RECORDING_ARCHITECTURE.md.
+  See ../docs/RECORDING_ARCHITECTURE.md.
 
 **Indexes:**
 - Composite: `workspace_id` (Ascending), `status` (Ascending)
@@ -204,6 +256,39 @@ Notification for a user within a workspace.
 - Composite: `workspace_id` (Ascending), `user_id` (Ascending)
 - Composite: `user_id` (Ascending), `read_at` (Ascending)
 
+### workspace_invites/{inviteId}
+A pending invitation to join a workspace. The document ID is **deterministic**
+(`<workspaceId>__<normalized-email>`, unsafe chars replaced) so re-inviting the same address is
+idempotent (no duplicate invites). Created by the workspace owner during/after onboarding.
+
+```json
+{
+  "workspace_id": "ws-<uid>",
+  "email": "Teammate@Acme.com",
+  "normalized_email": "teammate@acme.com",
+  "role": "admin | member",
+  "status": "pending | accepted | expired | revoked",
+  "invited_by_user_id": "auth-uid",
+  "invited_by_name": "Ada Lovelace",
+  "created_at": "2026-08-04T00:00:00Z",
+  "expires_at": "2026-08-18T00:00:00Z"
+}
+```
+
+**Field rules & security** (`firestore.rules`):
+- Only the workspace **owner** may create an invite; `role` is constrained to `admin | member`
+  (never `owner`, preventing client self-escalation); `invited_by_user_id` must equal the caller;
+  `status` must start `pending`.
+- Read is limited to workspace members OR the invited email (`request.auth.token.email.lower() ==
+  normalized_email`) so acceptance verifies the authenticated email.
+- `workspace_id` and `role` are immutable on update.
+- **Email delivery is not configured** — invites are persisted only. `onInviteCreated`
+  (`functions/src/invites.ts`) is the send seam. See [docs/AUTHENTICATION.md](../docs/AUTHENTICATION.md).
+
+**Indexes:**
+- Composite: `workspace_id` (Ascending), `status` (Ascending)
+- Composite: `normalized_email` (Ascending), `status` (Ascending)
+
 ## Cloud Storage Structure
 
 ### recordings bucket
@@ -232,9 +317,11 @@ When a new workspace is created, a Cloud Function trigger (`onCreate` on `worksp
 **Client-side owner self-enrollment (belt-and-suspenders).** `firestore.rules` also lets the
 workspace's own owner create their own `owner` member doc (narrowly: only when
 `request.auth.uid == userId`, the workspace's `owner_id` matches, and `role == 'owner'`). The
-frontend `bootstrapWorkspace` writes this membership itself so the first session write can't
-race the trigger; the trigger remains as a redundant backstop. Workspace ids are derived
-deterministically from the owner uid (`ws-<uid>`), so bootstrap is idempotent across refreshes.
+frontend `ensureWorkspace` (formerly `bootstrapWorkspace`, kept as a deprecated alias) writes this
+membership itself so the first session write can't race the trigger; the trigger remains as a
+redundant backstop. Workspace ids are derived deterministically from the owner uid (`ws-<uid>`), so
+bootstrap is idempotent across refreshes — and onboarding writes to the same id, so the two paths
+never create competing workspaces. See [docs/ONBOARDING_ARCHITECTURE.md](../docs/ONBOARDING_ARCHITECTURE.md).
 
 ## Updated-at Timestamps
 

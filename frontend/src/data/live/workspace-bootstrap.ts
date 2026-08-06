@@ -2,6 +2,12 @@ import { doc, getDoc, serverTimestamp, setDoc, type DocumentReference } from 'fi
 import { getDb } from '@/lib/firebase/firestore'
 import type { AuthUser } from '@/lib/auth/auth-service'
 
+/** The deterministic workspace id for a user. Deterministic ⇒ bootstrap and onboarding always
+ *  resolve to the SAME document, so a workspace can never be duplicated across refreshes/tabs. */
+export function workspaceIdForUser(uid: string): string {
+  return `ws-${uid}`
+}
+
 /**
  * Whether a doc exists, treating a DENIED read as "does not exist yet". A brand-new user is not yet
  * a workspace member, and the workspace read rule requires membership — so the very first read of
@@ -16,26 +22,24 @@ async function docExistsOrTreatMissing(ref: DocumentReference): Promise<boolean>
   }
 }
 
-/**
- * Resolves the user's workspace, creating a personal one on first run.
- *
- * The workspace ID is derived deterministically from the user's uid, which makes the whole
- * operation idempotent: repeated refreshes (and React StrictMode's double-invoked effects in
- * dev) re-run this without ever creating a second workspace or membership.
- *
- * We also create the owner membership client-side rather than depending only on the
- * onWorkspaceCreated Cloud Function trigger — this removes the race where the first session
- * write would fail because the trigger hadn't run yet. firestore.rules permits an owner to
- * self-enroll (owner_id === uid, role 'owner'), so this is safe; the trigger remains as a
- * redundant backstop.
- */
 /** Handoff key: the workspace name a user typed at sign-up, consumed once when the workspace is
  *  first created (see auth-service signUpWithPassword). Cleared after use. */
 const PENDING_WORKSPACE_KEY = 'recall:pending-workspace-name'
 
-export async function bootstrapWorkspace(user: AuthUser): Promise<string> {
+/**
+ * Idempotently ensures the user's workspace, owner membership, and canonical `users/{uid}` profile
+ * exist. Creates them on first run; never overwrites existing data (so it is safe to call on every
+ * `/app` entry AND at the start of onboarding). This is the RECOVERY / FALLBACK path — the source
+ * of truth for the workspace's descriptive fields (name/type/…) and for onboarding completion is
+ * the onboarding flow (see data/live/onboarding.ts). Returns the workspace id.
+ *
+ * The owner membership is created client-side rather than depending only on the onWorkspaceCreated
+ * Cloud Function trigger, removing the race where the first session write fails because the trigger
+ * hadn't run yet. firestore.rules permits an owner to self-enroll (owner_id === uid, role 'owner').
+ */
+export async function ensureWorkspace(user: AuthUser): Promise<string> {
   const db = getDb()
-  const workspaceId = `ws-${user.id}`
+  const workspaceId = workspaceIdForUser(user.id)
 
   const pendingName = typeof window !== 'undefined' ? window.localStorage.getItem(PENDING_WORKSPACE_KEY)?.trim() : null
 
@@ -46,6 +50,7 @@ export async function bootstrapWorkspace(user: AuthUser): Promise<string> {
     await setDoc(wsRef, {
       name: pendingName || `${user.name}'s Workspace`,
       owner_id: user.id,
+      onboarding_completed: false,
       created_at: serverTimestamp(),
       updated_at: serverTimestamp(),
     })
@@ -60,8 +65,8 @@ export async function bootstrapWorkspace(user: AuthUser): Promise<string> {
   }
 
   // Canonical user profile (users/{uid}). Idempotent: created once, never overwrites edits.
-  // BEST-EFFORT: the profile is display-only; a permission error (e.g. the users/{uid} rule not yet
-  // deployed) must NEVER block opening the workspace. Failure is logged, not thrown.
+  // BEST-EFFORT: a permission error (e.g. the users/{uid} rule not yet deployed) must NEVER block
+  // opening the workspace. Failure is logged, not thrown.
   try {
     const userRef = doc(db, 'users', user.id)
     const userSnap = await getDoc(userRef)
@@ -76,15 +81,25 @@ export async function bootstrapWorkspace(user: AuthUser): Promise<string> {
         photo_url: user.photoURL ?? null,
         workspace_id: workspaceId,
         role: 'owner',
+        onboarding_status: 'not_started',
+        onboarding_step: 0,
         onboarding_completed: false,
         tutorial_completed: false,
+        two_factor_status: null,
+        use_cases: [],
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
       })
     }
   } catch (err) {
-    console.warn('bootstrapWorkspace: user profile write skipped (deploy the users/{uid} Firestore rule to persist it)', err)
+    console.warn('ensureWorkspace: user profile write skipped (deploy the users/{uid} Firestore rule to persist it)', err)
   }
 
   return workspaceId
 }
+
+/**
+ * Back-compat alias. Older callers imported `bootstrapWorkspace`; it is exactly `ensureWorkspace`.
+ * @deprecated use ensureWorkspace
+ */
+export const bootstrapWorkspace = ensureWorkspace

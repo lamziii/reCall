@@ -6,7 +6,7 @@ import { DesignSystemPage } from '@/pages/dev/design'
 import { TranscriptionBenchmarkPage } from '@/pages/dev/transcription-benchmark'
 import { RecallShell } from '@/app/shell/recall-shell'
 import { ForceTheme } from '@/app/theme/force-theme'
-import { RequireAuth, RedirectIfAuthed } from '@/lib/auth/require-auth'
+import { RequireAuth, RequireOnboarded, RedirectIfAuthed } from '@/lib/auth/require-auth'
 import { WorkspaceProvider } from '@/data/live/workspace-context'
 import { AppHomePage } from '@/pages/app/home'
 import { SessionsPage } from '@/pages/app/sessions'
@@ -24,6 +24,7 @@ import { TeamsPage } from '@/pages/app/teams'
 import { TeamDetailPage } from '@/pages/app/team-detail'
 import { NotificationsPage } from '@/pages/app/notifications'
 import { SettingsPage } from '@/pages/app/settings'
+import { DevTaskboardPage } from '@/pages/tasks'
 
 export function AppRoutes() {
   return (
@@ -35,14 +36,19 @@ export function AppRoutes() {
       <Route path="/dev/design" element={<DesignSystemPage />} />
       {/* Internal transcription benchmark tool — auth-gated (needs an ID token to call the function). */}
       <Route path="/dev/transcription-benchmark" element={<RequireAuth><TranscriptionBenchmarkPage /></RequireAuth>} />
+      {/* Internal development task board (Uvejs & Lorik) — auth-gated, NOT in the customer sidebar,
+          and deliberately NOT behind RequireOnboarded so it's reachable independent of the app shell. */}
+      <Route path="/tasks" element={<RequireAuth><DevTaskboardPage /></RequireAuth>} />
 
       <Route
         path="/app"
         element={
           <RequireAuth>
-            <WorkspaceProvider>
-              <RecallShell />
-            </WorkspaceProvider>
+            <RequireOnboarded>
+              <WorkspaceProvider>
+                <RecallShell />
+              </WorkspaceProvider>
+            </RequireOnboarded>
           </RequireAuth>
         }
       >

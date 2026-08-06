@@ -4,57 +4,45 @@ import { useNavigate } from 'react-router-dom'
 import { Wordmark, GoogleIcon } from '@/components/branding'
 import { Button } from '@/components/ui/button'
 import { Alert, useToast } from '@/components/feedback'
-import { InlineLink } from '@/components/links'
 import { Divider } from '@/components/data-display'
 import { FormField, Input, PasswordInput } from '@/components/forms'
 import { H2, Body, Caption, Label } from '@/components/typography'
-import { signInWithGoogle, signInWithPassword, signUpWithPassword, authErrorMessage, AuthCancelledError } from '@/lib/auth/auth-service'
-
-type Mode = 'signin' | 'signup'
+import { signInWithGoogle, signInWithPassword, authErrorMessage, AuthCancelledError } from '@/lib/auth/auth-service'
 
 interface FieldErrors {
-  name?: string
   email?: string
   password?: string
 }
 
-function validate(mode: Mode, fields: { name: string; email: string; password: string }): FieldErrors {
+function validate(fields: { email: string; password: string }): FieldErrors {
   const errors: FieldErrors = {}
-  if (mode === 'signup' && !fields.name.trim()) errors.name = 'Your name is required.'
   if (!fields.email.trim()) errors.email = 'Email is required.'
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) errors.email = 'Enter a valid email address.'
   if (!fields.password) errors.password = 'Password is required.'
-  else if (mode === 'signup' && fields.password.length < 6) errors.password = 'Use at least 6 characters.'
   return errors
 }
 
+/**
+ * Sign-in for returning users. New accounts are created in the /onboarding funnel (which reuses the
+ * same auth service), so this page has no sign-up form — only sign-in + "Continue with Google".
+ * On success we go to /app; the /app guard sends anyone who hasn't finished onboarding to resume it.
+ */
 export function LoginPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const [mode, setMode] = useState<Mode>('signin')
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [isFormLoading, setIsFormLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const [name, setName] = useState('')
-  const [workspaceName, setWorkspaceName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
   const busy = isGoogleLoading || isFormLoading
-  const isSignup = mode === 'signup'
 
   function onSignedIn(displayName: string) {
-    toast({ title: isSignup ? 'Account created' : 'Signed in', description: `Welcome${isSignup ? '' : ' back'}, ${displayName}.`, variant: 'success' })
+    toast({ title: 'Signed in', description: `Welcome back, ${displayName}.`, variant: 'success' })
     navigate('/app')
-  }
-
-  function switchMode(next: Mode) {
-    setMode(next)
-    setError(null)
-    setFieldErrors({})
   }
 
   async function handleGoogleSignIn() {
@@ -73,19 +61,17 @@ export function LoginPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const errors = validate(mode, { name, email, password })
+    const errors = validate({ email, password })
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
     setError(null)
     setIsFormLoading(true)
     try {
-      const result = isSignup
-        ? await signUpWithPassword({ name, email, password, workspaceName })
-        : await signInWithPassword(email, password)
+      const result = await signInWithPassword(email, password)
       onSignedIn(result.user.name)
     } catch (err) {
-      setError(authErrorMessage(err, isSignup ? "Couldn't create your account. Please try again." : 'Incorrect email or password. Please try again.'))
+      setError(authErrorMessage(err, 'Incorrect email or password. Please try again.'))
     } finally {
       setIsFormLoading(false)
     }
@@ -104,9 +90,9 @@ export function LoginPage() {
         </a>
 
         <div className="flex flex-col items-center gap-3 text-center">
-          <Label as="span">{isSignup ? 'Get started' : 'Welcome back'}</Label>
-          <H2>{isSignup ? 'Create your account' : 'Sign in to Recall'}</H2>
-          <Body className="text-muted-foreground">{isSignup ? 'Set up your workspace in seconds.' : 'Sign in to access your workspace.'}</Body>
+          <Label as="span">Welcome back</Label>
+          <H2>Sign in to Recall</H2>
+          <Body className="text-muted-foreground">Sign in to access your workspace.</Body>
         </div>
 
         <div className="flex w-full flex-col gap-5">
@@ -127,26 +113,6 @@ export function LoginPage() {
           <Divider label="or" />
 
           <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
-            {isSignup && (
-              <FormField label="Full name" error={fieldErrors.name} required>
-                {(field) => (
-                  <Input
-                    {...field}
-                    size="lg"
-                    autoComplete="name"
-                    placeholder="Veiz Makulovci"
-                    error={field['aria-invalid']}
-                    value={name}
-                    disabled={busy}
-                    onChange={(e) => {
-                      setName(e.target.value)
-                      setFieldErrors((current) => ({ ...current, name: undefined }))
-                    }}
-                  />
-                )}
-              </FormField>
-            )}
-
             <FormField label="Email" error={fieldErrors.email} required>
               {(field) => (
                 <Input
@@ -171,8 +137,8 @@ export function LoginPage() {
                 <PasswordInput
                   {...field}
                   size="lg"
-                  autoComplete={isSignup ? 'new-password' : 'current-password'}
-                  placeholder={isSignup ? 'At least 6 characters' : 'Enter your password'}
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
                   error={field['aria-invalid']}
                   value={password}
                   disabled={busy}
@@ -184,48 +150,21 @@ export function LoginPage() {
               )}
             </FormField>
 
-            {isSignup && (
-              <FormField label="Workspace name" optional>
-                {(field) => (
-                  <Input
-                    {...field}
-                    size="lg"
-                    placeholder="e.g. Acme, or your team name"
-                    value={workspaceName}
-                    disabled={busy}
-                    onChange={(e) => setWorkspaceName(e.target.value)}
-                  />
-                )}
-              </FormField>
-            )}
-
             <Button type="submit" fullWidth loading={isFormLoading} disabled={busy} className="h-[52px] text-body">
-              {isFormLoading ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
+              {isFormLoading ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
 
           <Caption className="text-center text-subtle-foreground">
-            {isSignup ? 'Already have an account? ' : "Don't have an account? "}
+            Don't have an account?{' '}
             <button
               type="button"
               className="focus-ring rounded-sm font-medium text-foreground hover:underline"
-              onClick={() => switchMode(isSignup ? 'signin' : 'signup')}
+              onClick={() => navigate('/onboarding')}
               disabled={busy}
             >
-              {isSignup ? 'Sign in' : 'Create one'}
+              Create one
             </button>
-          </Caption>
-
-          <Caption className="text-center text-subtle-foreground">
-            By continuing, you agree to our{' '}
-            <InlineLink to="/terms" className="text-caption">
-              Terms
-            </InlineLink>{' '}
-            and{' '}
-            <InlineLink to="/privacy" className="text-caption">
-              Privacy Policy
-            </InlineLink>
-            .
           </Caption>
         </div>
       </div>

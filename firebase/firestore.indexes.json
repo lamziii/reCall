@@ -71,6 +71,22 @@
         { "fieldPath": "user_id", "order": "ASCENDING" },
         { "fieldPath": "read_at", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "workspace_invites",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "workspace_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "workspace_invites",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "normalized_email", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

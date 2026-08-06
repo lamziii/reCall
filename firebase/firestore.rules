@@ -108,5 +108,50 @@ service cloud.firestore {
       allow create: if isWorkspaceMember(request.resource.data.workspace_id);
       allow update, delete: if isWorkspaceMember(resource.data.workspace_id);
     }
+
+    // ========================================================================
+    // workspace_invites — pending invitations to join a workspace
+    // ========================================================================
+    // Only the workspace OWNER may create an invite. The role is constrained to admin|member (never
+    // owner), the status must start 'pending', and invited_by must be the caller — so a client can
+    // never mint an owner invite or forge the inviter. See docs/AUTHENTICATION.md.
+    match /workspace_invites/{inviteId} {
+      allow create: if request.auth != null
+        && isWorkspaceOwner(request.resource.data.workspace_id)
+        && request.resource.data.invited_by_user_id == request.auth.uid
+        && request.resource.data.role in ['admin', 'member']
+        && request.resource.data.status == 'pending';
+
+      // Workspace members see their workspace's invites; the invited person can read their own
+      // invite, matched on the authenticated email (so acceptance verifies identity).
+      allow read: if request.auth != null
+        && (isWorkspaceMember(resource.data.workspace_id)
+            || request.auth.token.email.lower() == resource.data.normalized_email);
+
+      // Owner can revoke/expire; the invited email can accept. The invite's workspace_id and role
+      // are immutable on update (can't re-target an invite or escalate its role).
+      allow update: if request.auth != null
+        && request.resource.data.workspace_id == resource.data.workspace_id
+        && request.resource.data.role == resource.data.role
+        && (isWorkspaceOwner(resource.data.workspace_id)
+            || request.auth.token.email.lower() == resource.data.normalized_email);
+
+      allow delete: if isWorkspaceOwner(resource.data.workspace_id);
+    }
+
+    // ========================================================================
+    // development_tasks + development_taskboard_meta — INTERNAL dev task board (/tasks)
+    // ========================================================================
+    // The shared build backlog for the Recall developers. Any signed-in user may read/write — this
+    // is an internal tool gated by the auth session, NOT customer data, and it is fully separate
+    // from the `tasks` collection (customer meeting action items). This does not weaken any existing
+    // rule. Uvejs/Lorik is a device-local attribution label, not an identity claim, so it is not
+    // (and cannot be) enforced here. See docs/DEVELOPMENT_TASKBOARD.md.
+    match /development_tasks/{taskId} {
+      allow read, create, update, delete: if request.auth != null;
+    }
+    match /development_taskboard_meta/{docId} {
+      allow read, create, update: if request.auth != null;
+    }
   }
 }
