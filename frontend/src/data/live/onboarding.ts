@@ -2,6 +2,7 @@ import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firest
 import { getDb } from '@/lib/firebase/firestore'
 import type { AuthUser } from '@/lib/auth/auth-service'
 import type { PlanTier } from '@/data/plans'
+import type { NotificationType } from '@/data/types'
 import { ensureWorkspace, workspaceIdForUser } from './workspace-bootstrap'
 
 /**
@@ -39,6 +40,8 @@ export interface UserProfile {
   use_cases: string[]
   custom_use_case: string | null
   two_factor_status: TwoFactorStatus | null
+  /** Notification types ranked most → least important, owned by Settings — see data/live/user-settings.ts. */
+  notification_priority?: NotificationType[] | null
 }
 
 /** Profile fields onboarding may persist as the user moves through steps. */

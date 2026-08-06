@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Database, Monitor, Moon, Sun } from 'lucide-react'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { SegmentedControl } from '@/components/forms/segmented-control'
-import { Label, Small, Body, Caption } from '@/components/typography'
-import { Avatar } from '@/components/data-display/avatar'
+import { Tabs, TabList, Tab, TabPanel } from '@/components/navigation/tabs'
+import { Label, Small } from '@/components/typography'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useToast } from '@/components/feedback'
@@ -11,15 +11,15 @@ import { useTheme } from '@/app/theme/theme-provider'
 import type { ThemePreference } from '@/app/theme/theme-provider'
 import { useAuth } from '@/lib/auth/auth-context'
 import { useWorkspace } from '@/data/live/workspace-context'
-import { useWorkspaceName } from '@/data/live/use-workspace-name'
 import { useWorkspacePlan } from '@/data/live/use-workspace-plan'
-import { useMonthlyUsageMinutes } from '@/data/live/use-monthly-usage'
 import { isLiveMode } from '@/data/live/data-mode'
-import { setWorkspacePlan } from '@/data/live/live-store'
 import { getWorkspaceData, saveWorkspaceData } from '@/data/workspace-repository'
 import { generateSampleWorkspace } from '@/data/sample/generate-sample-workspace'
 import { clearLiveSampleData, seedLiveSampleData } from '@/data/live/sample-live-data'
-import { PLANS, type PlanTier } from '@/data/plans'
+import { PersonalInfoSection } from '@/components/settings/personal-info-section'
+import { PlanSection } from '@/components/settings/plan-section'
+import { PaymentsSection } from '@/components/settings/payments-section'
+import { NotificationsSection } from '@/components/settings/notifications-section'
 
 const APPEARANCE_OPTIONS = [
   { value: 'light', label: 'Light', icon: <Sun /> },
@@ -27,82 +27,53 @@ const APPEARANCE_OPTIONS = [
   { value: 'system', label: 'System', icon: <Monitor /> },
 ]
 
-const PLAN_OPTIONS = [
-  { value: PLANS.pro.id, label: PLANS.pro.label },
-  { value: PLANS.teams.id, label: PLANS.teams.label },
-]
-
 export function SettingsPage() {
   const { preference, setPreference } = useTheme()
-  const { user } = useAuth()
-  const { workspaceId } = useWorkspace()
-  const workspaceName = useWorkspaceName()
-  const workspacePlan = useWorkspacePlan()
-  const usedMinutes = useMonthlyUsageMinutes()
-  const [plan, setPlan] = useState<PlanTier>(workspacePlan)
-
-  // Keep local state in sync once the real (subscribed/localStorage) plan resolves.
-  useEffect(() => setPlan(workspacePlan), [workspacePlan])
-
-  async function handlePlanChange(next: PlanTier) {
-    setPlan(next) // optimistic
-    if (isLiveMode) {
-      await setWorkspacePlan(workspaceId, next).catch(() => setPlan(workspacePlan))
-    } else {
-      const data = getWorkspaceData()
-      if (data) saveWorkspaceData({ ...data, workspace: { ...data.workspace, plan: next } })
-    }
-  }
+  const plan = useWorkspacePlan()
 
   return (
     <PageContainer>
       <PageHeader title="Settings" description="Manage your account and workspace preferences." />
 
-      <div className="flex flex-col gap-3 border-b border-border-subtle pb-8">
-        <Label as="span">Account</Label>
-        <div className="mt-1 flex items-center gap-3">
-          <Avatar name={user?.name ?? 'Recall User'} src={user?.photoURL} size="lg" />
-          <div className="flex min-w-0 flex-col">
-            <Body className="font-medium text-foreground">{user?.name ?? 'Recall User'}</Body>
-            <Caption className="text-subtle-foreground">{user?.email ?? '—'}</Caption>
+      <Tabs defaultValue="account">
+        <TabList>
+          <Tab value="account">Account</Tab>
+          <Tab value="plan">Plan</Tab>
+          <Tab value="payments">Payments</Tab>
+          <Tab value="notifications">Notifications</Tab>
+          <Tab value="appearance">Appearance</Tab>
+        </TabList>
+
+        <TabPanel value="account" className="pt-6">
+          <PersonalInfoSection />
+        </TabPanel>
+
+        <TabPanel value="plan" className="pt-6">
+          <PlanSection />
+        </TabPanel>
+
+        <TabPanel value="payments" className="pt-6">
+          <PaymentsSection plan={plan} />
+        </TabPanel>
+
+        <TabPanel value="notifications" className="pt-6">
+          <NotificationsSection />
+        </TabPanel>
+
+        <TabPanel value="appearance" className="pt-6">
+          <div className="flex flex-col gap-2.5">
+            <Label as="span">Appearance</Label>
+            <Small className="text-muted-foreground">Choose how Recall looks on this device. System follows your OS setting.</Small>
+            <SegmentedControl
+              aria-label="Appearance"
+              value={preference}
+              onChange={(value) => setPreference(value as ThemePreference)}
+              options={APPEARANCE_OPTIONS}
+              className="mt-1.5 w-fit"
+            />
           </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2.5 border-b border-border-subtle pb-8">
-        <Label as="span">Plan</Label>
-        <Small className="text-muted-foreground">Choose the plan that fits how you use Recall.</Small>
-        <SegmentedControl
-          aria-label="Plan"
-          value={plan}
-          onChange={(value) => void handlePlanChange(value as PlanTier)}
-          options={PLAN_OPTIONS}
-          className="mt-1.5 w-fit"
-        />
-        <Caption className="text-subtle-foreground">
-          {usedMinutes} of {PLANS[plan].maxHoursPerMonth * 60} min used this month
-        </Caption>
-      </div>
-
-      {plan === 'teams' && (
-        <div className="flex flex-col gap-1.5 border-b border-border-subtle pb-8">
-          <Label as="span">Workspace</Label>
-          <Small className="text-muted-foreground">You're the owner of this workspace.</Small>
-          <Body className="mt-1 font-medium text-foreground">{workspaceName}</Body>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-2.5 pb-8">
-        <Label as="span">Appearance</Label>
-        <Small className="text-muted-foreground">Choose how Recall looks on this device. System follows your OS setting.</Small>
-        <SegmentedControl
-          aria-label="Appearance"
-          value={preference}
-          onChange={(value) => setPreference(value as ThemePreference)}
-          options={APPEARANCE_OPTIONS}
-          className="mt-1.5 w-fit"
-        />
-      </div>
+        </TabPanel>
+      </Tabs>
 
       {/* Dev-only tooling — compiled out of production builds (import.meta.env.DEV is false there). */}
       {import.meta.env.DEV && <DeveloperSection />}
@@ -169,7 +140,7 @@ function DeveloperSection() {
   }
 
   return (
-    <div className="flex flex-col gap-2.5 border-t border-border-subtle pt-8">
+    <div className="mt-8 flex flex-col gap-2.5 border-t border-border-subtle pt-8">
       <div className="flex items-center gap-2">
         <Database className="size-4 text-muted-foreground" aria-hidden />
         <Label as="span">Developer</Label>
