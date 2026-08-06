@@ -14,6 +14,9 @@ import { getWorkspaceData } from '@/data/workspace-repository'
 import { AudioVisualizer, LiveTranscript, RecordingControls, RecordingHeader, RecordingSetup } from '@/components/recording'
 import type { RecordingSetupValues } from '@/data/recording/recording-types'
 import { isLiveMode } from '@/data/live/data-mode'
+import { useWorkspacePlan } from '@/data/live/use-workspace-plan'
+import { useMonthlyUsageMinutes } from '@/data/live/use-monthly-usage'
+import { PLANS } from '@/data/plans'
 import { LiveRecordSessionPage } from './record-live'
 
 const ACTIVE_STATUSES = new Set(['requesting-permission', 'recording', 'paused', 'stopping'])
@@ -33,6 +36,10 @@ function DemoRecordSessionPage() {
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false)
 
   const workspace = getWorkspaceData()
+  const plan = useWorkspacePlan()
+  const usedMinutes = useMonthlyUsageMinutes()
+  const limitMinutes = PLANS[plan].maxHoursPerMonth * 60
+  const overLimit = usedMinutes >= limitMinutes
   const isRecordingLike = recorder.status === 'recording' || recorder.status === 'paused'
   const speech = useSpeechRecognition({ active: recorder.status === 'recording', lang: setupValues?.language ?? 'en-US' })
 
@@ -47,6 +54,7 @@ function DemoRecordSessionPage() {
   }, [isRecordingLike])
 
   async function handleStart(values: RecordingSetupValues) {
+    if (overLimit) return
     setSetupValues(values)
     await recorder.start()
   }
@@ -105,6 +113,24 @@ function DemoRecordSessionPage() {
   }
 
   if (!setupValues || recorder.status === 'idle') {
+    if (overLimit) {
+      return (
+        <PageContainer>
+          <div className="flex flex-1 items-center justify-center">
+            <EmptyState
+              icon={<Mic />}
+              title={`You've used all ${PLANS[plan].maxHoursPerMonth} hrs on ${PLANS[plan].label} this month`}
+              description="Upgrade your plan in Settings, or wait until next month to record again."
+              action={
+                <Button variant="secondary" onClick={() => navigate('/app/sessions')}>
+                  Back to Sessions
+                </Button>
+              }
+            />
+          </div>
+        </PageContainer>
+      )
+    }
     return (
       <PageContainer>
         <RecordingSetup projects={workspace.projects} onCancel={() => navigate('/app/sessions')} onStart={handleStart} />

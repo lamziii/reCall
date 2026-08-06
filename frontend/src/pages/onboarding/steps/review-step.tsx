@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react'
 import { Body, Caption, Label, Small } from '@/components/typography'
 import { Button } from '@/components/ui/button'
+import { PLANS } from '@/data/plans'
 import {
   INDUSTRY_OPTIONS,
   TEAM_SIZE_OPTIONS,
@@ -42,12 +43,18 @@ export function ReviewStep({ form, onEdit }: Props) {
         <Small className="text-foreground">{useCaseLabels.length ? useCaseLabels.join(', ') : '—'}</Small>
       </Section>
 
-      <Section title="Workspace" step="workspace" onEdit={onEdit}>
-        <Row label="Name" value={form.workspaceName || '—'} />
-        <Row label="Type" value={form.workspaceType ? labelOf(WORKSPACE_TYPE_OPTIONS, form.workspaceType) : '—'} />
-        <Row label="Team size" value={form.teamSize ? labelOf(TEAM_SIZE_OPTIONS, form.teamSize) : '—'} />
-        <Row label="Industry" value={industryLabel} />
+      <Section title="Plan" step="plan" onEdit={onEdit}>
+        <Row label="Plan" value={form.plan ? PLANS[form.plan].label : '—'} />
       </Section>
+
+      {form.plan !== 'pro' && (
+        <Section title="Workspace" step="workspace" onEdit={onEdit}>
+          <Row label="Name" value={form.workspaceName || '—'} />
+          <Row label="Type" value={form.workspaceType ? labelOf(WORKSPACE_TYPE_OPTIONS, form.workspaceType) : '—'} />
+          <Row label="Team size" value={form.teamSize ? labelOf(TEAM_SIZE_OPTIONS, form.teamSize) : '—'} />
+          <Row label="Industry" value={industryLabel} />
+        </Section>
+      )}
 
       <Section title="Preferences" step="regional" onEdit={onEdit}>
         <Row label="Language" value={languageLabel(form.language)} />

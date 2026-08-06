@@ -2,6 +2,7 @@ import { languageLabel } from './options'
 import type { InviteRole } from './options'
 import type { AuthProvider, OnboardingProfileFields, OnboardingWorkspaceFields, TwoFactorStatus, UserProfile } from '@/data/live/onboarding'
 import type { AuthUser } from '@/lib/auth/auth-service'
+import { DEFAULT_PLAN, type PlanTier } from '@/data/plans'
 import { detectRegionalDefaults } from './regional'
 
 export interface PendingInvite {
@@ -24,19 +25,21 @@ export interface OnboardingForm {
   // Step 3 — use cases
   useCases: string[]
   customUseCase: string
-  // Step 4 — workspace
+  // Step 4 — plan
+  plan: PlanTier | ''
+  // Step 5 — workspace (skipped entirely when plan === 'pro')
   workspaceName: string
   workspaceType: string
   teamSize: string
   industry: string
   customIndustry: string
-  // Step 5 — regional
+  // Step 6 — regional
   language: string
   country: string
   timezone: string
   dateFormat: string
   timeFormat: '12h' | '24h'
-  // Step 6 — invites (persisted to workspace_invites on finish)
+  // Step 7 — invites (persisted to workspace_invites on finish)
   invites: PendingInvite[]
 }
 
@@ -50,6 +53,7 @@ export const INITIAL_FORM: OnboardingForm = {
   twoFactorStatus: null,
   useCases: [],
   customUseCase: '',
+  plan: '',
   workspaceName: '',
   workspaceType: '',
   teamSize: '',
@@ -63,7 +67,7 @@ export const INITIAL_FORM: OnboardingForm = {
   invites: [],
 }
 
-export type StepId = 'account' | 'secure' | 'use-cases' | 'workspace' | 'regional' | 'invite' | 'review'
+export type StepId = 'account' | 'secure' | 'use-cases' | 'plan' | 'workspace' | 'regional' | 'invite' | 'review'
 
 export interface StepMeta {
   id: StepId
@@ -71,22 +75,29 @@ export interface StepMeta {
   description: string
 }
 
-/** Ordered step definitions. `onboarding_step` stores a 1-based index into this list. */
+/** Ordered step definitions. `onboarding_step` stores a 1-based index into the plan-filtered
+ *  (visibleSteps) list, NOT this raw array — see visibleSteps below. */
 export const STEPS: StepMeta[] = [
   { id: 'account', title: 'Create your Recall account', description: 'Start turning every conversation into clear decisions and actionable work.' },
   { id: 'secure', title: 'Secure your account', description: 'Add a second layer of protection. You can also do this later in Settings.' },
   { id: 'use-cases', title: 'What will you use Recall for?', description: 'Pick everything that applies — we use this to tailor your workspace.' },
+  { id: 'plan', title: 'Choose your plan', description: 'Pick the plan that fits how you’ll use Recall. You can change this anytime in Settings.' },
   { id: 'workspace', title: 'Set up your workspace', description: 'A few details so Recall fits how your team works.' },
   { id: 'regional', title: 'Language & regional preferences', description: 'Set your language and formats. We detected what we could.' },
   { id: 'invite', title: 'Invite your team', description: 'Bring people in now, or skip and invite them later.' },
   { id: 'review', title: 'Review and finish', description: 'Make sure everything looks right before we create your workspace.' },
 ]
 
-export const STEP_COUNT = STEPS.length
 export const FIRST_POST_AUTH_STEP = 2 // step index (1-based) shown right after the account is created
 
-export function stepIndexById(id: StepId): number {
-  return STEPS.findIndex((s) => s.id === id) + 1
+/** The steps actually shown for a given plan choice — Recall Pro (solo) skips the team/workspace
+ *  step entirely. An unset plan (still on the plan step itself) shows every step. */
+export function visibleSteps(plan: OnboardingForm['plan']): StepMeta[] {
+  return STEPS.filter((s) => s.id !== 'workspace' || plan !== 'pro')
+}
+
+export function stepIndexById(id: StepId, steps: StepMeta[]): number {
+  return steps.findIndex((s) => s.id === id) + 1
 }
 
 /** Maps the form to the profile fields onboarding persists (no passwords). */
@@ -113,6 +124,7 @@ export function mapFormToWorkspace(form: OnboardingForm): OnboardingWorkspaceFie
     team_size: form.teamSize || null,
     industry: form.industry || null,
     custom_industry: form.industry === 'other' ? form.customIndustry.trim() || null : null,
+    plan: form.plan || undefined,
   }
 }
 
@@ -122,6 +134,7 @@ export interface WorkspaceSnapshotFields {
   team_size?: string | null
   industry?: string | null
   custom_industry?: string | null
+  plan?: string | null
 }
 
 /**
@@ -145,6 +158,7 @@ export function hydrateForm(
     twoFactorStatus: base.twoFactorStatus ?? profile?.two_factor_status ?? null,
     useCases: profile?.use_cases?.length ? profile.use_cases : base.useCases,
     customUseCase: base.customUseCase || profile?.custom_use_case || '',
+    plan: (base.plan || (workspace?.plan as PlanTier) || DEFAULT_PLAN) as PlanTier,
     workspaceName: base.workspaceName || workspace?.name || (defaultName ? `${defaultName}'s Workspace` : ''),
     workspaceType: base.workspaceType || workspace?.type || '',
     teamSize: base.teamSize || workspace?.team_size || '',

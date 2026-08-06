@@ -1,4 +1,5 @@
 import type { SelectOption } from '@/components/forms'
+import { PLANS, type PlanTier } from '@/data/plans'
 
 /**
  * Static option lists for onboarding. Kept out of the Firestore layer so they can be unit-tested
@@ -24,6 +25,19 @@ export const USE_CASE_OPTIONS: OnboardingOption[] = [
   { value: 'education', label: 'Education & lectures' },
   { value: 'personal', label: 'Personal productivity' },
   { value: 'other', label: 'Other' },
+]
+
+// ---- Step: Plan ----------------------------------------------------------------
+
+export interface PlanOption {
+  value: PlanTier
+  label: string
+  description: string
+}
+
+export const PLAN_OPTIONS: PlanOption[] = [
+  { value: 'pro', label: PLANS.pro.label, description: `${PLANS.pro.tagline} Up to ${PLANS.pro.maxHoursPerMonth} hours of recording a month.` },
+  { value: 'teams', label: PLANS.teams.label, description: `${PLANS.teams.tagline} Up to ${PLANS.teams.maxHoursPerMonth} hours of recording a month.` },
 ]
 
 // ---- Step: Workspace ---------------------------------------------------------

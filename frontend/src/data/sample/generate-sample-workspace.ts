@@ -67,7 +67,7 @@ export function generateSampleWorkspace(batchId: string): WorkspaceData {
       {
         id: 'majalab',
         name: 'majaLab',
-        plan: 'Pro trial',
+        plan: 'teams',
         industry: 'Software studio',
         teamSize: people.length,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC',

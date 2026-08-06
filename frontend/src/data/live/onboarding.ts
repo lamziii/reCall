@@ -1,6 +1,7 @@
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase/firestore'
 import type { AuthUser } from '@/lib/auth/auth-service'
+import type { PlanTier } from '@/data/plans'
 import { ensureWorkspace, workspaceIdForUser } from './workspace-bootstrap'
 
 /**
@@ -64,6 +65,7 @@ export interface OnboardingWorkspaceFields {
   team_size?: string | null
   industry?: string | null
   custom_industry?: string | null
+  plan?: PlanTier
 }
 
 export async function loadUserProfile(uid: string): Promise<UserProfile | null> {
@@ -87,6 +89,7 @@ export async function loadWorkspaceFields(workspaceId: string): Promise<Onboardi
       team_size: (d.team_size as string) ?? null,
       industry: (d.industry as string) ?? null,
       custom_industry: (d.custom_industry as string) ?? null,
+      plan: (d.plan as PlanTier) ?? undefined,
     }
   } catch {
     return null

@@ -2,6 +2,7 @@ import type { SessionStatusValue } from '@/components/recall/session-status'
 import type { TaskStatusValue } from '@/components/recall/task-status'
 import type { DecisionStatusValue } from '@/components/recall/decision-status'
 import type { Priority } from '@/components/data-display/priority-badge'
+import type { PlanTier } from '@/data/plans'
 
 /** Present on every record the sample-data generator creates. Absent on real, user-created records. */
 export interface SampleMeta {
@@ -199,7 +200,7 @@ export interface Notification {
 export interface Workspace {
   id: string
   name: string
-  plan: string
+  plan: PlanTier
   industry: string
   teamSize: number
   timezone: string
