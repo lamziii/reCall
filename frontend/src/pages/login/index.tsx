@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { Wordmark, GoogleIcon } from '@/components/branding'
 import { Button } from '@/components/ui/button'
 import { Alert, useToast } from '@/components/feedback'
@@ -83,6 +84,15 @@ export function LoginPage() {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_50%_38%,rgba(255,255,255,0.035),transparent_70%)]"
       />
+
+      <button
+        type="button"
+        onClick={() => navigate('/')}
+        className="focus-ring absolute left-6 top-6 inline-flex items-center gap-1.5 rounded-md text-small text-muted-foreground transition-fast hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        Back to site
+      </button>
 
       <div className="flex w-full max-w-[420px] flex-col items-center gap-8">
         <a href="/" className="focus-ring w-fit rounded-md" aria-label="Recall home">

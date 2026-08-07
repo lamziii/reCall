@@ -145,8 +145,10 @@ export const openaiProvider: TranscriptionProvider = {
       try {
         return await transcribeDiarized(apiKey, req);
       } catch (err) {
+        // NB: log key is `detail`, not `message` — `message` collides with firebase logger's own
+        // structured field and silently drops the error text.
         logger.warn("openai-provider: diarize failed, falling back to plain transcription", {
-          message: err instanceof Error ? err.message : String(err),
+          detail: err instanceof Error ? err.message : String(err),
         });
       }
     }

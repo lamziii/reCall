@@ -3,7 +3,7 @@ import { Container } from '@/components/layout/container'
 import { Grid } from '@/components/layout/grid'
 import { BodyLarge, Caption } from '@/components/typography'
 import { Reveal } from '@/pages/home/reveal'
-import { PlansHeader } from './plans-header'
+import { Navigation } from '@/pages/home/navigation'
 import { PlanCard } from './plan-card'
 import { MARKETING_PLANS } from './plan-data'
 
@@ -14,7 +14,7 @@ export function PlansPage() {
         Skip to content
       </VisuallyHidden>
 
-      <PlansHeader />
+      <Navigation />
 
       <main id="main-content">
         <section className="relative pt-20 pb-32 sm:pt-28">

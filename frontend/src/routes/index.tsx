@@ -31,10 +31,10 @@ export function AppRoutes() {
   return (
     <Routes>
       {/* Public/pre-auth surfaces are always dark — only the /app dashboard responds to the appearance toggle. */}
-      <Route path="/" element={<ForceTheme theme="dark"><HomePage /></ForceTheme>} />
-      <Route path="/plans" element={<ForceTheme theme="dark"><PlansPage /></ForceTheme>} />
-      <Route path="/login" element={<ForceTheme theme="dark"><RedirectIfAuthed><LoginPage /></RedirectIfAuthed></ForceTheme>} />
-      <Route path="/onboarding" element={<ForceTheme theme="dark"><OnboardingPage /></ForceTheme>} />
+      <Route path="/" element={<ForceTheme theme="dark" syncDocument><HomePage /></ForceTheme>} />
+      <Route path="/plans" element={<ForceTheme theme="dark" syncDocument><PlansPage /></ForceTheme>} />
+      <Route path="/login" element={<ForceTheme theme="dark" syncDocument><RedirectIfAuthed><LoginPage /></RedirectIfAuthed></ForceTheme>} />
+      <Route path="/onboarding" element={<ForceTheme theme="dark" syncDocument><OnboardingPage /></ForceTheme>} />
       <Route path="/dev/design" element={<DesignSystemPage />} />
       {/* Internal transcription benchmark tool — auth-gated (needs an ID token to call the function). */}
       <Route path="/dev/transcription-benchmark" element={<RequireAuth><TranscriptionBenchmarkPage /></RequireAuth>} />

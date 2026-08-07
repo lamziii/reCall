@@ -161,7 +161,9 @@ export const transcribeSession = onRequest({ timeoutSeconds: 300, memory: "512Mi
     logger.error("transcribeSession: provider failed", {
       session_id: sessionId,
       provider: provider.name,
-      message: err instanceof Error ? err.message : String(err),
+      // NB: key must NOT be `message` — it collides with firebase logger's own structured
+      // `message` field and silently drops the error text (this hid a 1400s-cap 400 for a while).
+      detail: err instanceof Error ? err.message : String(err),
     });
     await sessionRef
       .update({

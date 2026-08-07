@@ -3,12 +3,18 @@ import { Check, Minus } from 'lucide-react'
 import { Surface } from '@/components/layout/surface'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Caption, Small, Title } from '@/components/typography'
+import { APP_BASE } from '@/app/shell/nav-config'
+import { useAuth } from '@/lib/auth/auth-context'
 import { cn } from '@/lib/utils'
 import type { MarketingPlan } from './plan-data'
 
 export function PlanCard({ plan }: { plan: MarketingPlan }) {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const isMailto = plan.cta.href.startsWith('mailto:')
+  // Already signed in? The onboarding funnel would just loop them back out, so send them to the app.
+  const ctaHref = user && !isMailto ? APP_BASE : plan.cta.href
+  const ctaLabel = user && !isMailto ? 'Go to dashboard' : plan.cta.label
 
   return (
     <Surface
@@ -41,8 +47,8 @@ export function PlanCard({ plan }: { plan: MarketingPlan }) {
           {plan.cta.label}
         </a>
       ) : (
-        <Button variant={plan.highlighted ? 'primary' : 'secondary'} size="lg" fullWidth onClick={() => navigate(plan.cta.href)}>
-          {plan.cta.label}
+        <Button variant={plan.highlighted ? 'primary' : 'secondary'} size="lg" fullWidth onClick={() => navigate(ctaHref)}>
+          {ctaLabel}
         </Button>
       )}
 

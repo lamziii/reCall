@@ -5,14 +5,16 @@ import { Menu } from 'lucide-react'
 import { Wordmark } from '@/components/branding/logo'
 import { Button, IconButton } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Avatar } from '@/components/data-display/avatar'
+import { APP_BASE } from '@/app/shell/nav-config'
+import { useAuth } from '@/lib/auth/auth-context'
 import { cn } from '@/lib/utils'
 
 const LINKS = [
-  { label: 'Product', href: '#capabilities' },
-  { label: 'How it works', href: '#workflow' },
+  { label: 'How it works', href: '#how' },
+  { label: 'Search', href: '#search' },
+  { label: 'Security', href: '#security' },
   { label: 'Pricing', href: '/plans' },
-  { label: 'Security', href: '#' },
-  { label: 'Resources', href: '#' },
 ]
 
 /** Renders a route (client-side) for app paths, a plain anchor for in-page scroll targets. */
@@ -30,6 +32,7 @@ function NavLink({ href, className, children }: { href: string; className?: stri
 
 export function Navigation() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -67,12 +70,25 @@ export function Navigation() {
         </ul>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
-            Sign in
-          </Button>
-          <Button size="sm" onClick={() => navigate('/onboarding')}>
-            Start free
-          </Button>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => navigate(APP_BASE)}
+              className="focus-ring inline-flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 text-small font-medium text-foreground transition-fast hover:bg-surface-hover"
+            >
+              <Avatar src={user.photoURL} name={user.name} size="sm" />
+              Dashboard
+            </button>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
+                Sign in
+              </Button>
+              <Button size="sm" onClick={() => navigate('/onboarding')}>
+                Start free
+              </Button>
+            </>
+          )}
         </div>
 
         <Sheet>
@@ -93,10 +109,25 @@ export function Navigation() {
               ))}
             </ul>
             <div className="mt-6 flex flex-col gap-2">
-              <Button variant="secondary" onClick={() => navigate('/login')}>
-                Sign in
-              </Button>
-              <Button onClick={() => navigate('/onboarding')}>Start free</Button>
+              {user ? (
+                <>
+                  <div className="flex items-center gap-3 rounded-md px-3 py-2">
+                    <Avatar src={user.photoURL} name={user.name} size="md" />
+                    <div className="min-w-0">
+                      <p className="truncate text-body font-medium text-foreground">{user.name}</p>
+                      <p className="truncate text-small text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <Button onClick={() => navigate(APP_BASE)}>Go to dashboard</Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="secondary" onClick={() => navigate('/login')}>
+                    Sign in
+                  </Button>
+                  <Button onClick={() => navigate('/onboarding')}>Start free</Button>
+                </>
+              )}
             </div>
           </SheetContent>
         </Sheet>

@@ -21,6 +21,9 @@
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
+    /* Paint the overscroll/rubber-band area with the themed background instead of
+     * the UA default (white), which otherwise shows below the page on bounce. */
+    background-color: var(--color-bg);
   }
 
   body {
