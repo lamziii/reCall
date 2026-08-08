@@ -1,39 +1,14 @@
-import { Lock, ShieldCheck, KeyRound, Database, EyeOff, Globe } from 'lucide-react'
-import { Body, Title } from '@/components/typography'
+import { Lock, EyeOff, KeyRound, Globe, ShieldCheck, Database } from 'lucide-react'
 import { SectionShell } from '../section-shell'
-import { Reveal } from '../reveal'
+import { Stagger, RevealItem } from '../reveal'
 
 const POINTS = [
-  {
-    icon: Lock,
-    title: 'Encrypted end to end',
-    body: 'Recordings and transcripts are encrypted in transit and at rest with AES-256. Keys are managed, rotated, and never shared.',
-  },
-  {
-    icon: EyeOff,
-    title: 'Never trained on your data',
-    body: 'Your conversations are yours. We never use customer content to train models — full stop.',
-  },
-  {
-    icon: KeyRound,
-    title: 'Granular access control',
-    body: 'Roles, workspaces, and per-meeting permissions decide exactly who can see what. SSO and SCIM on business plans.',
-  },
-  {
-    icon: Database,
-    title: 'You own your data',
-    body: 'Export or delete everything at any time. Set retention windows and Recall enforces them automatically.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Compliance built in',
-    body: 'SOC 2 Type II and GDPR compliant, with a DPA available and regular third-party penetration testing.',
-  },
-  {
-    icon: Globe,
-    title: 'Choose your region',
-    body: 'Keep data resident in the US or EU. Your workspace stays where your policies require it.',
-  },
+  { icon: Lock, title: 'Encrypted end to end', body: 'AES-256 in transit and at rest.' },
+  { icon: EyeOff, title: 'Never trained on', body: 'Your conversations train no model.' },
+  { icon: KeyRound, title: 'Workspace isolation', body: 'Per-meeting roles. SSO & SCIM.' },
+  { icon: Globe, title: 'Regional storage', body: 'Keep data resident in the US or EU.' },
+  { icon: ShieldCheck, title: 'SOC 2 & GDPR', body: 'DPA and pen tests on request.' },
+  { icon: Database, title: 'You own it', body: 'Export or delete everything, anytime.' },
 ]
 
 export function SecuritySection() {
@@ -43,21 +18,19 @@ export function SecuritySection() {
       align="center"
       eyebrow="Trust"
       title="Your memory, kept private."
-      description="Recall holds your most sensitive conversations. We treat them accordingly — with security you can hand to your CISO."
+      description="Security you can hand to your CISO."
     >
-      <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-        {POINTS.map((p, i) => (
-          <Reveal key={p.title} delay={(i % 3) * 0.06}>
+      <Stagger className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3" amount={0.2}>
+        {POINTS.map((p) => (
+          <RevealItem key={p.title}>
             <div className="flex h-full flex-col gap-3 bg-bg p-7 text-left">
               <p.icon className="size-5 text-accent" strokeWidth={1.5} aria-hidden />
-              <Title as="h3" className="text-title">
-                {p.title}
-              </Title>
-              <Body className="text-muted-foreground">{p.body}</Body>
+              <h3 className="text-title font-semibold text-foreground">{p.title}</h3>
+              <p className="text-small text-muted-foreground">{p.body}</p>
             </div>
-          </Reveal>
+          </RevealItem>
         ))}
-      </div>
+      </Stagger>
     </SectionShell>
   )
 }

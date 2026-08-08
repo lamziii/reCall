@@ -11,22 +11,22 @@ import { useAuth } from '@/lib/auth/auth-context'
 import { cn } from '@/lib/utils'
 
 const LINKS = [
-  { label: 'How it works', href: '#how' },
-  { label: 'Search', href: '#search' },
-  { label: 'Security', href: '#security' },
+  { label: 'How it works', href: '/#how' },
+  { label: 'Search', href: '/#search' },
+  { label: 'Security', href: '/#security' },
   { label: 'Pricing', href: '/plans' },
 ]
 
-/** Renders a route (client-side) for app paths, a plain anchor for in-page scroll targets. */
+/**
+ * Client-side router Link for every destination. Section links are `/#id` (not bare `#id`) so they
+ * always resolve to the homepage anchor — clicking "Security" from /plans lands on /#security, not
+ * /plans#security. The homepage's scroll-to-hash effect handles the actual scroll.
+ */
 function NavLink({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
-  return href.startsWith('/') ? (
+  return (
     <Link to={href} className={className}>
       {children}
     </Link>
-  ) : (
-    <a href={href} className={className}>
-      {children}
-    </a>
   )
 }
 
@@ -52,9 +52,9 @@ export function Navigation() {
       )}
     >
       <nav aria-label="Primary" className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <a href="#top" className="focus-ring rounded-md" aria-label="Recall home">
+        <Link to="/" className="focus-ring rounded-md" aria-label="Recall home">
           <Wordmark size="lg" />
-        </a>
+        </Link>
 
         <ul className="hidden items-center gap-1 md:flex">
           {LINKS.map((link) => (

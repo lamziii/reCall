@@ -7,14 +7,12 @@ export function SearchSection() {
     <SectionShell
       id="search"
       align="center"
-      eyebrow="How teams use it"
+      eyebrow="Retrieval"
       title="Ask your organization anything."
-      description="Every meeting your team has ever had becomes one searchable memory. Ask in plain language and get answers — with the decisions, tasks, and people behind them."
+      description="Plain-language questions, answered from every meeting you've ever had."
     >
-      <Reveal>
-        <div className="mx-auto max-w-2xl">
-          <SearchDemo />
-        </div>
+      <Reveal className="mx-auto max-w-2xl">
+        <SearchDemo />
       </Reveal>
     </SectionShell>
   )

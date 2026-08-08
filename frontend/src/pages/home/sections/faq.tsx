@@ -1,58 +1,76 @@
+import { useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Plus } from 'lucide-react'
-import { Body } from '@/components/typography'
+import { cn } from '@/lib/utils'
 import { SectionShell } from '../section-shell'
-import { Reveal } from '../reveal'
 
 const FAQS = [
   {
-    q: 'How is Recall different from a meeting-notes tool?',
-    a: 'Notes tools hand you a summary and stop there. Recall turns every meeting into structured, linked knowledge — decisions, tasks, people, and projects — that stays searchable and compounds over time. The value grows with every conversation, not just the last one.',
+    q: 'How is this different from meeting notes?',
+    a: 'Notes tools hand you a summary and stop. Recall turns every meeting into structured, linked knowledge that stays searchable and compounds over time.',
   },
   {
-    q: 'Which meetings and calls does it work with?',
-    a: 'In-person conversations and any video call — Zoom, Google Meet, Microsoft Teams, and more. Recall joins, captures clean audio, and processes everything automatically once the meeting ends.',
+    q: 'Which meetings does it work with?',
+    a: 'In person and any video call — Zoom, Google Meet, Microsoft Teams. Recall joins, captures, and processes automatically.',
   },
   {
-    q: 'How accurate is the extraction?',
-    a: "Recall uses frontier language models to read the full transcript in context, so decisions and action items are captured with their owners and nuance intact. Every extracted item links back to the exact moment it was said, so it's always verifiable.",
-  },
-  {
-    q: 'Is my data used to train AI models?',
-    a: 'No. Your conversations are never used to train any model. Data is encrypted in transit and at rest, and you can export or delete it at any time.',
+    q: 'Is my data used to train AI?',
+    a: 'Never. Your conversations train no model, are encrypted in transit and at rest, and can be exported or deleted anytime.',
   },
   {
     q: 'Can I control who sees what?',
-    a: 'Yes. Roles, workspaces, and per-meeting permissions give you precise control. Business plans add SSO and SCIM for centrally managed access.',
+    a: 'Yes — roles, workspaces, and per-meeting permissions. Business plans add SSO and SCIM.',
   },
   {
     q: 'What does it cost to start?',
-    a: 'You can start free, no credit card required. Paid plans add team workspaces, longer retention, and admin controls — see the pricing page for details.',
+    a: 'Free, no card required. Paid plans add team workspaces, longer retention, and admin controls.',
   },
 ]
 
+function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
+  const [open, setOpen] = useState(false)
+  const reduce = useReducedMotion()
+  const id = `faq-${index}`
+  return (
+    <div className="border-b border-border">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((v) => !v)}
+        className="focus-ring flex w-full items-center justify-between gap-4 rounded-md py-5 text-left"
+      >
+        <span className="text-body font-medium text-foreground">{q}</span>
+        <Plus
+          className={cn('size-4 shrink-0 text-subtle-foreground transition-transform duration-300', open && 'rotate-45')}
+          strokeWidth={1.5}
+          aria-hidden
+        />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            id={id}
+            initial={reduce ? undefined : { height: 0, opacity: 0 }}
+            animate={reduce ? undefined : { height: 'auto', opacity: 1 }}
+            exit={reduce ? undefined : { height: 0, opacity: 0 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <p className="max-w-[60ch] pb-5 pr-8 text-body text-muted-foreground">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export function FaqSection() {
   return (
-    <SectionShell
-      eyebrow="FAQ"
-      title="Questions, answered."
-      width="content"
-      align="center"
-    >
-      <div className="flex flex-col divide-y divide-border border-y border-border">
+    <SectionShell id="faq" eyebrow="FAQ" title="Questions, answered." width="content" align="center">
+      <div className="border-t border-border text-left">
         {FAQS.map((item, i) => (
-          <Reveal key={item.q} delay={Math.min(i, 4) * 0.05}>
-            <details className="group py-1">
-              <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 rounded-md py-4 text-left text-body font-medium text-foreground marker:hidden [&::-webkit-details-marker]:hidden">
-                {item.q}
-                <Plus
-                  className="size-4.5 shrink-0 text-subtle-foreground transition-transform duration-200 group-open:rotate-45"
-                  strokeWidth={1.5}
-                  aria-hidden
-                />
-              </summary>
-              <Body className="max-w-[62ch] pb-5 pr-8 text-muted-foreground">{item.a}</Body>
-            </details>
-          </Reveal>
+          <FaqItem key={item.q} q={item.q} a={item.a} index={i} />
         ))}
       </div>
     </SectionShell>

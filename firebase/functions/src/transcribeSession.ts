@@ -29,9 +29,10 @@ function sendError(res: any, status: number, message: string) {
   res.set(CORS_HEADERS).status(status).json({ error: message });
 }
 
-// 300s timeout: the diarizing provider (Speechmatics) polls a batch job, which can outlast the
-// 60s default on longer clips.
-export const transcribeSession = onRequest({ timeoutSeconds: 300, memory: "512MiB" }, async (req, res) => {
+// 540s timeout + 1GiB: a long recording is now split into ~20min chunks and transcribed one after
+// another (plus ffmpeg segmentation and the correction pass), so a 60-90min meeting needs well past
+// the old 300s/512MiB. The diarizing Speechmatics path (batch polling) also benefits from the room.
+export const transcribeSession = onRequest({ timeoutSeconds: 540, memory: "1GiB" }, async (req, res) => {
   if (req.method === "OPTIONS") {
     res.set(CORS_HEADERS).status(204).send("");
     return;

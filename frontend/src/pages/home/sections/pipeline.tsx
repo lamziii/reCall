@@ -1,33 +1,11 @@
-import { AudioLines, FileText, Brain, Network } from 'lucide-react'
-import { Body, Caption, Title } from '@/components/typography'
+import { AudioLines, Sparkles, Network } from 'lucide-react'
 import { SectionShell } from '../section-shell'
-import { Reveal } from '../reveal'
+import { Stagger, RevealItem } from '../reveal'
 
 const STEPS = [
-  {
-    icon: AudioLines,
-    step: 'Record',
-    title: 'Join the conversation',
-    body: 'Recall sits in on your meetings — in person or on any call — and captures crisp, private audio.',
-  },
-  {
-    icon: FileText,
-    step: 'Transcribe',
-    title: 'Turn speech into text',
-    body: 'A speaker-labeled transcript appears in seconds, searchable down to the sentence.',
-  },
-  {
-    icon: Brain,
-    step: 'Understand',
-    title: 'Read the meaning',
-    body: 'The model follows the thread — who committed to what, what was agreed, what stayed unresolved.',
-  },
-  {
-    icon: Network,
-    step: 'Extract',
-    title: 'Build the knowledge',
-    body: 'Decisions, tasks, and questions are structured and linked to the people and projects involved.',
-  },
+  { icon: AudioLines, title: 'Record', body: 'Join any meeting — in person or on a call.' },
+  { icon: Sparkles, title: 'Understand', body: 'AI lifts out decisions, tasks, and open questions.' },
+  { icon: Network, title: 'Remember', body: 'Each one links to its people and projects, for good.' },
 ]
 
 export function PipelineSection() {
@@ -35,36 +13,31 @@ export function PipelineSection() {
     <SectionShell
       id="how"
       eyebrow="How it works"
-      title="From spoken words to structured memory."
-      description="Four steps run automatically after every meeting. You just talk — Recall does the rest."
+      title="Talk. Recall does the rest."
+      description="Three steps, fully automatic, after every conversation."
     >
-      <ol className="grid gap-8 md:grid-cols-4">
+      <Stagger className="grid gap-10 md:grid-cols-3">
         {STEPS.map((s, i) => (
-          <Reveal key={s.step} delay={i * 0.08}>
-            <li className="relative flex flex-col gap-4">
-              {/* connector line to the next node (desktop only) */}
+          <RevealItem key={s.title}>
+            <div className="relative flex flex-col gap-4">
               {i < STEPS.length - 1 && (
                 <span
                   aria-hidden
-                  className="absolute left-11 top-5 hidden h-px w-[calc(100%-2.5rem)] bg-gradient-to-r from-border-strong to-transparent md:block"
+                  className="absolute left-11 top-5 hidden h-px w-[calc(100%-2rem)] bg-gradient-to-r from-border-strong to-transparent md:block"
                 />
               )}
               <div className="flex size-10 items-center justify-center rounded-full border border-border bg-surface text-accent">
-                <s.icon className="size-4.5" strokeWidth={1.5} aria-hidden />
+                <s.icon className="size-[18px]" strokeWidth={1.5} aria-hidden />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Caption className="font-mono uppercase tracking-widest text-subtle-foreground">
-                  {String(i + 1).padStart(2, '0')} · {s.step}
-                </Caption>
-                <Title as="h3" className="text-title">
-                  {s.title}
-                </Title>
-                <Body className="text-muted-foreground">{s.body}</Body>
+                <span className="font-mono text-caption tracking-widest text-subtle-foreground">0{i + 1}</span>
+                <h3 className="text-title font-semibold text-foreground">{s.title}</h3>
+                <p className="max-w-[26ch] text-small text-muted-foreground">{s.body}</p>
               </div>
-            </li>
-          </Reveal>
+            </div>
+          </RevealItem>
         ))}
-      </ol>
+      </Stagger>
     </SectionShell>
   )
 }

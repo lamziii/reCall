@@ -8,9 +8,9 @@ const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] =
   {
     heading: 'Product',
     links: [
-      { label: 'How it works', href: '#how' },
-      { label: 'Search', href: '#search' },
-      { label: 'Security', href: '#security' },
+      { label: 'How it works', href: '/#how' },
+      { label: 'Search', href: '/#search' },
+      { label: 'Security', href: '/#security' },
       { label: 'Pricing', href: '/plans' },
     ],
   },
@@ -51,9 +51,9 @@ export function Footer() {
       <Container width="page" className="py-16">
         <div className="grid gap-12 md:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div className="flex flex-col gap-4">
-            <a href="#top" className="focus-ring w-fit rounded-md" aria-label="Recall home">
+            <Link to="/" className="focus-ring w-fit rounded-md" aria-label="Recall home">
               <Wordmark size="md" />
-            </a>
+            </Link>
             <Small className="max-w-[30ch] text-muted-foreground">
               The AI memory system for your organization. Every conversation, remembered.
             </Small>

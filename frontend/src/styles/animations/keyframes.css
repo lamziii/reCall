@@ -37,5 +37,10 @@
 }
 
 .hero-dashboard-ambient {
-  background: radial-gradient(ellipse 80% 70% at 50% 0%, color-mix(in oklch, var(--color-accent-400) 12%, transparent), transparent 70%);
+  background: radial-gradient(
+    ellipse 62% 58% at 50% 8%,
+    color-mix(in oklch, var(--color-accent-400) 18%, transparent),
+    color-mix(in oklch, var(--color-accent-400) 6%, transparent) 42%,
+    transparent 72%
+  );
 }

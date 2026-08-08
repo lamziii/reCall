@@ -1,5 +1,5 @@
 import { Container } from '@/components/layout/container'
-import { BodyLarge, Body, Label, Small } from '@/components/typography'
+import { Small } from '@/components/typography'
 import { Reveal } from '../reveal'
 import { KnowledgeGraph } from '../visuals/knowledge-graph'
 
@@ -12,36 +12,35 @@ const LEGEND = [
 
 export function GraphSection() {
   return (
-    <section className="scroll-mt-24 py-24 sm:py-32">
+    <section className="scroll-mt-24 py-16 sm:py-20 lg:py-24">
       <Container width="page">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div className="flex flex-col items-start">
-            <Reveal>
-              <Label as="span" className="mb-4 block text-subtle-foreground">
-                Why it beats notes
-              </Label>
+            <Reveal className="mb-5">
+              <span className="inline-flex items-center gap-2 text-caption font-medium uppercase tracking-[0.14em] text-subtle-foreground">
+                <span className="size-1 rounded-full bg-accent" aria-hidden />
+                Why it's different
+              </span>
             </Reveal>
-            <Reveal delay={0.06}>
-              <h2 className="max-w-[16ch] text-[clamp(1.875rem,1.3rem+2.2vw,3rem)] font-semibold leading-[1.1] tracking-tight text-foreground">
-                Notes are forgotten. Memory connects.
+            <Reveal delay={0.05}>
+              <h2 className="max-w-[15ch] text-balance text-[clamp(1.625rem,1.2rem+1.6vw,2.5rem)] font-semibold leading-[1.12] tracking-[-0.02em] text-foreground">
+                Notes get filed. Memory connects.
               </h2>
             </Reveal>
-            <Reveal delay={0.12}>
-              <BodyLarge className="mt-5 max-w-[46ch] text-muted-foreground">
-                A document is a dead end — the moment it's filed, it starts to fade. Recall stores every meeting as
-                links, not files. People, projects, and decisions connect automatically, so context is one click away
-                and gets richer with each conversation.
-              </BodyLarge>
+            <Reveal delay={0.1}>
+              <p className="mt-4 max-w-[38ch] text-body-lg text-muted-foreground">
+                Every meeting is stored as links — not a document that fades the moment it's saved.
+              </p>
             </Reveal>
-            <Reveal delay={0.18}>
-              <Body className="mt-6 max-w-[46ch] text-foreground">
-                Ask <span className="text-accent">"why did we choose annual billing?"</span> and Recall walks the graph
-                back to the meeting, the person, and the moment it was decided.
-              </Body>
+            <Reveal delay={0.16}>
+              <p className="mt-6 max-w-[38ch] text-body text-foreground">
+                Ask <span className="text-accent">"why annual billing?"</span> and Recall walks the graph back to the
+                room where it was decided.
+              </p>
             </Reveal>
           </div>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.08}>
             <div className="rounded-2xl border border-border bg-surface p-4 sm:p-6">
               <KnowledgeGraph />
               <ul className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
