@@ -10,6 +10,7 @@ import { ForceTheme } from '@/app/theme/force-theme'
 import { RequireAuth, RequireOnboarded, RedirectIfAuthed } from '@/lib/auth/require-auth'
 import { WorkspaceProvider } from '@/data/live/workspace-context'
 import { AppHomePage } from '@/pages/app/home'
+import { AssistantPage } from '@/pages/app/assistant'
 import { SessionsPage } from '@/pages/app/sessions'
 import { SessionReviewPage } from '@/pages/app/session-detail'
 import { RecordSessionPage } from '@/pages/app/record'
@@ -55,6 +56,7 @@ export function AppRoutes() {
         }
       >
         <Route index element={<AppHomePage />} />
+        <Route path="assistant" element={<AssistantPage />} />
         <Route path="sessions" element={<SessionsPage />} />
         <Route path="sessions/:sessionId" element={<SessionReviewPage />} />
         <Route path="record" element={<RecordSessionPage />} />

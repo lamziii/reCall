@@ -131,6 +131,10 @@ export interface LiveWorkspaceDoc {
   plan?: PlanTier
   /** Extra minutes purchased on top of the plan's included monthly hours (see data/plans.ts USAGE_PACKS). */
   bonus_minutes?: number
+  /** Extra Recall AI questions purchased on top of the plan's monthly limit (see AI_QUESTION_PACKS). */
+  bonus_ai_questions?: number
+  /** Recall AI questions used per calendar month, keyed "YYYY-MM". Written server-side by recallAiChat. */
+  ai_usage?: Record<string, number>
 }
 
 /** Updates the workspace's subscription plan (Settings' plan switcher). */
@@ -142,6 +146,14 @@ export async function setWorkspacePlan(workspaceId: string, plan: PlanTier): Pro
 export async function addWorkspaceBonusMinutes(workspaceId: string, minutes: number): Promise<void> {
   await updateDoc(doc(getDb(), 'workspaces', workspaceId), {
     bonus_minutes: increment(minutes),
+    updated_at: serverTimestamp(),
+  })
+}
+
+/** Adds Recall AI questions from a purchased pack (Usage page "buy more questions") to the monthly limit. */
+export async function addWorkspaceBonusAiQuestions(workspaceId: string, questions: number): Promise<void> {
+  await updateDoc(doc(getDb(), 'workspaces', workspaceId), {
+    bonus_ai_questions: increment(questions),
     updated_at: serverTimestamp(),
   })
 }

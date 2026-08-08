@@ -7,6 +7,7 @@ import { SearchTrigger } from './search-trigger'
 import { NotificationsMenu } from './notifications-menu'
 import { ProfileMenu } from './profile-menu'
 import { ThemeToggle } from '@/app/theme/theme-toggle'
+import { RecallAiTrigger } from '@/components/ai/recall-ai-trigger'
 import { APP_BASE, MAIN_NAV, getActiveNavItem } from './nav-config'
 
 const QUICK_ADD_TARGETS = new Set([`${APP_BASE}/sessions`, `${APP_BASE}/projects`, `${APP_BASE}/tasks`])
@@ -15,9 +16,11 @@ export interface RecallTopbarProps {
   onOpenSearch: () => void
   onOpenMobileNav: () => void
   showMobileMenuButton: boolean
+  aiOpen: boolean
+  onToggleAi: () => void
 }
 
-export function RecallTopbar({ onOpenSearch, onOpenMobileNav, showMobileMenuButton }: RecallTopbarProps) {
+export function RecallTopbar({ onOpenSearch, onOpenMobileNav, showMobileMenuButton, aiOpen, onToggleAi }: RecallTopbarProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const title = getActiveNavItem(location.pathname)?.label ?? 'Recall'
@@ -50,6 +53,7 @@ export function RecallTopbar({ onOpenSearch, onOpenMobileNav, showMobileMenuButt
 
           <NotificationsMenu trigger={<IconButton icon={<Bell />} label="Notifications" variant="ghost" />} />
           <ThemeToggle />
+          <RecallAiTrigger open={aiOpen} onClick={onToggleAi} />
           <ProfileMenu trigger={<IconButton icon={<User />} label="Profile" variant="ghost" />} />
         </>
       }

@@ -5,6 +5,8 @@ import { AppShell } from '@/components/layout/app-shell'
 import { Content } from '@/components/layout/content'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { CommandMenu } from '@/components/navigation/command-menu'
+import { RecallAiPanel } from '@/components/ai/recall-ai-panel'
+import { RecallAiProvider } from '@/lib/ai/recall-ai-provider'
 import { useMediaQuery } from '@/hooks'
 import { RecallSidebar } from './recall-sidebar'
 import { RecallTopbar } from './recall-topbar'
@@ -24,6 +26,7 @@ export function RecallShell() {
   const [userCollapsed, setUserCollapsed] = useState(() => localStorage.getItem(COLLAPSED_STORAGE_KEY) === 'true')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
 
   useEffect(() => {
     if (isDesktop) localStorage.setItem(COLLAPSED_STORAGE_KEY, String(userCollapsed))
@@ -36,7 +39,7 @@ export function RecallShell() {
   const collapsed = isDesktop ? userCollapsed : true
 
   return (
-    <>
+    <RecallAiProvider>
       <AppShell
         sidebar={
           isTabletUp ? (
@@ -54,6 +57,8 @@ export function RecallShell() {
             onOpenSearch={() => setSearchOpen(true)}
             onOpenMobileNav={() => setMobileNavOpen(true)}
             showMobileMenuButton={!isTabletUp}
+            aiOpen={aiOpen}
+            onToggleAi={() => setAiOpen((v) => !v)}
           />
         }
       >
@@ -84,6 +89,8 @@ export function RecallShell() {
         </Sheet>
       )}
 
+      <RecallAiPanel open={aiOpen} onClose={() => setAiOpen(false)} />
+
       <CommandMenu
         open={searchOpen}
         onOpenChange={setSearchOpen}
@@ -96,6 +103,6 @@ export function RecallShell() {
           onSelect: () => navigate(item.to),
         }))}
       />
-    </>
+    </RecallAiProvider>
   )
 }

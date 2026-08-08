@@ -203,6 +203,8 @@ export interface Workspace {
   plan: PlanTier
   /** Extra minutes purchased on top of the plan's included monthly hours (see data/plans.ts USAGE_PACKS). */
   bonusMinutes?: number
+  /** Extra Recall AI questions purchased on top of the plan's monthly limit (see AI_QUESTION_PACKS). */
+  bonusAiQuestions?: number
   industry: string
   teamSize: number
   timezone: string
