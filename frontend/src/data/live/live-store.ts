@@ -11,6 +11,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  type Timestamp,
 } from 'firebase/firestore'
 import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { getDb } from '@/lib/firebase/firestore'
@@ -135,6 +136,42 @@ export interface LiveWorkspaceDoc {
   bonus_ai_questions?: number
   /** Recall AI questions used per calendar month, keyed "YYYY-MM". Written server-side by recallAiChat. */
   ai_usage?: Record<string, number>
+  /** Server timestamp set once on first workspace creation (see workspace-bootstrap.ts). Anchors the 7-day free trial countdown. */
+  created_at?: Timestamp
+}
+
+export interface ScheduleSessionInput {
+  workspaceId: string
+  title: string
+  /** Meeting start time. Passed as a native Date — the Firestore SDK stores it as a Timestamp. */
+  scheduledAt: Date
+  participants?: string[]
+  meetingLink?: string | null
+  /** Minutes before scheduledAt to fire an in-app reminder. */
+  reminderMinutesBefore?: number
+  createdBy: string
+}
+
+/** Creates a 'scheduled' session doc — a future meeting with no transcript yet. Distinct from
+ *  createSession (which always writes a completed, transcript-bearing recording). The Calendar and
+ *  reminders (see data/calendar/use-meeting-reminders) read status/scheduled_at from this doc. */
+export async function scheduleSession(input: ScheduleSessionInput): Promise<string> {
+  const db = getDb()
+  const ref = doc(collection(db, 'sessions'))
+  await setDoc(ref, {
+    workspace_id: input.workspaceId,
+    title: input.title,
+    status: 'scheduled' as const,
+    scheduled_at: input.scheduledAt,
+    session_type: 'Meeting',
+    participants: input.participants ?? [],
+    meeting_link: input.meetingLink ?? null,
+    reminder_minutes_before: input.reminderMinutesBefore ?? 10,
+    created_by: input.createdBy,
+    created_at: serverTimestamp(),
+    updated_at: serverTimestamp(),
+  })
+  return ref.id
 }
 
 /** Updates the workspace's subscription plan (Settings' plan switcher). */

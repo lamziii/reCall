@@ -8,10 +8,8 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { CommandMenu } from '@/components/navigation/command-menu'
 import type { CommandItem } from '@/components/navigation/command-palette'
 import { RecallAiPanel } from '@/components/ai/recall-ai-panel'
-import { RecallAiProvider, useRecallAiStore } from '@/lib/ai/recall-ai-provider'
-import { TutorialProvider } from '@/lib/onboarding/use-tutorial'
-import { OnboardingDialog } from '@/components/onboarding/onboarding-dialog'
-import { useToast } from '@/components/feedback'
+import { RecallAiProvider } from '@/lib/ai/recall-ai-provider'
+import { useMeetingReminders } from '@/data/calendar/use-meeting-reminders'
 import { useMediaQuery } from '@/hooks'
 import { useSearchIndex, type SearchEntry } from '@/data/live/use-search-index'
 import { RecallSidebar } from './recall-sidebar'
@@ -70,6 +68,8 @@ export function RecallShell() {
 
   const isTabletUp = useMediaQuery('(min-width: 768px)')
   const isDesktop = useMediaQuery('(min-width: 1024px)')
+
+  useMeetingReminders()
 
   const [userCollapsed, setUserCollapsed] = useState(() => localStorage.getItem(COLLAPSED_STORAGE_KEY) === 'true')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)

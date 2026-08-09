@@ -181,6 +181,7 @@ export function dateGroupFor(iso: string): SessionDateGroup {
  * review yet is still "processing" (analysis auto-fires); a completed review is "ready".
  */
 export function liveSessionStatus(session: LiveSessionDoc): SessionStatusValue {
+  if (session.status === 'scheduled') return 'scheduled'
   const t = session.transcription_status
   if (t === 'pending' || t === 'processing') return 'processing'
   if (t === 'failed') return 'failed'

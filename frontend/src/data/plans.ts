@@ -18,6 +18,11 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
 
 export const DEFAULT_PLAN: PlanTier = 'pro'
 
+/** Length of the free trial every new workspace starts on, anchored to Workspace.createdAt /
+ *  the live workspace doc's created_at. Single source of truth for both the marketing copy
+ *  (pages/plans) and the real countdown shown on the Usage page. */
+export const TRIAL_DAYS = 7
+
 export interface UsagePack {
   id: string
   label: string

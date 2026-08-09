@@ -93,6 +93,10 @@ export interface SessionRecord {
   source?: SessionSource
   createdBy?: string
   language?: string
+  /** Optional video/call link for a scheduled meeting (status 'scheduled'). */
+  meetingLink?: string
+  /** Minutes before a scheduled meeting's start to fire an in-app reminder. Defaults to 10 when unset. */
+  reminderMinutesBefore?: number
   /** Set when a recording's audio Blob was saved to IndexedDB (see data/recording/audio-storage-service), keyed by session id. */
   audio?: SessionAudioMeta
   _sample?: SampleMeta
@@ -201,6 +205,8 @@ export interface Workspace {
   id: string
   name: string
   plan: PlanTier
+  /** ISO timestamp of workspace creation. Anchors the 7-day free trial countdown (see data/plans.ts TRIAL_DAYS). */
+  createdAt?: string
   /** Extra minutes purchased on top of the plan's included monthly hours (see data/plans.ts USAGE_PACKS). */
   bonusMinutes?: number
   /** Extra Recall AI questions purchased on top of the plan's monthly limit (see AI_QUESTION_PACKS). */

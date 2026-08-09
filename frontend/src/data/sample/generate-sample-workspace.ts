@@ -68,6 +68,8 @@ export function generateSampleWorkspace(batchId: string): WorkspaceData {
         id: 'majalab',
         name: 'majaLab',
         plan: 'teams',
+        // Established sample team, well past its trial window — keeps the Usage page's trial card hidden in demo mode.
+        createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
         industry: 'Software studio',
         teamSize: people.length,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC',
