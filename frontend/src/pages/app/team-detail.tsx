@@ -72,12 +72,12 @@ export function TeamDetailPage() {
     <PageContainer>
       <div className="flex flex-col gap-5 pb-6">
         <BackButton label="Teams" onClick={() => navigate('/app/teams')} />
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-col gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-subtle-foreground">
               <Users className="size-4" />
             </span>
-            <H2>{data.name}</H2>
+            <H2 className="min-w-0 break-words">{data.name}</H2>
           </div>
           <Body className="max-w-[60ch] text-muted-foreground">{data.description}</Body>
           <Caption className="text-subtle-foreground">

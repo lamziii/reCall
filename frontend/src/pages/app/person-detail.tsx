@@ -80,8 +80,8 @@ export function PersonDetailPage() {
               <StatusDot state={STATUS_DOT[data.status]} className="absolute bottom-0.5 right-0.5 ring-2 ring-bg" />
             </div>
             <div className="flex min-w-0 flex-col gap-1">
-              <H2>{data.name}</H2>
-              <Body className="text-muted-foreground">{data.role}</Body>
+              <H2 className="break-words">{data.name}</H2>
+              <Body className="break-words text-muted-foreground">{data.role}</Body>
               <Caption className="text-subtle-foreground">
                 {data.department}
                 {data.teamName ? ` · ${data.teamName}` : ''} · {STATUS_LABEL[data.status]}

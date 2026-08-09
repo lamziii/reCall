@@ -21,8 +21,10 @@ function SessionSection({ title, items, emptyLabel }: { title: string; items: Ca
               onClick={() => navigate(`/app/sessions/${item.id}`)}
               className="focus-ring flex flex-col gap-0.5 rounded-md text-left transition-fast hover:text-accent"
             >
-              <Small className="truncate font-medium text-foreground">{item.title}</Small>
-              <Caption className="text-subtle-foreground">
+              <Small className="truncate font-medium text-foreground" title={item.title}>
+                {item.title}
+              </Small>
+              <Caption className="truncate text-subtle-foreground">
                 {item.dateLabel} · {item.timeLabel}
                 {item.projectName ? ` · ${item.projectName}` : ''}
               </Caption>
@@ -62,8 +64,10 @@ export function CalendarSidebar({ upcomingMeetings, todaysAgenda, upcomingDeadli
                 onClick={() => navigate('/app/tasks')}
                 className="focus-ring flex flex-col gap-0.5 rounded-md text-left transition-fast hover:text-accent"
               >
-                <Small className="truncate font-medium text-foreground">{task.title}</Small>
-                <Caption className={cn('text-subtle-foreground', task.isOverdue && 'font-medium text-danger')}>{task.dueDateLabel}</Caption>
+                <Small className="line-clamp-2 font-medium text-foreground" title={task.title}>
+                  {task.title}
+                </Small>
+                <Caption className={cn('truncate text-subtle-foreground', task.isOverdue && 'font-medium text-danger')}>{task.dueDateLabel}</Caption>
               </button>
             ))}
           </div>

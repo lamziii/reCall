@@ -174,8 +174,12 @@ export function TasksPage() {
           <TableBody>
             {filteredSorted.map((task) => (
               <TableRow key={task.id} className="cursor-pointer" onClick={() => setSelectedTaskId(task.id)}>
-                <TableCell className="max-w-64 whitespace-normal font-medium text-foreground">{task.title}</TableCell>
-                <TableCell className="text-muted-foreground">{task.projectName ?? '—'}</TableCell>
+                <TableCell className="max-w-64 truncate font-medium text-foreground" title={task.title}>
+                  {task.title}
+                </TableCell>
+                <TableCell className="max-w-48 truncate text-muted-foreground" title={task.projectName ?? undefined}>
+                  {task.projectName ?? '—'}
+                </TableCell>
                 <TableCell>
                   <Assignee name={task.assigneeName} compact />
                 </TableCell>

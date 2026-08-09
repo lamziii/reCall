@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Database, Monitor, Moon, Sun } from 'lucide-react'
+import { Database, Monitor, Moon, Sun, PlayCircle, RotateCcw } from 'lucide-react'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { SegmentedControl } from '@/components/forms/segmented-control'
 import { Tabs, TabList, Tab, TabPanel } from '@/components/navigation/tabs'
@@ -13,6 +13,8 @@ import { useAuth } from '@/lib/auth/auth-context'
 import { useWorkspace } from '@/data/live/workspace-context'
 import { useWorkspacePlan } from '@/data/live/use-workspace-plan'
 import { isLiveMode } from '@/data/live/data-mode'
+import { resetTutorial } from '@/data/live/onboarding'
+import { useTutorial } from '@/lib/onboarding/use-tutorial'
 import { getWorkspaceData, saveWorkspaceData } from '@/data/workspace-repository'
 import { generateSampleWorkspace } from '@/data/sample/generate-sample-workspace'
 import { clearLiveSampleData, seedLiveSampleData } from '@/data/live/sample-live-data'
@@ -75,9 +77,61 @@ export function SettingsPage() {
         </TabPanel>
       </Tabs>
 
+      <HelpOnboardingSection />
+
       {/* Dev-only tooling — compiled out of production builds (import.meta.env.DEV is false there). */}
       {import.meta.env.DEV && <DeveloperSection />}
     </PageContainer>
+  )
+}
+
+/**
+ * Help & onboarding — replay the product tour anytime (does NOT overwrite completed/skipped state).
+ * The dev-only "Reset onboarding" returns the tour to its first-run state so the auto-show flow can
+ * be re-tested; it's compiled out of production builds.
+ */
+function HelpOnboardingSection() {
+  const { replay } = useTutorial()
+  const { toast } = useToast()
+  const { user } = useAuth()
+  const [resetting, setResetting] = useState(false)
+
+  async function reset() {
+    if (!user) return
+    setResetting(true)
+    try {
+      await resetTutorial(user.id)
+      toast({ title: 'Onboarding reset', description: 'Reload the app to see the tour run as a first-time user.' })
+    } catch {
+      toast({ title: "Couldn't reset onboarding", variant: 'danger' })
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  return (
+    <div className="mt-8 flex flex-col gap-2.5 border-t border-border-subtle pt-8">
+      <div className="flex items-center gap-2">
+        <PlayCircle className="size-4 text-muted-foreground" aria-hidden />
+        <Label as="span">Help &amp; onboarding</Label>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col">
+          <Small className="text-foreground">Product tour</Small>
+          <Small className="text-muted-foreground">Replay the Recall introduction.</Small>
+        </div>
+        <div className="flex items-center gap-2">
+          {import.meta.env.DEV && isLiveMode && (
+            <Button variant="ghost" size="md" leftIcon={<RotateCcw />} loading={resetting} onClick={() => void reset()}>
+              Reset onboarding
+            </Button>
+          )}
+          <Button variant="secondary" size="md" leftIcon={<PlayCircle />} onClick={replay}>
+            Replay tutorial
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 

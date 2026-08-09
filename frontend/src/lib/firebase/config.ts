@@ -56,6 +56,13 @@ export const transcribeUrl =
     ? `http://${emulatorConfig.host}:${emulatorConfig.functions}/${firebaseConfig.projectId}/${functionsRegion}/transcribeSession`
     : `https://${functionsRegion}-${firebaseConfig.projectId}.cloudfunctions.net/transcribeSession`)
 
+/** URL of the transcribeVoice Cloud Function (voice → text for the Recall AI composer). Same rule. */
+export const transcribeVoiceUrl =
+  env.VITE_FIREBASE_TRANSCRIBE_VOICE_URL ??
+  (useEmulators
+    ? `http://${emulatorConfig.host}:${emulatorConfig.functions}/${firebaseConfig.projectId}/${functionsRegion}/transcribeVoice`
+    : `https://${functionsRegion}-${firebaseConfig.projectId}.cloudfunctions.net/transcribeVoice`)
+
 /** URL of the recallAiChat Cloud Function (the workspace assistant, SSE streaming). Same rule. */
 export const recallAiChatUrl =
   env.VITE_FIREBASE_RECALL_AI_URL ??

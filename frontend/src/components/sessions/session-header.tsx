@@ -21,9 +21,9 @@ export function SessionHeader({ session }: { session: SessionDetailData }) {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <H2>{session.title}</H2>
-            <SessionStatus status={session.status} />
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <H2 className="min-w-0 break-words">{session.title}</H2>
+            <SessionStatus status={session.status} className="shrink-0" />
           </div>
           <Body className="text-muted-foreground">
             {[session.projectName, session.fullDateTimeLabel, session.durationLabel].filter(Boolean).join(' · ')}
