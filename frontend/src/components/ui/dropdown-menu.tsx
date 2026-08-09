@@ -85,8 +85,8 @@ export function DropdownMenuItem({ children, onSelect, disabled, danger, icon, s
       )}
     >
       {icon && <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">{icon}</span>}
-      <span className="flex-1">{children}</span>
-      {shortcut && <span className="text-caption text-subtle-foreground">{shortcut}</span>}
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+      {shortcut && <span className="shrink-0 text-caption text-subtle-foreground">{shortcut}</span>}
     </button>
   )
 }

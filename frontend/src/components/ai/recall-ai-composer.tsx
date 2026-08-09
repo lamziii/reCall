@@ -1,6 +1,7 @@
-import { useLayoutEffect, useRef, useState } from 'react'
-import { ArrowUp, Square } from 'lucide-react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { ArrowUp, Square, Mic, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useVoiceInput } from '@/lib/ai/use-voice-input'
 
 const MAX_HEIGHT = 200 // ~8 lines before internal scroll
 
@@ -20,6 +21,15 @@ export function RecallAiComposer({
   const [value, setValue] = useState('')
   const ref = useRef<HTMLTextAreaElement>(null)
 
+  // Voice input drops transcribed text into the composer (appended to whatever's already typed).
+  const appendTranscript = useCallback((text: string) => {
+    setValue((v) => (v ? `${v.trimEnd()} ${text}` : text))
+    requestAnimationFrame(() => ref.current?.focus())
+  }, [])
+  const voice = useVoiceInput(appendTranscript)
+  const recording = voice.state === 'recording'
+  const transcribing = voice.state === 'transcribing'
+
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
@@ -35,6 +45,8 @@ export function RecallAiComposer({
   }
 
   const canSend = value.trim().length > 0 && !streaming
+
+  const placeholder = recording ? 'Listening… tap the mic to stop' : transcribing ? 'Transcribing…' : 'Message Recall AI…'
 
   return (
     <div className="bg-bg px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
@@ -52,10 +64,39 @@ export function RecallAiComposer({
                 submit()
               }
             }}
-            placeholder="Message Recall AI…"
+            placeholder={placeholder}
             aria-label="Message Recall AI"
             className="max-h-[200px] flex-1 resize-none self-center bg-transparent px-1.5 py-1 text-body leading-relaxed text-foreground outline-none placeholder:text-subtle-foreground"
           />
+
+          {/* Voice input — hidden when the runtime can't record. Toggles record → stop → transcribe. */}
+          {voice.supported && !streaming && (
+            <button
+              type="button"
+              onClick={() => (recording ? void voice.stop() : void voice.start())}
+              disabled={transcribing}
+              aria-label={recording ? 'Stop recording' : 'Record a voice message'}
+              aria-pressed={recording}
+              title={voice.error ?? (recording ? 'Stop recording' : 'Voice input')}
+              className={cn(
+                'flex size-8 shrink-0 items-center justify-center rounded-full transition-fast active:scale-95',
+                recording
+                  ? 'focus-ring bg-danger text-danger-foreground hover:opacity-80'
+                  : transcribing
+                    ? 'cursor-default text-subtle-foreground'
+                    : 'focus-ring text-subtle-foreground hover:bg-surface-hover hover:text-foreground',
+              )}
+            >
+              {transcribing ? (
+                <Loader2 className="size-4.5 animate-spin" />
+              ) : recording ? (
+                <Square className="size-3.5 fill-current" />
+              ) : (
+                <Mic className="size-4.5" />
+              )}
+            </button>
+          )}
+
           {streaming ? (
             <button
               type="button"

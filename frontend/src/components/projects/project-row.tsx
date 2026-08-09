@@ -48,7 +48,7 @@ export function ProjectRow({ project }: { project: ProjectListItem }) {
           <Caption className="text-subtle-foreground">{project.progressPct}%</Caption>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-subtle-foreground">
-          <span>{project.ownerName}</span>
+          <span className="max-w-[12rem] truncate">{project.ownerName}</span>
           <span className="inline-flex items-center gap-1">
             <GitBranch className="size-3" />
             {project.decisionsCount}

@@ -18,9 +18,9 @@ export function ProjectHeader({ project }: { project: ProjectDetailData }) {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <H2>{project.name}</H2>
-            <ProjectStatus status={project.status} />
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <H2 className="min-w-0 break-words">{project.name}</H2>
+            <ProjectStatus status={project.status} className="shrink-0" />
           </div>
           <Body className="max-w-[60ch] text-muted-foreground">{project.description}</Body>
           <Body className="text-caption text-subtle-foreground">

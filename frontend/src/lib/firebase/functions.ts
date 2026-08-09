@@ -1,5 +1,5 @@
 import { getFirebaseAuth } from './auth'
-import { extractReviewUrl, transcribeUrl } from './config'
+import { extractReviewUrl, transcribeUrl, transcribeVoiceUrl } from './config'
 import type { SessionReviewDoc, SessionSpeaker, TranscriptSegment } from '@/data/live/types'
 
 export class ExtractReviewError extends Error {}
@@ -66,6 +66,39 @@ export async function requestTranscription(sessionId: string, audio: Blob): Prom
     provider: body.provider ?? null,
     model: body.model ?? null,
   }
+}
+
+/**
+ * Transcribes a short voice snippet (from the Recall AI composer) via the authenticated
+ * transcribeVoice function — OpenAI server-side, no session written. Returns plain text. Throws a
+ * user-safe ExtractReviewError on failure so the caller can fall back or surface a message.
+ */
+export async function requestVoiceTranscription(audio: Blob, durationSeconds?: number): Promise<string> {
+  const user = getFirebaseAuth().currentUser
+  if (!user) throw new ExtractReviewError('You need to be signed in to use voice input.')
+  const token = await user.getIdToken()
+
+  const headers: Record<string, string> = {
+    'Content-Type': audio.type || 'audio/webm',
+    Authorization: `Bearer ${token}`,
+  }
+  if (durationSeconds && durationSeconds > 0) headers['X-Audio-Duration'] = String(Math.round(durationSeconds))
+
+  let res: Response
+  try {
+    res = await fetch(transcribeVoiceUrl, { method: 'POST', headers, body: audio })
+  } catch {
+    throw new ExtractReviewError("Couldn't reach Recall's servers. Check your connection and try again.")
+  }
+
+  let body: { text?: string; error?: string } = {}
+  try {
+    body = await res.json()
+  } catch {
+    /* fall through */
+  }
+  if (!res.ok) throw new ExtractReviewError(body.error || "Couldn't transcribe that. Please try again.")
+  return (body.text ?? '').trim()
 }
 
 export interface RequestSessionReviewOptions {

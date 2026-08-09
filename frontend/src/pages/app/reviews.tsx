@@ -134,8 +134,12 @@ export function ReviewsPage() {
           <TableBody>
             {filtered.map((review) => (
               <TableRow key={review.id} className="cursor-pointer" onClick={() => setSelectedSessionId(review.sessionId)}>
-                <TableCell className="max-w-64 whitespace-normal font-medium text-foreground">{review.title}</TableCell>
-                <TableCell className="text-muted-foreground">{review.projectName ?? '—'}</TableCell>
+                <TableCell className="max-w-64 truncate font-medium text-foreground" title={review.title}>
+                  {review.title}
+                </TableCell>
+                <TableCell className="max-w-48 truncate text-muted-foreground" title={review.projectName ?? undefined}>
+                  {review.projectName ?? '—'}
+                </TableCell>
                 <TableCell>
                   <ConfidenceIndicator value={review.confidence} />
                 </TableCell>

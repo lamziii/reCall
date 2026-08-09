@@ -57,8 +57,10 @@ function NotificationRow({
         <Icon className="size-4" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <Small className={cn('text-foreground', !notification.read && 'font-medium')}>{notification.title}</Small>
-        <Caption className="text-subtle-foreground">{notification.description}</Caption>
+        <Small className={cn('truncate text-foreground', !notification.read && 'font-medium')} title={notification.title}>
+          {notification.title}
+        </Small>
+        <Caption className="line-clamp-2 text-subtle-foreground">{notification.description}</Caption>
       </div>
       <div className="flex shrink-0 items-center gap-2 pt-0.5">
         <Caption className="whitespace-nowrap text-subtle-foreground">{notification.relativeTimeLabel}</Caption>

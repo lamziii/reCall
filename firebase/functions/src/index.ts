@@ -4,3 +4,4 @@ export { extractSessionReview } from "./extractSessionReview";
 export { transcribeSession } from "./transcribeSession";
 export { benchmarkTranscription } from "./benchmarkTranscription";
 export { recallAiChat } from "./recallAiChat";
+export { transcribeVoice } from "./transcribeVoice";

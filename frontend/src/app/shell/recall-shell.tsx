@@ -1,23 +1,68 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { Video, CheckSquare, FolderKanban } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Content } from '@/components/layout/content'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { CommandMenu } from '@/components/navigation/command-menu'
+import type { CommandItem } from '@/components/navigation/command-palette'
 import { RecallAiPanel } from '@/components/ai/recall-ai-panel'
 import { RecallAiProvider } from '@/lib/ai/recall-ai-provider'
 import { useMeetingReminders } from '@/data/calendar/use-meeting-reminders'
 import { useMediaQuery } from '@/hooks'
+import { useSearchIndex, type SearchEntry } from '@/data/live/use-search-index'
 import { RecallSidebar } from './recall-sidebar'
 import { RecallTopbar } from './recall-topbar'
 import { ALL_NAV_ITEMS } from './nav-config'
+
+const ENTRY_META: Record<SearchEntry['type'], { group: string; icon: ReactNode }> = {
+  session: { group: 'Meetings', icon: <Video /> },
+  task: { group: 'Tasks', icon: <CheckSquare /> },
+  project: { group: 'Projects', icon: <FolderKanban /> },
+}
+
+/**
+ * The global ⌘K palette, mounted inside the AI provider so it can route `/ai` / `/ask` queries to
+ * Recall AI. Merges workspace content (meetings, tasks, projects) with navigation, and escalates
+ * any query to the assistant.
+ */
+function ShellCommandMenu({ open, onOpenChange, onOpenAiPanel }: { open: boolean; onOpenChange: (open: boolean) => void; onOpenAiPanel: () => void }) {
+  const navigate = useNavigate()
+  const ai = useRecallAiStore()
+  const entries = useSearchIndex()
+
+  const items = useMemo<CommandItem[]>(() => {
+    const content: CommandItem[] = entries.map((e) => ({
+      id: e.id,
+      label: e.title,
+      sublabel: e.subtitle,
+      group: ENTRY_META[e.type].group,
+      icon: ENTRY_META[e.type].icon,
+      onSelect: () => navigate(e.to),
+    }))
+    const nav: CommandItem[] = ALL_NAV_ITEMS.map((item) => ({
+      id: item.to,
+      label: item.label,
+      icon: <item.icon />,
+      group: 'Go to',
+      onSelect: () => navigate(item.to),
+    }))
+    return [...content, ...nav]
+  }, [entries, navigate])
+
+  const onAskAi = (q: string) => {
+    onOpenAiPanel()
+    if (q.trim()) ai.send(q.trim())
+  }
+
+  return <CommandMenu open={open} onOpenChange={onOpenChange} items={items} onAskAi={onAskAi} />
+}
 
 const COLLAPSED_STORAGE_KEY = 'recall:sidebar-collapsed'
 
 /** The permanent shell every authenticated Recall page renders inside. Mount once above the /app route tree. */
 export function RecallShell() {
-  const navigate = useNavigate()
   const location = useLocation()
   const reduceMotion = useReducedMotion()
 
@@ -40,9 +85,13 @@ export function RecallShell() {
   }, [location.pathname])
 
   const collapsed = isDesktop ? userCollapsed : true
+  const { toast } = useToast()
+  const onTourSkipped = () => toast({ title: 'Tour skipped', description: 'You can replay it anytime from Settings.' })
 
   return (
     <RecallAiProvider>
+      <TutorialProvider onSkipped={onTourSkipped}>
+        <OnboardingDialog />
       <AppShell
         sidebar={
           isTabletUp ? (
@@ -94,18 +143,8 @@ export function RecallShell() {
 
       <RecallAiPanel open={aiOpen} onClose={() => setAiOpen(false)} />
 
-      <CommandMenu
-        open={searchOpen}
-        onOpenChange={setSearchOpen}
-        placeholder="Search Recall or jump to..."
-        items={ALL_NAV_ITEMS.map((item) => ({
-          id: item.to,
-          label: item.label,
-          icon: <item.icon />,
-          group: 'Go to',
-          onSelect: () => navigate(item.to),
-        }))}
-      />
+      <ShellCommandMenu open={searchOpen} onOpenChange={setSearchOpen} onOpenAiPanel={() => setAiOpen(true)} />
+      </TutorialProvider>
     </RecallAiProvider>
   )
 }

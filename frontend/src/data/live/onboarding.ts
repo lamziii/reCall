@@ -30,7 +30,17 @@ export interface UserProfile {
   onboarding_status: OnboardingStatus
   onboarding_step: number
   onboarding_completed: boolean
+  /**
+   * Product-tour state (distinct from the sign-up onboarding above). `tutorial_completed` is
+   * written `false` when a new account finishes sign-up, so the tour auto-shows exactly once for
+   * genuinely new users. Legacy accounts never had this field, so it reads `undefined` and the tour
+   * is never forced on them. See lib/onboarding/use-tutorial.tsx.
+   */
   tutorial_completed: boolean
+  tutorial_skipped?: boolean
+  tutorial_last_step?: number
+  /** ONBOARDING_VERSION the user has completed/skipped — lets a future tour re-run cleanly. */
+  tutorial_version?: number
   preferred_language: string | null
   language_label: string | null
   country_code: string | null
@@ -166,6 +176,10 @@ export async function completeOnboarding(params: {
       onboarding_step: finalStep,
       onboarding_status: 'completed',
       onboarding_completed: true,
+      // Genuinely-new account → the product tour should auto-show once. Writing an explicit `false`
+      // (only ever set here) is how the tour distinguishes new users from legacy accounts, which
+      // have no `tutorial_completed` field at all.
+      tutorial_completed: false,
       updated_at: serverTimestamp(),
     },
     { merge: true },
@@ -176,6 +190,46 @@ export async function completeOnboarding(params: {
     onboarding_completed: true,
     updated_at: serverTimestamp(),
   })
+}
+
+// ---- Product tour (the first-run tutorial, distinct from sign-up onboarding above) -------------
+// All best-effort: a failed write must never block the user from using Recall.
+
+/** Persists the tour's resume pointer without completing it (e.g. the user pressed Escape). */
+export async function saveTutorialStep(uid: string, step: number): Promise<void> {
+  try {
+    await setDoc(doc(getDb(), 'users', uid), { tutorial_last_step: step, updated_at: serverTimestamp() }, { merge: true })
+  } catch {
+    /* non-fatal */
+  }
+}
+
+/** Marks the tour finished (or skipped). Idempotent; records the version so a future tour re-runs. */
+export async function completeTutorial(uid: string, opts: { skipped: boolean; version: number; finalStep: number }): Promise<void> {
+  try {
+    await setDoc(
+      doc(getDb(), 'users', uid),
+      {
+        tutorial_completed: true,
+        tutorial_skipped: opts.skipped,
+        tutorial_version: opts.version,
+        tutorial_last_step: opts.finalStep,
+        updated_at: serverTimestamp(),
+      },
+      { merge: true },
+    )
+  } catch {
+    /* non-fatal */
+  }
+}
+
+/** Dev-only: returns the tour to its first-run state so the auto-show flow can be re-tested. */
+export async function resetTutorial(uid: string): Promise<void> {
+  await setDoc(
+    doc(getDb(), 'users', uid),
+    { tutorial_completed: false, tutorial_skipped: false, tutorial_last_step: 0, tutorial_version: 0, updated_at: serverTimestamp() },
+    { merge: true },
+  )
 }
 
 export { workspaceIdForUser }
