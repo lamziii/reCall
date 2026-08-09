@@ -40,6 +40,9 @@ export function PlanCard({ plan }: { plan: MarketingPlan }) {
           {plan.priceSuffix && <span className="text-small text-muted-foreground">{plan.priceSuffix}</span>}
         </div>
         {plan.priceNote && <Caption className="text-subtle-foreground">{plan.priceNote}</Caption>}
+        {plan.trialDays && (
+          <Caption className="font-medium text-accent">{plan.trialDays}-day free trial, no card required</Caption>
+        )}
       </div>
 
       {isMailto ? (

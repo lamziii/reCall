@@ -1,36 +1,94 @@
+import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card } from '@/components/data-display/card'
-import { EmptyState } from '@/components/feedback/empty-state'
-import { Caption, H3, Small } from '@/components/typography'
+import { motion, useReducedMotion } from 'framer-motion'
+import { AlertCircle, CalendarClock, Clock, History } from 'lucide-react'
+import { Surface } from '@/components/layout/surface'
+import { List, ListItem } from '@/components/data-display/list'
+import { StatusBadge } from '@/components/data-display/status-badge'
+import { Caption, Small, Title } from '@/components/typography'
+import { staggerContainer, staggerItem } from '@/styles/animations/presets'
 import type { CalendarDeadlineItem, CalendarListItem } from '@/data/calendar/types'
-import { cn } from '@/lib/utils'
 
-function SessionSection({ title, items, emptyLabel }: { title: string; items: CalendarListItem[]; emptyLabel: string }) {
+function SectionHeader({ icon, title, count }: { icon: ReactNode; title: string; count: number }) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-4 pt-3.5">
+      <div className="flex items-center gap-2">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-active text-subtle-foreground [&>svg]:size-3.5">
+          {icon}
+        </span>
+        <Title className="text-small font-semibold">{title}</Title>
+      </div>
+      {count > 0 && <Caption className="tabular-nums text-subtle-foreground">{count}</Caption>}
+    </div>
+  )
+}
+
+function SessionSection({
+  icon,
+  title,
+  items,
+  emptyLabel,
+  showTime,
+}: {
+  icon: ReactNode
+  title: string
+  items: CalendarListItem[]
+  emptyLabel: string
+  showTime?: boolean
+}) {
   const navigate = useNavigate()
   return (
-    <Card className="flex flex-col gap-3 p-4">
-      <H3 className="text-small font-semibold">{title}</H3>
+    <Surface level="raised" border className="overflow-hidden">
+      <SectionHeader icon={icon} title={title} count={items.length} />
       {items.length === 0 ? (
-        <Caption className="text-subtle-foreground">{emptyLabel}</Caption>
+        <Caption className="block px-4 pb-3.5 pt-2 text-subtle-foreground">{emptyLabel}</Caption>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <List className="mt-2 pb-1">
           {items.map((item) => (
-            <button
+            <ListItem
               key={item.id}
-              type="button"
+              interactive
               onClick={() => navigate(`/app/sessions/${item.id}`)}
-              className="focus-ring flex flex-col gap-0.5 rounded-md text-left transition-fast hover:text-accent"
+              className="px-4"
+              leading={showTime ? <Caption className="w-12 shrink-0 tabular-nums text-muted-foreground">{item.timeLabel}</Caption> : undefined}
             >
-              <Small className="truncate font-medium text-foreground">{item.title}</Small>
-              <Caption className="text-subtle-foreground">
-                {item.dateLabel} · {item.timeLabel}
-                {item.projectName ? ` · ${item.projectName}` : ''}
-              </Caption>
-            </button>
+              <span className="flex min-w-0 flex-col">
+                <Small className="truncate font-medium text-foreground">{item.title}</Small>
+                <Caption className="truncate text-subtle-foreground">
+                  {showTime ? (item.projectName ?? 'No project') : `${item.dateLabel} · ${item.timeLabel}${item.projectName ? ` · ${item.projectName}` : ''}`}
+                </Caption>
+              </span>
+            </ListItem>
           ))}
-        </div>
+        </List>
       )}
-    </Card>
+    </Surface>
+  )
+}
+
+function DeadlinesSection({ items }: { items: CalendarDeadlineItem[] }) {
+  const navigate = useNavigate()
+  return (
+    <Surface level="raised" border className="overflow-hidden">
+      <SectionHeader icon={<AlertCircle />} title="Upcoming deadlines" count={items.length} />
+      {items.length === 0 ? (
+        <Caption className="block px-4 pb-3.5 pt-2 text-subtle-foreground">No upcoming deadlines.</Caption>
+      ) : (
+        <List className="mt-2 pb-1">
+          {items.map((task) => (
+            <ListItem
+              key={task.id}
+              interactive
+              onClick={() => navigate('/app/tasks')}
+              className="px-4"
+              trailing={task.isOverdue ? <StatusBadge tone="danger" label="Overdue" /> : <Caption className="text-subtle-foreground">{task.dueDateLabel}</Caption>}
+            >
+              <Small className="truncate font-medium text-foreground">{task.title}</Small>
+            </ListItem>
+          ))}
+        </List>
+      )}
+    </Surface>
   )
 }
 
@@ -42,39 +100,24 @@ export interface CalendarSidebarProps {
 }
 
 export function CalendarSidebar({ upcomingMeetings, todaysAgenda, upcomingDeadlines, recentSessions }: CalendarSidebarProps) {
-  const navigate = useNavigate()
+  const reduceMotion = useReducedMotion()
+  const containerVariants = reduceMotion ? undefined : staggerContainer
+  const itemVariants = reduceMotion ? undefined : staggerItem
 
   return (
-    <div className="flex flex-col gap-4">
-      <SessionSection title="Today's agenda" items={todaysAgenda} emptyLabel="Nothing scheduled today." />
-      <SessionSection title="Upcoming meetings" items={upcomingMeetings} emptyLabel="No upcoming meetings." />
-
-      <Card className="flex flex-col gap-3 p-4">
-        <H3 className="text-small font-semibold">Upcoming deadlines</H3>
-        {upcomingDeadlines.length === 0 ? (
-          <Caption className="text-subtle-foreground">No upcoming deadlines.</Caption>
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            {upcomingDeadlines.map((task) => (
-              <button
-                key={task.id}
-                type="button"
-                onClick={() => navigate('/app/tasks')}
-                className="focus-ring flex flex-col gap-0.5 rounded-md text-left transition-fast hover:text-accent"
-              >
-                <Small className="truncate font-medium text-foreground">{task.title}</Small>
-                <Caption className={cn('text-subtle-foreground', task.isOverdue && 'font-medium text-danger')}>{task.dueDateLabel}</Caption>
-              </button>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      <SessionSection title="Recent sessions" items={recentSessions} emptyLabel="No recent sessions." />
-
-      {upcomingMeetings.length === 0 && todaysAgenda.length === 0 && upcomingDeadlines.length === 0 && recentSessions.length === 0 && (
-        <EmptyState title="Nothing to show yet" className="py-4" />
-      )}
-    </div>
+    <motion.div className="flex flex-col gap-4" variants={containerVariants} initial="initial" animate="animate">
+      <motion.div variants={itemVariants}>
+        <SessionSection icon={<Clock />} title="Today's agenda" items={todaysAgenda} emptyLabel="Nothing scheduled today." showTime />
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <SessionSection icon={<CalendarClock />} title="Upcoming meetings" items={upcomingMeetings} emptyLabel="No upcoming meetings." />
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <DeadlinesSection items={upcomingDeadlines} />
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <SessionSection icon={<History />} title="Recent sessions" items={recentSessions} emptyLabel="No recent sessions." />
+      </motion.div>
+    </motion.div>
   )
 }

@@ -103,7 +103,8 @@ Session recording metadata. Scoped to a workspace via `workspace_id`.
 
 **Field rules:**
 - `workspace_id` — required, used for RLS scoping.
-- `status` — exactly one of `"live"` or `"completed"`.
+- `status` — one of `"scheduled"`, `"live"`, or `"completed"`. `"scheduled"` is a future meeting
+  with no transcript yet, written by `scheduleSession()` (Calendar's "Schedule meeting" dialog).
 - `ended_at`, `recording_url`, `transcript` — optional, populated when the session ends.
 
 **Added fields (live vertical slice):**
@@ -123,6 +124,13 @@ Session recording metadata. Scoped to a workspace via `workspace_id`.
   optional. Speaker roster + label→name mapping. `recording_url` holds the Storage object path
   `workspaces/{workspace_id}/recordings/{sessionId}.webm`; `audio` holds `{ mimeType, durationSeconds }`.
   See ../docs/RECORDING_ARCHITECTURE.md.
+- `scheduled_at` — timestamp, optional. Meeting start time for `status: "scheduled"` sessions —
+  the Calendar and in-app reminders place the session by this instead of `created_at`.
+- `meeting_link` — string or null, optional. Video/call link for a scheduled meeting.
+- `reminder_minutes_before` — number or null, optional. Minutes before `scheduled_at` the client
+  fires an in-app reminder toast (see frontend `data/calendar/use-meeting-reminders.ts`). Defaults
+  to 10 when unset. Reminders are computed client-side while the app is open — there is no
+  server-side/push delivery.
 
 **Indexes:**
 - Composite: `workspace_id` (Ascending), `status` (Ascending)

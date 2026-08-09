@@ -7,6 +7,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { CommandMenu } from '@/components/navigation/command-menu'
 import { RecallAiPanel } from '@/components/ai/recall-ai-panel'
 import { RecallAiProvider } from '@/lib/ai/recall-ai-provider'
+import { useMeetingReminders } from '@/data/calendar/use-meeting-reminders'
 import { useMediaQuery } from '@/hooks'
 import { RecallSidebar } from './recall-sidebar'
 import { RecallTopbar } from './recall-topbar'
@@ -22,6 +23,8 @@ export function RecallShell() {
 
   const isTabletUp = useMediaQuery('(min-width: 768px)')
   const isDesktop = useMediaQuery('(min-width: 1024px)')
+
+  useMeetingReminders()
 
   const [userCollapsed, setUserCollapsed] = useState(() => localStorage.getItem(COLLAPSED_STORAGE_KEY) === 'true')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)

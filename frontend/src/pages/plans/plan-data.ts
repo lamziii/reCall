@@ -1,4 +1,4 @@
-import { PLANS } from '@/data/plans'
+import { PLANS, TRIAL_DAYS } from '@/data/plans'
 
 export interface PlanFeature {
   label: string
@@ -12,6 +12,7 @@ export interface MarketingPlan {
   price: string
   priceSuffix: string
   priceNote?: string
+  trialDays?: number
   features: PlanFeature[]
   cta: { label: string; href: string }
   highlighted?: boolean
@@ -26,13 +27,14 @@ export const MARKETING_PLANS: MarketingPlan[] = [
     tagline: PLANS.pro.tagline,
     price: '$19',
     priceSuffix: '/month',
+    trialDays: TRIAL_DAYS,
     features: [
       { label: `${PLANS.pro.maxHoursPerMonth} hours of recording per month`, included: true },
       { label: 'AI summaries, decisions & tasks', included: true },
       { label: 'Personal session library & search', included: true },
       { label: 'Shared team workspace', included: false },
     ],
-    cta: { label: 'Get started', href: '/onboarding' },
+    cta: { label: 'Start free trial', href: '/onboarding' },
   },
   {
     id: 'teams',
@@ -41,13 +43,14 @@ export const MARKETING_PLANS: MarketingPlan[] = [
     price: '$29',
     priceSuffix: '/user/month',
     priceNote: 'The more people you add, the lower the price per seat.',
+    trialDays: TRIAL_DAYS,
     features: [
       { label: `${PLANS.teams.maxHoursPerMonth} hours of recording per month`, included: true },
       { label: 'Shared team workspace', included: true },
       { label: 'Everything in Recall Pro', included: true },
       { label: 'Lower per-seat price at scale', included: true },
     ],
-    cta: { label: 'Get started', href: '/onboarding' },
+    cta: { label: 'Start free trial', href: '/onboarding' },
     highlighted: true,
   },
   {
@@ -56,6 +59,7 @@ export const MARKETING_PLANS: MarketingPlan[] = [
     tagline: 'For organizations with custom needs.',
     price: 'Custom',
     priceSuffix: '',
+    trialDays: TRIAL_DAYS,
     features: [
       { label: 'Custom recording hours', included: true },
       { label: 'Shared team workspace', included: true },

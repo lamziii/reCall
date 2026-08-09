@@ -44,7 +44,14 @@ export interface LiveSessionDoc {
   id: string
   workspace_id: string
   title: string
-  status?: 'live' | 'completed'
+  status?: 'scheduled' | 'live' | 'completed'
+  /** Start time for a scheduled meeting (status 'scheduled'), set by scheduleSession(). Distinct
+   *  from created_at (when the doc was written) — the calendar/reminders place the session by this. */
+  scheduled_at?: Timestamp | null
+  /** Optional video/call link for a scheduled meeting. */
+  meeting_link?: string | null
+  /** Minutes before scheduled_at to fire an in-app reminder. Defaults to 10 when unset. */
+  reminder_minutes_before?: number | null
   /** Session type (Meeting, Investor Conversation, …). Added field. */
   session_type?: string
   /**

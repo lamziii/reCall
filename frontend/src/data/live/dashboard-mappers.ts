@@ -23,6 +23,11 @@ const isOpen = (t: LiveTaskDoc) => t.status !== 'done'
 const dueMs = (t: LiveTaskDoc) => (t.deadline ? new Date(t.deadline).getTime() : Number.POSITIVE_INFINITY)
 const isSameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString()
 
+/** Where a session is placed on the calendar: a scheduled meeting's start time, otherwise when it
+ *  was recorded. */
+const sessionDisplayIso = (s: LiveSessionDoc) => tsToIso(s.scheduled_at ?? s.created_at)
+const isScheduled = (s: LiveSessionDoc) => s.status === 'scheduled'
+
 function durationLabel(s: LiveSessionDoc): string {
   const mins = sessionDurationMinutes(s)
   return mins ? `${mins} min` : ''
@@ -130,7 +135,7 @@ export function toLiveHomeData(
 // ---- Calendar ----------------------------------------------------------------
 
 function sessionPill(s: LiveSessionDoc): CalendarSessionPill {
-  return { id: s.id, title: s.title?.trim() || 'Untitled session', timeLabel: formatTimeLabel(tsToIso(s.created_at)), status: liveSessionStatus(s) }
+  return { id: s.id, title: s.title?.trim() || 'Untitled session', timeLabel: formatTimeLabel(sessionDisplayIso(s)), status: liveSessionStatus(s) }
 }
 function deadlinePill(t: LiveTaskDoc): CalendarSessionPill {
   return { id: `task-${t.id}`, title: t.title, timeLabel: 'Due', status: 'scheduled' }
@@ -144,7 +149,7 @@ export function toLiveCalendarData(sessions: LiveSessionDoc[], tasks: LiveTaskDo
 
   const days: CalendarDay[] = Array.from({ length: 42 }, (_, i) => {
     const date = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i)
-    const sessionPills = sessions.filter((s) => isSameDay(new Date(tsToIso(s.created_at)), date)).map(sessionPill)
+    const sessionPills = sessions.filter((s) => isSameDay(new Date(sessionDisplayIso(s)), date)).map(sessionPill)
     const deadlinePills = tasks.filter((t) => t.deadline && isSameDay(new Date(t.deadline), date) && isOpen(t)).map(deadlinePill)
     return {
       dateIso: date.toISOString(),
@@ -158,19 +163,25 @@ export function toLiveCalendarData(sessions: LiveSessionDoc[], tasks: LiveTaskDo
   const listItem = (s: LiveSessionDoc): CalendarListItem => ({
     id: s.id,
     title: s.title?.trim() || 'Untitled session',
-    dateLabel: formatDateLabel(tsToIso(s.created_at)),
-    timeLabel: formatTimeLabel(tsToIso(s.created_at)),
+    dateLabel: formatDateLabel(sessionDisplayIso(s)),
+    timeLabel: formatTimeLabel(sessionDisplayIso(s)),
     projectName: s.project_name ?? undefined,
   })
 
   const todaysAgenda: CalendarListItem[] = sessions
-    .filter((s) => isSameDay(new Date(tsToIso(s.created_at)), today))
+    .filter((s) => isSameDay(new Date(sessionDisplayIso(s)), today))
     .map(listItem)
     .concat(
       tasks
         .filter((t) => t.deadline && isSameDay(new Date(t.deadline), today) && isOpen(t))
         .map((t) => ({ id: `task-${t.id}`, title: t.title, dateLabel: 'Today', timeLabel: 'Due', projectName: undefined })),
     )
+
+  const upcomingMeetings: CalendarListItem[] = sessions
+    .filter((s) => isScheduled(s) && new Date(sessionDisplayIso(s)).getTime() > Date.now())
+    .sort((a, b) => new Date(sessionDisplayIso(a)).getTime() - new Date(sessionDisplayIso(b)).getTime())
+    .slice(0, 6)
+    .map(listItem)
 
   const upcomingDeadlines: CalendarDeadlineItem[] = [...tasks]
     .filter((t) => t.deadline && isOpen(t))
@@ -183,12 +194,16 @@ export function toLiveCalendarData(sessions: LiveSessionDoc[], tasks: LiveTaskDo
       isOverdue: !!t.deadline && new Date(t.deadline).getTime() < Date.now(),
     }))
 
-  const recentSessions: CalendarListItem[] = [...sessions].sort((a, b) => createdMs(b) - createdMs(a)).slice(0, 6).map(listItem)
+  const recentSessions: CalendarListItem[] = [...sessions]
+    .filter((s) => !isScheduled(s))
+    .sort((a, b) => createdMs(b) - createdMs(a))
+    .slice(0, 6)
+    .map(listItem)
 
   return {
     monthLabel: first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
     days,
-    upcomingMeetings: [], // no future-scheduled meetings yet
+    upcomingMeetings,
     todaysAgenda,
     upcomingDeadlines,
     recentSessions,
