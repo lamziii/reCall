@@ -26,6 +26,7 @@ import { TeamsPage } from '@/pages/app/teams'
 import { TeamDetailPage } from '@/pages/app/team-detail'
 import { NotificationsPage } from '@/pages/app/notifications'
 import { SettingsPage } from '@/pages/app/settings'
+import { HelpPage } from '@/pages/app/help'
 import { DevTaskboardPage } from '@/pages/tasks'
 
 export function AppRoutes() {
@@ -72,6 +73,7 @@ export function AppRoutes() {
         <Route path="teams/:teamId" element={<TeamDetailPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="help" element={<HelpPage />} />
       </Route>
     </Routes>
   )

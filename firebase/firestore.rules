@@ -110,6 +110,20 @@ service cloud.firestore {
     }
 
     // ========================================================================
+    // support_requests — "Contact support" submissions from the Help Center
+    // ========================================================================
+    // A user may create a support request for themselves (user_id must be the caller) and read back
+    // only their own requests. There is no client update/delete — status is managed by support staff
+    // out of band (Firebase console / a future admin tool), never by the requester. See
+    // firebase/functions/src/support.ts for the email-delivery boundary.
+    match /support_requests/{requestId} {
+      allow create: if request.auth != null
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.status == 'open';
+      allow read: if request.auth != null && request.auth.uid == resource.data.user_id;
+    }
+
+    // ========================================================================
     // workspace_invites — pending invitations to join a workspace
     // ========================================================================
     // Only the workspace OWNER may create an invite. The role is constrained to admin|member (never

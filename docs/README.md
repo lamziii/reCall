@@ -19,6 +19,12 @@ doc here is either a live reference or historical context; where any of them dis
   rules, indexes. **Source of truth for the database layer.** (Lives next to the Firebase config it
   documents.)
 
+## Integrations (planned)
+
+- [INTEGRATIONS.md](INTEGRATIONS.md) — strategy for Slack/Notion (and future providers): connection
+  model, provider abstraction, data model, Cloud Functions, phased rollout. ⚠️ Not built yet — this
+  is a design doc to build from, not a description of shipped code.
+
 ## Auth & onboarding
 
 - [ONBOARDING_ARCHITECTURE.md](ONBOARDING_ARCHITECTURE.md) — the 7-step account-creation → workspace

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, CircleQuestionMark, PanelLeftClose, PanelLeftOpen, Settings, User } from 'lucide-react'
 import { Sidebar, SidebarHeader, SidebarSection, SidebarItem, SidebarButtonItem, SidebarFooter } from '@/components/layout/sidebar'
@@ -5,6 +6,7 @@ import { Logo } from '@/components/branding/logo'
 import { IconButton } from '@/components/ui/button'
 import { UserMenuTrigger } from '@/components/data-display/user-menu-trigger'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
+import { SupportDialog } from '@/components/help/support-dialog'
 import { NotificationsMenu } from './notifications-menu'
 import { ProfileMenu } from './profile-menu'
 import { APP_BASE, MAIN_NAV, WORKSPACE_NAV } from './nav-config'
@@ -24,6 +26,7 @@ export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle
   const navigate = useNavigate()
   const workspaceName = useWorkspaceName()
   const { user } = useAuth()
+  const [supportOpen, setSupportOpen] = useState(false)
 
   return (
     <Sidebar collapsed={collapsed}>
@@ -87,13 +90,15 @@ export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle
           </DropdownMenuTrigger>
           <DropdownMenuContent width={200} placement="right">
             <DropdownMenuLabel>Help</DropdownMenuLabel>
-            <DropdownMenuItem>Documentation</DropdownMenuItem>
-            <DropdownMenuItem>Contact support</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => navigate(`${APP_BASE}/help`)}>Documentation</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setSupportOpen(true)}>Contact support</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
         <ProfileMenu placement="right" trigger={<SidebarButtonItem icon={<User />}>Profile</SidebarButtonItem>} />
       </SidebarFooter>
+
+      <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
     </Sidebar>
   )
 }
