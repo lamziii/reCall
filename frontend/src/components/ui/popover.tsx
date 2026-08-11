@@ -122,7 +122,7 @@ export function PopoverContent({
             exit={{ opacity: 0, scale: 0.97, y: -4 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
-              'rounded-lg border border-border bg-surface-overlay shadow-lg outline-none',
+              'recall-glass rounded-lg border border-border bg-surface-overlay shadow-lg outline-none',
               className,
             )}
           >

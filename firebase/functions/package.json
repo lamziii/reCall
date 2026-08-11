@@ -14,7 +14,7 @@
     "logs": "firebase functions:log",
     "test:anthropic": "npm run build && node lib/scripts/test-anthropic-local.js",
     "check:transcription": "npm run build && node lib/scripts/check-transcription-env.js",
-    "test:transcription": "npm run build && node lib/transcription/language-metrics.test.js && node lib/transcription/supported-languages.js && node lib/correctTranscript.js && node lib/transcription/workspace-vocabulary.js",
+    "test:transcription": "npm run build && node lib/transcription/language-metrics.test.js && node lib/transcription/config.test.js && node lib/transcription/providers/openai-provider.js && node lib/transcription/supported-languages.js && node lib/correctTranscript.js && node lib/transcription/workspace-vocabulary.js",
     "backfill:tasks": "npm run build && node lib/scripts/backfill-tasks.js"
   },
   "dependencies": {

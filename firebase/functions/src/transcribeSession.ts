@@ -2,7 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
-import { db } from "./admin";
+import { db, bucket } from "./admin";
 import { getDefaultProvider } from "./transcription/registry";
 import { validateAudio } from "./transcription/validate-audio";
 import { pickLanguageHint, PRIMARY_LANGUAGE, parseExpectedLanguages } from "./transcription/supported-languages";
@@ -22,17 +22,19 @@ import { isAiConfigured } from "./aiEnvironment";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Session-Id, X-Audio-Duration",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Session-Id, X-Audio-Duration, X-Audio-Storage-Path",
 };
 
 function sendError(res: any, status: number, message: string) {
   res.set(CORS_HEADERS).status(status).json({ error: message });
 }
 
-// 540s timeout + 1GiB: a long recording is now split into ~20min chunks and transcribed one after
-// another (plus ffmpeg segmentation and the correction pass), so a 60-90min meeting needs well past
-// the old 300s/512MiB. The diarizing Speechmatics path (batch polling) also benefits from the room.
-export const transcribeSession = onRequest({ timeoutSeconds: 540, memory: "1GiB" }, async (req, res) => {
+// 3600s (Cloud Run max) + 1GiB: a long recording is split into ~20min chunks transcribed with small
+// concurrency (plus ffmpeg segmentation and the correction pass). A multi-hour meeting is many
+// chunks; transcription runs faster than realtime, but the headroom keeps a 2-3h meeting comfortably
+// inside one invocation. Very large recordings arrive via Cloud Storage (X-Audio-Storage-Path)
+// because a single HTTP request body can't exceed ~32MB. The diarizing Speechmatics path benefits too.
+export const transcribeSession = onRequest({ timeoutSeconds: 3600, memory: "1GiB" }, async (req, res) => {
   if (req.method === "OPTIONS") {
     res.set(CORS_HEADERS).status(204).send("");
     return;
@@ -121,23 +123,58 @@ export const transcribeSession = onRequest({ timeoutSeconds: 540, memory: "1GiB"
     return;
   }
 
-  const audio = req.rawBody as Buffer | undefined;
   const contentType = req.get("content-type") || "audio/webm";
   const durationHeader = Number(req.get("x-audio-duration"));
   const durationHintSeconds = Number.isFinite(durationHeader) && durationHeader > 0 ? durationHeader : undefined;
 
-  const validationError = validateAudio({ byteLength: audio?.length ?? 0, mimeType: contentType, durationSeconds: durationHintSeconds });
-  if (validationError) {
-    sendError(res, 413, validationError);
-    return;
+  // Two ways the audio arrives: (1) X-Audio-Storage-Path — the browser uploaded the recording to
+  // Cloud Storage first (the only way past the ~32MB single-request body limit, so this is how
+  // multi-hour meetings come in); we download it server-side. (2) inline raw body — the fast path
+  // for short recordings, still byte-capped so it can't blow the request limit. Either way the
+  // provider chunks it internally, so there is no duration ceiling here anymore.
+  const storagePath = (req.get("x-audio-storage-path") || "").trim();
+  let audio: Buffer;
+  let audioMime = contentType;
+  if (storagePath) {
+    // Path must belong to this session's workspace (matches storage.rules), so a member can't point
+    // the function at another workspace's object.
+    const expectedPrefix = `workspaces/${workspaceId}/recordings/`;
+    if (!storagePath.startsWith(expectedPrefix) || storagePath.includes("..")) {
+      sendError(res, 400, "Invalid audio storage path.");
+      return;
+    }
+    try {
+      const file = bucket.file(storagePath);
+      const [meta] = await file.getMetadata();
+      audioMime = (meta.contentType as string | undefined) || contentType;
+      [audio] = await file.download();
+    } catch (err) {
+      logger.error("transcribeSession: storage download failed", { session_id: sessionId, detail: err instanceof Error ? err.message : String(err) });
+      sendError(res, 502, "Couldn't read your uploaded recording. Please retry.");
+      return;
+    }
+    // No byte cap on the Storage path (that's the whole point) — validate the type only.
+    const typeError = validateAudio({ byteLength: audio.length || 1, mimeType: audioMime, skipByteLimit: true });
+    if (typeError) {
+      sendError(res, 413, typeError);
+      return;
+    }
+  } else {
+    audio = req.rawBody as Buffer;
+    const validationError = validateAudio({ byteLength: audio?.length ?? 0, mimeType: contentType, durationSeconds: durationHintSeconds });
+    if (validationError) {
+      sendError(res, 413, validationError);
+      return;
+    }
   }
 
   logger.info("transcribeSession: start", {
     session_id: sessionId,
     workspace_id: workspaceId,
     uid,
-    audio_bytes: (audio as Buffer).length,
-    content_type: contentType,
+    audio_bytes: audio.length,
+    content_type: audioMime,
+    source: storagePath ? "storage" : "inline",
     provider: provider.name,
     // Diagnostics: prove the runtime sees config WITHOUT ever printing the key or its value.
     openai_key_present: Boolean(process.env.OPENAI_API_KEY?.trim()),
@@ -146,15 +183,31 @@ export const transcribeSession = onRequest({ timeoutSeconds: 540, memory: "1GiB"
     fallback_model: process.env.OPENAI_TRANSCRIPTION_FALLBACK_MODEL || process.env.OPENAI_TRANSCRIBE_FALLBACK_MODEL || "gpt-4o-transcribe",
   });
 
+  // Truthful progress: the provider fires onProgress after each transcribed chunk. We persist it on
+  // the session so the review UI can show real percentage on a long meeting AND so a refresh mid-
+  // processing reads the last known progress instead of resetting. Best-effort — a failed write here
+  // must never fail transcription, so errors are swallowed.
+  let lastProgressWrite = 0;
+  const persistProgress = async (completed: number, total: number) => {
+    const now = Date.now();
+    // Throttle writes to at most one per ~750ms (chunks can complete in bursts under concurrency).
+    if (completed < total && now - lastProgressWrite < 750) return;
+    lastProgressWrite = now;
+    await sessionRef
+      .update({ transcription_progress: { completed, total }, updated_at: FieldValue.serverTimestamp() })
+      .catch(() => {});
+  };
+
   let out;
   try {
     out = await provider.transcribe({
-      audio: audio as Buffer,
-      mimeType: contentType,
+      audio,
+      mimeType: audioMime,
       language: languageHint,
       enableDiarization: true,
       vocabulary,
       durationHintSeconds,
+      onProgress: persistProgress,
     });
   } catch (err) {
     // Record the failure on the session so the client can show "retry" without guessing — and so
@@ -248,8 +301,16 @@ export const transcribeSession = onRequest({ timeoutSeconds: 540, memory: "1GiB"
     transcription_provider: out.provider,
     transcription_model: out.model ?? null,
     transcription_error: null,
+    transcription_progress: null,
     updated_at: FieldValue.serverTimestamp(),
   });
+
+  // The Storage object was only a conduit past the request-size limit — the canonical recording
+  // lives in the browser (IndexedDB) and playback never reads Storage. Delete it on success to avoid
+  // leaving private meeting audio at rest. Best-effort; a retry re-uploads if it's missing.
+  if (storagePath) {
+    await bucket.file(storagePath).delete({ ignoreNotFound: true }).catch(() => {});
+  }
 
   logger.info("transcribeSession: done", {
     session_id: sessionId,

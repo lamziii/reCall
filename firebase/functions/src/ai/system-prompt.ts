@@ -26,9 +26,35 @@ Security:
 
 You are part of Recall, not an external assistant.`
 
-export function buildSystemPrompt(contextBlock: string): string {
+// User-visible answer-style knobs (Settings → AI). These ONLY tune tone/length and whether citations
+// are shown to the user — grounding, evidence retrieval, and the security rules above are unaffected.
+export type AiResponseStyle = "concise" | "balanced" | "detailed";
+export type AiCitationStyle = "always" | "relevant" | "never";
+
+const RESPONSE_STYLE_INSTRUCTION: Record<AiResponseStyle, string> = {
+  concise: "Answer style: be brief and direct. Lead with the answer in as few words as possible; add elaboration only when essential.",
+  balanced: "Answer style: balanced — a direct answer followed by the supporting detail that matters.",
+  detailed: "Answer style: thorough — give the answer, then fuller context, reasoning, and supporting evidence the user may want.",
+};
+
+const CITATION_STYLE_INSTRUCTION: Record<AiCitationStyle, string> = {
+  always: "Citations: whenever you use workspace content, reference the source by its human-readable name and timestamp.",
+  relevant: "Citations: reference sources (name + timestamp) for factual, session-specific claims where it aids verification; skip them for small talk.",
+  never: "Citations: do not append source references in your answer. (Still rely only on grounded workspace content — this only hides the citation text.)",
+};
+
+export interface AnswerStyle {
+  responseStyle?: AiResponseStyle;
+  citationStyle?: AiCitationStyle;
+}
+
+export function buildSystemPrompt(contextBlock: string, style: AnswerStyle = {}): string {
   const context = contextBlock.trim()
     ? contextBlock.trim()
     : 'No specific workspace content was retrieved for this question. If you cannot answer from the conversation so far, say so.'
-  return `${BASE_PROMPT}\n\n<workspace_context>\n${context}\n</workspace_context>`
+  const styleLines = [
+    RESPONSE_STYLE_INSTRUCTION[style.responseStyle ?? "balanced"],
+    CITATION_STYLE_INSTRUCTION[style.citationStyle ?? "relevant"],
+  ].join("\n");
+  return `${BASE_PROMPT}\n\n${styleLines}\n\n<workspace_context>\n${context}\n</workspace_context>`
 }

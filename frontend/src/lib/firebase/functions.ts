@@ -1,8 +1,24 @@
+import { ref, uploadBytesResumable } from 'firebase/storage'
 import { getFirebaseAuth } from './auth'
+import { getFirebaseStorage } from './storage'
 import { extractReviewUrl, transcribeUrl, transcribeVoiceUrl } from './config'
 import type { SessionReviewDoc, SessionSpeaker, TranscriptSegment } from '@/data/live/types'
 
 export class ExtractReviewError extends Error {}
+
+// A single Cloud Functions HTTP request body can't exceed ~32MB, so recordings above this go to
+// Cloud Storage first and the function reads them out-of-band (removing any duration ceiling).
+// Short meetings stay on the fast inline path. 20MB ≈ ~1h of speech-bitrate Opus.
+const INLINE_UPLOAD_LIMIT_BYTES = 20 * 1024 * 1024
+
+function audioExt(mime: string): string {
+  const t = (mime || '').toLowerCase()
+  if (t.includes('ogg')) return 'ogg'
+  if (t.includes('mp4') || t.includes('m4a') || t.includes('aac')) return 'm4a'
+  if (t.includes('mpeg') || t.includes('mp3')) return 'mp3'
+  if (t.includes('wav')) return 'wav'
+  return 'webm'
+}
 
 export interface TranscriptionResult {
   transcript: string
@@ -20,22 +36,42 @@ export interface TranscriptionResult {
  * sessionId travels in a header. Throws a user-safe ExtractReviewError on failure so the caller
  * can fall back to the browser transcript. The OpenAI key stays server-side — never in the client.
  */
-export async function requestTranscription(sessionId: string, audio: Blob): Promise<TranscriptionResult> {
+export async function requestTranscription(
+  sessionId: string,
+  audio: Blob,
+  options: { workspaceId?: string; durationSeconds?: number } = {},
+): Promise<TranscriptionResult> {
   const user = getFirebaseAuth().currentUser
   if (!user) throw new ExtractReviewError('You need to be signed in to transcribe a recording.')
   const token = await user.getIdToken()
 
+  const headers: Record<string, string> = {
+    'Content-Type': audio.type || 'audio/webm',
+    Authorization: `Bearer ${token}`,
+    'X-Session-Id': sessionId,
+  }
+  if (options.durationSeconds && options.durationSeconds > 0) {
+    headers['X-Audio-Duration'] = String(Math.round(options.durationSeconds))
+  }
+
+  // Large recordings can't fit in one request body — upload to Storage and send only the path.
+  // Path matches storage.rules (workspaces/<id>/recordings/**). Falls back to inline on any upload
+  // failure so a Storage hiccup never blocks a recording that would have fit anyway.
+  let requestBody: BodyInit = audio
+  if (audio.size > INLINE_UPLOAD_LIMIT_BYTES && options.workspaceId) {
+    const path = `workspaces/${options.workspaceId}/recordings/${sessionId}.${audioExt(audio.type)}`
+    try {
+      await uploadBytesResumable(ref(getFirebaseStorage(), path), audio, { contentType: audio.type || 'audio/webm' })
+      headers['X-Audio-Storage-Path'] = path
+      requestBody = new Blob([]) // path travels in the header; body is unused on the Storage path
+    } catch {
+      // fall through to inline (may still be rejected server-side if truly over the request limit)
+    }
+  }
+
   let res: Response
   try {
-    res = await fetch(transcribeUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': audio.type || 'audio/webm',
-        Authorization: `Bearer ${token}`,
-        'X-Session-Id': sessionId,
-      },
-      body: audio,
-    })
+    res = await fetch(transcribeUrl, { method: 'POST', headers, body: requestBody })
   } catch {
     throw new ExtractReviewError("Couldn't reach Recall's servers. Check your connection and try again.")
   }

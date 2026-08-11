@@ -88,7 +88,10 @@ export function useAudioRecorder() {
     mimeTypeRef.current = mimeType
     setDeviceLabel(stream.getAudioTracks()[0]?.label || 'Default microphone')
 
-    const recorder = new MediaRecorder(stream, { mimeType })
+    // Cap the bitrate: speech is fine at 32kbps Opus, and a predictable low bitrate keeps file size
+    // linear with duration (~0.24MB/min) — most meetings stay on the fast inline upload path, chunks
+    // land well under OpenAI's 25MB/request cap, and Storage/transcription cost stays down.
+    const recorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: 32000 })
     chunksRef.current = []
     recorder.ondataavailable = (event) => {
       if (event.data.size > 0) chunksRef.current.push(event.data)

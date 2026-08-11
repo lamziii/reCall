@@ -28,6 +28,12 @@ export interface TranscriptionRequest {
   vocabulary?: string[];
   /** Optional client-measured duration (seconds) — lets non-duration providers estimate cost. */
   durationHintSeconds?: number;
+  /**
+   * Called after each audio chunk finishes (long recordings are transcribed in chunks). Lets the
+   * caller persist truthful progress. `completed`/`total` are chunk counts; a one-chunk recording
+   * fires once with 1/1. Best-effort — throwing here must not fail transcription.
+   */
+  onProgress?: (completed: number, total: number) => void | Promise<void>;
 }
 
 export interface NormalizedTranscript {

@@ -56,10 +56,15 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-// Transcript guardrails. Too-short is almost certainly a mistake; too-long protects cost and
-// the model's context window (a demo transcript is a few KB).
+// Transcript guardrails. Too-short is almost certainly a mistake. The upper bound protects the
+// model's context window: Claude has a 200k-token context, and ~400k chars ≈ ~110k tokens leaves
+// ample room for the system prompt + structured JSON output — that's roughly a 4-5 HOUR meeting in
+// one pass, so the felt "meeting is too long to analyze" limit is gone for realistic recordings.
+// ponytail: single-call, not map/reduce. A hierarchical map→reduce (chunk the transcript, extract
+// per section, then reconcile) is the upgrade path for transcripts beyond one context window (8h+
+// meetings / huge pasted imports); not built because nothing realistic reaches it with this model.
 const MIN_TRANSCRIPT_CHARS = 20;
-const MAX_TRANSCRIPT_CHARS = 100_000;
+const MAX_TRANSCRIPT_CHARS = Number(process.env.MAX_TRANSCRIPT_CHARS) || 400_000;
 
 function sendError(res: any, status: number, message: string) {
   res.set(CORS_HEADERS).status(status).json({ error: message });
