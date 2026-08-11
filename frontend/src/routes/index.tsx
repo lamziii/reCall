@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useRecallPreferences } from '@/settings/settings-context'
 import { HomePage } from '@/pages/home'
 import { PlansPage } from '@/pages/plans'
 import { LoginPage } from '@/pages/login'
@@ -25,9 +26,24 @@ import { PersonDetailPage } from '@/pages/app/person-detail'
 import { TeamsPage } from '@/pages/app/teams'
 import { TeamDetailPage } from '@/pages/app/team-detail'
 import { NotificationsPage } from '@/pages/app/notifications'
-import { SettingsPage } from '@/pages/app/settings'
-import { HelpPage } from '@/pages/app/help'
+import { SettingsPage, SettingsContent } from '@/pages/app/settings'
 import { DevTaskboardPage } from '@/pages/tasks'
+
+// Fires at most once per app load, and ONLY at the /app index — so it respects the user's Default
+// landing page when they enter Recall, but never hijacks a deep link (/app/sessions/x) or a later
+// click on the Home nav. A full reload re-arms it (that's "entering the application" again).
+let landingHandled = false
+
+function LandingGate() {
+  const { preferences } = useRecallPreferences()
+  const landing = preferences.workspace.landingPage
+  if (!landingHandled && landing !== 'home') {
+    landingHandled = true
+    return <Navigate to={`/app/${landing}`} replace />
+  }
+  landingHandled = true
+  return <AppHomePage />
+}
 
 export function AppRoutes() {
   return (
@@ -56,7 +72,7 @@ export function AppRoutes() {
           </RequireAuth>
         }
       >
-        <Route index element={<AppHomePage />} />
+        <Route index element={<LandingGate />} />
         <Route path="assistant" element={<AssistantPage />} />
         <Route path="sessions" element={<SessionsPage />} />
         <Route path="sessions/:sessionId" element={<SessionReviewPage />} />
@@ -72,8 +88,12 @@ export function AppRoutes() {
         <Route path="teams" element={<TeamsPage />} />
         <Route path="teams/:teamId" element={<TeamDetailPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="help" element={<HelpPage />} />
+        {/* Settings: the shell (header + nav) is the parent element and stays mounted; only the
+            section content swaps through the child routes' <Outlet/>, so tab switches are instant. */}
+        <Route path="settings" element={<SettingsPage />}>
+          <Route index element={<SettingsContent />} />
+          <Route path=":section" element={<SettingsContent />} />
+        </Route>
       </Route>
     </Routes>
   )

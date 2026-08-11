@@ -134,6 +134,15 @@ export const recallAiChat = onRequest({ timeoutSeconds: 120, memory: "512MiB" },
     id: typeof rawContext.entityId === "string" ? rawContext.entityId : null,
   };
 
+  // Answer-style prefs (Settings → AI). Validated against the allowed sets; anything else falls back
+  // to the balanced/relevant defaults. These affect ONLY tone/length + visible citations, never
+  // grounding or the security rules.
+  const rawPrefs = (body.preferences ?? {}) as Record<string, any>;
+  const answerStyle = {
+    responseStyle: ["concise", "balanced", "detailed"].includes(rawPrefs.responseStyle) ? rawPrefs.responseStyle : undefined,
+    citationStyle: ["always", "relevant", "never"].includes(rawPrefs.citationStyle) ? rawPrefs.citationStyle : undefined,
+  };
+
   // Retrieve a bounded, workspace-scoped context package.
   let contextText = "";
   let entities: ContextEntity[] = [];
@@ -161,7 +170,7 @@ export const recallAiChat = onRequest({ timeoutSeconds: 120, memory: "512MiB" },
   const stream = client.messages.stream({
     model,
     max_tokens: 2048,
-    system: buildSystemPrompt(contextText),
+    system: buildSystemPrompt(contextText, answerStyle),
     messages: messages.map((m) => ({ role: m.role, content: m.content })),
   });
 

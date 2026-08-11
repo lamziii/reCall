@@ -18,7 +18,8 @@ import type { SessionSpeaker, TranscriptSegment } from "../types";
 import { diarizedToSegments } from "../normalize";
 import { finalizeTranscript } from "../language-metrics";
 import { segmentAudio } from "../segment-audio";
-import { withTimeout } from "../http";
+import { withTimeout, withRetry } from "../http";
+import { TRANSCRIPTION_CONFIG, chunkSecondsForByteCap, mapWithConcurrency } from "../config";
 
 const TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions";
 // Model names come from env so switching models needs NO code change. Both the OPENAI_TRANSCRIPTION_*
@@ -28,11 +29,11 @@ const PRIMARY_MODEL =
 const FALLBACK_MODEL =
   process.env.OPENAI_TRANSCRIPTION_FALLBACK_MODEL?.trim() || process.env.OPENAI_TRANSCRIBE_FALLBACK_MODEL?.trim() || "gpt-4o-transcribe";
 const RATE_PER_MIN = Number(process.env.OPENAI_STT_RATE_PER_MIN) || 0.006; // ~list price; comparison only
-// OpenAI 400s any single request over 1400s (~23min). Split longer recordings into chunks below
-// this and transcribe each with the same gpt-4o path. 1200s (20min) leaves margin. Env-overridable.
-const MAX_SEGMENT_SECONDS = Number(process.env.OPENAI_MAX_SEGMENT_SECONDS) || 1200;
-// A long meeting's transcription is a single slow request — allow well past the 60s shared default
-// (the function itself runs up to 300s). Overridable for tuning.
+// All chunking/concurrency/retry knobs live in ../config (TRANSCRIPTION_CONFIG). OpenAI rejects a
+// single request over 1400s (~23min) OR over 25MB — both caps are handled by splitting long
+// recordings into chunks that respect BOTH limits, then transcribing each with the same gpt-4o path.
+const { targetChunkSeconds: MAX_SEGMENT_SECONDS, maxFileBytes: MAX_TRANSCRIPTION_FILE_BYTES, minChunkSeconds: MIN_SEGMENT_SECONDS, maxConcurrency: CHUNK_CONCURRENCY, maxRetries: CHUNK_MAX_RETRIES, retryBackoffMs: CHUNK_RETRY_BACKOFF_MS } = TRANSCRIPTION_CONFIG;
+// A long meeting's transcription is a single slow request — allow well past the 60s shared default.
 const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TRANSCRIBE_TIMEOUT_MS) || 240_000;
 
 interface DiarizedResponse {
@@ -233,13 +234,13 @@ export const openaiProvider: TranscriptionProvider = {
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
 
-    // Long recordings exceed OpenAI's 1400s single-request cap, so split them first (ffmpeg
-    // stream-copy) and transcribe each chunk with the identical gpt-4o path — multilingual and
-    // diarization behave exactly as on a short clip. If splitting isn't possible, fall back to a
-    // single whole-file request (still correct for short audio).
-    let parts: Buffer[];
+    // Long recordings exceed OpenAI's per-request caps (1400s AND 25MB), so split them first (ffmpeg
+    // stream-copy) into chunks that respect BOTH, then transcribe each with the identical gpt-4o path
+    // — multilingual and diarization behave exactly as on a short clip. If splitting isn't possible,
+    // fall back to a single whole-file request (still correct for short audio).
+    let parts: AudioChunk[];
     try {
-      parts = await segmentAudio(req.audio, req.mimeType, MAX_SEGMENT_SECONDS);
+      parts = await splitWithinLimits(req.audio, req.mimeType, req.durationHintSeconds);
     } catch (err) {
       logger.warn("openai-provider: audio segmentation unavailable, transcribing whole file", {
         detail: err instanceof Error ? err.message : String(err),
@@ -247,19 +248,76 @@ export const openaiProvider: TranscriptionProvider = {
       return transcribeClip(apiKey, req);
     }
 
-    if (parts.length <= 1) return transcribeClip(apiKey, req);
+    if (parts.length <= 1) {
+      const single = await transcribeClip(apiKey, req);
+      await Promise.resolve(req.onProgress?.(1, 1)).catch(() => {});
+      return single;
+    }
 
     logger.info("openai-provider: long recording split into chunks", {
       chunks: parts.length,
-      segment_seconds: MAX_SEGMENT_SECONDS,
+      target_seconds: MAX_SEGMENT_SECONDS,
+      max_file_bytes: MAX_TRANSCRIPTION_FILE_BYTES,
+      concurrency: CHUNK_CONCURRENCY,
     });
-    const results: NormalizedTranscript[] = [];
-    for (const part of parts) {
-      results.push(await transcribeClip(apiKey, { ...req, audio: part, durationHintSeconds: undefined }));
-    }
+
+    // Transcribe chunks with controlled concurrency; each chunk retries independently so one
+    // transient failure never restarts the others. Progress fires per completed chunk (order-
+    // independent) so the UI can show real progress on a multi-hour meeting.
+    let completed = 0;
+    const results = await mapWithConcurrency(parts, CHUNK_CONCURRENCY, async (part, index) => {
+      const clip = await withRetry(
+        () => transcribeClip(apiKey, { ...req, audio: part.buffer, durationHintSeconds: part.seconds, onProgress: undefined }),
+        CHUNK_MAX_RETRIES,
+        CHUNK_RETRY_BACKOFF_MS,
+      );
+      completed += 1;
+      logger.info("openai-provider: chunk done", { chunk: `${index + 1}/${parts.length}`, completed, bytes: part.buffer.length, seconds: part.seconds });
+      await Promise.resolve(req.onProgress?.(completed, parts.length)).catch(() => {});
+      return clip;
+    });
     return mergeChunks(results);
   },
 };
+
+interface AudioChunk {
+  buffer: Buffer;
+  /** The chunk's clip length in seconds — used as a duration hint so merged timestamps stay exact
+   *  even on the no-duration plain-text fallback path. */
+  seconds: number;
+}
+
+/**
+ * Splits `audio` into chunks that each respect BOTH the time cap (MAX_SEGMENT_SECONDS) and the byte
+ * cap (MAX_TRANSCRIPTION_FILE_BYTES). Picks a byte-aware segment length up front from the measured
+ * bitrate, then verifies actual sizes and re-splits any straggler that's still too large (variable
+ * bitrate can defeat a pure time split) — halving its segment time until it fits or hits the floor.
+ */
+async function splitWithinLimits(audio: Buffer, mimeType: string, durationHintSeconds?: number): Promise<AudioChunk[]> {
+  const segSeconds = chunkSecondsForByteCap(audio.length, durationHintSeconds, MAX_SEGMENT_SECONDS, MAX_TRANSCRIPTION_FILE_BYTES, MIN_SEGMENT_SECONDS);
+  const parts = await segmentAudio(audio, mimeType, segSeconds);
+  if (parts.length <= 1 && audio.length <= MAX_TRANSCRIPTION_FILE_BYTES) {
+    // Short recording that already fits — one clip, no chunking.
+    return [{ buffer: audio, seconds: durationHintSeconds ?? segSeconds }];
+  }
+
+  const chunks: AudioChunk[] = [];
+  for (const part of parts) {
+    if (part.length <= MAX_TRANSCRIPTION_FILE_BYTES) {
+      chunks.push({ buffer: part, seconds: segSeconds });
+      continue;
+    }
+    // Oversized despite the time split (high/variable bitrate) — re-split this part smaller.
+    let sub = segSeconds;
+    let subParts = [part];
+    while (subParts.some((p) => p.length > MAX_TRANSCRIPTION_FILE_BYTES) && sub > MIN_SEGMENT_SECONDS) {
+      sub = Math.max(MIN_SEGMENT_SECONDS, Math.floor(sub / 2));
+      subParts = await segmentAudio(part, mimeType, sub);
+    }
+    for (const p of subParts) chunks.push({ buffer: p, seconds: sub });
+  }
+  return chunks;
+}
 
 /** ponytail: one runnable self-check for the chunk-merge math — `node lib/transcription/providers/openai-provider.js`. */
 if (require.main === module) {

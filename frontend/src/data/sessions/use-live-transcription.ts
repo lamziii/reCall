@@ -26,6 +26,9 @@ export const TRANSCRIPTION_STAGES = [
 export interface LiveTranscriptionState {
   /** Index into TRANSCRIPTION_STAGES while processing; null when not animating. */
   stageLabel: string | null
+  /** Truthful transcription percentage from persisted chunk progress (completed/total), or null for
+   *  short single-chunk recordings where there's nothing meaningful to show. Survives refresh. */
+  progressPercent: number | null
   /** True while this hook is actively running a request (not just reading a stale 'processing'). */
   active: boolean
   retry: () => void
@@ -40,6 +43,9 @@ export function useLiveTranscription(
   const [active, setActive] = useState(false)
   // Guards a single auto-start per mount so React StrictMode / re-renders can't double-fire.
   const startedRef = useRef(false)
+  // Always-latest session so `run` (keyed only on sessionId) reads current workspace/duration.
+  const sessionRef = useRef(session)
+  sessionRef.current = session
 
   const run = useCallback(async () => {
     if (!sessionId || activeRef.current) return
@@ -76,7 +82,11 @@ export function useLiveTranscription(
       await setTranscriptionStatus(sessionId, 'processing', { error: null })
       pipelineLog('transcription.request', { sessionId, bytes: blob.size, mime: blob.type })
 
-      const result = await requestTranscription(sessionId, blob)
+      const latest = sessionRef.current
+      const result = await requestTranscription(sessionId, blob, {
+        workspaceId: latest?.workspace_id,
+        durationSeconds: latest?.duration_seconds ?? latest?.audio?.durationSeconds ?? undefined,
+      })
       // Backend already wrote transcript + status 'complete'; log for diagnostics.
       pipelineLog('transcription.response', {
         sessionId,
@@ -109,5 +119,11 @@ export function useLiveTranscription(
     void run()
   }, [run])
 
-  return { stageLabel: stageIndex === null ? null : TRANSCRIPTION_STAGES[stageIndex], active, retry }
+  // Truthful progress from persisted chunk counts, mapped into the transcription band (10–65%) so a
+  // long meeting shows real movement. Null when there are no chunk counts (short recording).
+  const chunks = session?.transcription_progress
+  const progressPercent =
+    chunks && chunks.total > 0 ? Math.round(10 + Math.min(1, chunks.completed / chunks.total) * 55) : null
+
+  return { stageLabel: stageIndex === null ? null : TRANSCRIPTION_STAGES[stageIndex], progressPercent, active, retry }
 }

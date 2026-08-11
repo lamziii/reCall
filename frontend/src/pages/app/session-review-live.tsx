@@ -68,11 +68,13 @@ function mmss(ms: number): string {
  *  says 'processing' but no tab is driving it (stalled), offer a manual retry. */
 function TranscriptionStatusPanel({
   stageLabel,
+  progressPercent,
   tempTranscript,
   stalled,
   onRetry,
 }: {
   stageLabel: string | null
+  progressPercent: number | null
   tempTranscript: string
   stalled: boolean
   onRetry: () => void
@@ -81,7 +83,10 @@ function TranscriptionStatusPanel({
     <div className="mx-auto flex max-w-xl flex-col items-center gap-6 py-16 text-center" aria-live="polite">
       <Loader2 className="size-6 animate-spin text-foreground" aria-hidden />
       <div className="flex flex-col gap-1">
-        <p className="text-title font-medium text-foreground">{stageLabel ?? 'Transcribing…'}</p>
+        <p className="text-title font-medium text-foreground">
+          {stageLabel ?? 'Transcribing…'}
+          {progressPercent !== null && <span className="ml-2 tabular-nums text-muted-foreground">{progressPercent}%</span>}
+        </p>
         <Small className="text-muted-foreground">
           Recall is transcribing the recording with OpenAI. The live captions below are temporary and will be replaced.
         </Small>
@@ -346,6 +351,7 @@ export function LiveSessionReviewPage() {
       {transcriptionInProgress ? (
         <TranscriptionStatusPanel
           stageLabel={transcription.stageLabel}
+          progressPercent={transcription.progressPercent}
           tempTranscript={session.transcript ?? ''}
           stalled={tStatus === 'processing' && !transcription.active}
           onRetry={transcription.retry}

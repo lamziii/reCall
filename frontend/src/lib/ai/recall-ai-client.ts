@@ -1,5 +1,6 @@
 import { getFirebaseAuth } from '@/lib/firebase/auth'
 import { recallAiChatUrl } from '@/lib/firebase/config'
+import { getRuntimePreferences } from '@/settings/runtime'
 import type { AIContext, ChatMessage, StreamEvent } from './types'
 
 export class RecallAiError extends Error {
@@ -38,6 +39,9 @@ export async function streamRecallAiChat({ messages, workspaceId, context, signa
         messages: messages.map((m) => ({ role: m.role, content: m.content })),
         workspaceId,
         context: { route: context.route, entityType: context.entityType, entityId: context.entityId },
+        // User-visible answer style (Settings → AI). Grounding/security are enforced server-side and
+        // are NOT influenced by these — only tone/length and whether citations are shown.
+        preferences: { responseStyle: getRuntimePreferences().ai.responseStyle, citationStyle: getRuntimePreferences().ai.citationStyle },
       }),
       signal,
     })

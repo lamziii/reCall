@@ -1,14 +1,10 @@
 import { useState } from 'react'
-import { Database, Monitor, Moon, Sun, PlayCircle, RotateCcw } from 'lucide-react'
-import { PageContainer, PageHeader } from '@/components/layout/page'
-import { SegmentedControl } from '@/components/forms/segmented-control'
-import { Tabs, TabList, Tab, TabPanel } from '@/components/navigation/tabs'
+import { useParams } from 'react-router-dom'
+import { Database, PlayCircle, RotateCcw } from 'lucide-react'
 import { Label, Small } from '@/components/typography'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useToast } from '@/components/feedback'
-import { useTheme } from '@/app/theme/theme-provider'
-import type { ThemePreference } from '@/app/theme/theme-provider'
 import { useAuth } from '@/lib/auth/auth-context'
 import { useWorkspace } from '@/data/live/workspace-context'
 import { useWorkspacePlan } from '@/data/live/use-workspace-plan'
@@ -22,67 +18,90 @@ import { PersonalInfoSection } from '@/components/settings/personal-info-section
 import { PlanSection } from '@/components/settings/plan-section'
 import { PaymentsSection } from '@/components/settings/payments-section'
 import { NotificationsSection } from '@/components/settings/notifications-section'
+import { SettingsShell, type SettingsNavGroup } from '@/components/settings/settings-shell'
+import { AppearanceSection } from '@/components/settings/sections/appearance-section'
+import { WorkspaceSection } from '@/components/settings/sections/workspace-section'
+import { ProductivitySection } from '@/components/settings/sections/productivity-section'
+import { AiSection } from '@/components/settings/sections/ai-section'
+import { AccessibilitySection } from '@/components/settings/sections/accessibility-section'
+import { PersonalizationSection } from '@/components/settings/sections/personalization-section'
+import { ExperimentalSection } from '@/components/settings/sections/experimental-section'
+import { AdvancedSection } from '@/components/settings/sections/advanced-section'
 
-const APPEARANCE_OPTIONS = [
-  { value: 'light', label: 'Light', icon: <Sun /> },
-  { value: 'dark', label: 'Dark', icon: <Moon /> },
-  { value: 'system', label: 'System', icon: <Monitor /> },
+const NAV_GROUPS: SettingsNavGroup[] = [
+  {
+    label: 'Account',
+    items: [
+      { key: 'account', label: 'Account' },
+      { key: 'plan', label: 'Plan' },
+      { key: 'payments', label: 'Payments' },
+      { key: 'notifications', label: 'Notifications' },
+    ],
+  },
+  {
+    label: 'Customization',
+    items: [
+      { key: 'appearance', label: 'Appearance' },
+      { key: 'workspace', label: 'Workspace' },
+      { key: 'productivity', label: 'Productivity' },
+      { key: 'ai', label: 'AI' },
+      { key: 'accessibility', label: 'Accessibility' },
+      { key: 'personalization', label: 'Personalization' },
+      { key: 'experimental', label: 'Experimental' },
+      { key: 'advanced', label: 'Advanced' },
+    ],
+  },
 ]
 
+/** Stable shell (header + nav + search). The section content renders through <Outlet/> so switching
+ *  tabs never remounts the header — see the nested routes in routes/index.tsx. */
 export function SettingsPage() {
-  const { preference, setPreference } = useTheme()
+  return <SettingsShell groups={NAV_GROUPS} defaultSection="appearance" />
+}
+
+/** The swappable panel, chosen by the :section route param. Rendered inside SettingsShell's Outlet. */
+export function SettingsContent() {
+  const { section } = useParams<{ section: string }>()
   const plan = useWorkspacePlan()
+  const active = section ?? 'appearance'
 
-  return (
-    <PageContainer>
-      <PageHeader title="Settings" description="Manage your account and workspace preferences." />
-
-      <Tabs defaultValue="account">
-        <TabList>
-          <Tab value="account">Account</Tab>
-          <Tab value="plan">Plan</Tab>
-          <Tab value="payments">Payments</Tab>
-          <Tab value="notifications">Notifications</Tab>
-          <Tab value="appearance">Appearance</Tab>
-        </TabList>
-
-        <TabPanel value="account" className="pt-6">
+  switch (active) {
+    case 'account':
+      return (
+        <div className="flex flex-col gap-8">
           <PersonalInfoSection />
-        </TabPanel>
-
-        <TabPanel value="plan" className="pt-6">
-          <PlanSection />
-        </TabPanel>
-
-        <TabPanel value="payments" className="pt-6">
-          <PaymentsSection plan={plan} />
-        </TabPanel>
-
-        <TabPanel value="notifications" className="pt-6">
-          <NotificationsSection />
-        </TabPanel>
-
-        <TabPanel value="appearance" className="pt-6">
-          <div className="flex flex-col gap-2.5">
-            <Label as="span">Appearance</Label>
-            <Small className="text-muted-foreground">Choose how Recall looks on this device. System follows your OS setting.</Small>
-            <SegmentedControl
-              aria-label="Appearance"
-              value={preference}
-              onChange={(value) => setPreference(value as ThemePreference)}
-              options={APPEARANCE_OPTIONS}
-              className="mt-1.5 w-fit"
-            />
-          </div>
-        </TabPanel>
-      </Tabs>
-
-      <HelpOnboardingSection />
-
-      {/* Dev-only tooling — compiled out of production builds (import.meta.env.DEV is false there). */}
-      {import.meta.env.DEV && <DeveloperSection />}
-    </PageContainer>
-  )
+          <HelpOnboardingSection />
+        </div>
+      )
+    case 'plan':
+      return <PlanSection />
+    case 'payments':
+      return <PaymentsSection plan={plan} />
+    case 'notifications':
+      return <NotificationsSection />
+    case 'workspace':
+      return <WorkspaceSection />
+    case 'productivity':
+      return <ProductivitySection />
+    case 'ai':
+      return <AiSection />
+    case 'accessibility':
+      return <AccessibilitySection />
+    case 'personalization':
+      return <PersonalizationSection />
+    case 'experimental':
+      return <ExperimentalSection />
+    case 'advanced':
+      return (
+        <div className="flex flex-col gap-8">
+          <AdvancedSection />
+          {import.meta.env.DEV && <DeveloperSection />}
+        </div>
+      )
+    case 'appearance':
+    default:
+      return <AppearanceSection />
+  }
 }
 
 /**
@@ -110,7 +129,7 @@ function HelpOnboardingSection() {
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-2.5 border-t border-border-subtle pt-8">
+    <div className="flex flex-col gap-2.5 border-t border-border-subtle pt-8">
       <div className="flex items-center gap-2">
         <PlayCircle className="size-4 text-muted-foreground" aria-hidden />
         <Label as="span">Help &amp; onboarding</Label>
@@ -136,14 +155,8 @@ function HelpOnboardingSection() {
 }
 
 /**
- * Developer utilities, shown ONLY in dev builds and ONLY here in Settings. "Generate dummy data"
- * reuses the existing sample-workspace generator + localStorage repository (no second
- * implementation) to seed the full sample dataset.
- *
- * In LIVE mode it writes real, `sample`-flagged sessions + tasks to the current Firestore workspace
- * (seedLiveSampleData) so the Home dashboard, Sessions, Calendar and Tasks board render populated
- * instead of their empty state. In DEMO mode it seeds the localStorage sample workspace. Either way
- * it reuses existing generators — no second implementation — and never touches real user sessions.
+ * Developer utilities, shown ONLY in dev builds. "Generate dummy data" reuses the existing
+ * sample-workspace generator + repository (no second implementation) to seed the full sample dataset.
  */
 function DeveloperSection() {
   const { toast } = useToast()
@@ -184,8 +197,6 @@ function DeveloperSection() {
   }
 
   function handleClick() {
-    // Live seed is non-destructive to real data (only sample-flagged docs), so it's safe to re-run;
-    // demo seed overwrites the single localStorage workspace, so confirm when one already exists.
     if (!isLiveMode && getWorkspaceData()) {
       setConfirmOpen(true)
     } else {
@@ -194,7 +205,7 @@ function DeveloperSection() {
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-2.5 border-t border-border-subtle pt-8">
+    <div className="flex flex-col gap-2.5 border-t border-border-subtle pt-8">
       <div className="flex items-center gap-2">
         <Database className="size-4 text-muted-foreground" aria-hidden />
         <Label as="span">Developer</Label>

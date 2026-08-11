@@ -1,3 +1,5 @@
+import { formatRecallDate, formatRecallTime } from '@/settings/format'
+
 const DAY_MS = 86_400_000
 
 export function formatDateLabel(iso: string): string {
@@ -6,14 +8,15 @@ export function formatDateLabel(iso: string): string {
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
   const diffDays = Math.round((startOfDay(date) - startOfDay(now)) / DAY_MS)
 
+  // Near-term stays human ("Today"/"Tomorrow"); the absolute fallback honors the user's Date format.
   if (diffDays === 0) return 'Today'
   if (diffDays === -1) return 'Yesterday'
   if (diffDays === 1) return 'Tomorrow'
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return formatRecallDate(date, { withYear: false })
 }
 
 export function formatTimeLabel(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+  return formatRecallTime(iso)
 }
 
 export function formatDuration(minutes: number): string {
@@ -49,7 +52,7 @@ export function formatDueLabel(iso?: string): string | undefined {
   if (diffDays === 0) return 'Due today'
   if (diffDays === 1) return 'Due tomorrow'
   if (diffDays <= 7) return `Due ${new Date(iso).toLocaleDateString(undefined, { weekday: 'short' })}`
-  return `Due ${new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+  return `Due ${formatRecallDate(iso, { withYear: false })}`
 }
 
 export function greetingForHour(hour: number): 'Good morning' | 'Good afternoon' | 'Good evening' {

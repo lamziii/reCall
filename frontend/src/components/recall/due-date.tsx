@@ -1,5 +1,6 @@
 import { CalendarClock } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatRecallDate } from '@/settings/format'
 
 export interface DueDateProps {
   date?: Date
@@ -16,7 +17,7 @@ export function DueDate({ date, className }: DueDateProps) {
   const target = new Date(date)
   target.setHours(0, 0, 0, 0)
   const diffDays = Math.round((target.getTime() - now.getTime()) / 86_400_000)
-  const formatted = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  const formatted = formatRecallDate(date, { withYear: false })
 
   const { label, tone } =
     diffDays < 0
