@@ -50,7 +50,7 @@ export function TranscriptView({ entries, activeEntryId }: TranscriptViewProps) 
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="recall-transcript flex flex-col gap-3">
       <SearchInput value={query} onChange={(e) => setQuery(e.target.value)} onClear={() => setQuery('')} placeholder="Search transcript..." className="max-w-sm" />
       <div className="flex flex-col gap-1">
         {filtered.length === 0 ? (

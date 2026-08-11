@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useResolvedPreferences } from "@/settings/use-resolved-preferences";
 import { Video, CheckSquare, FolderKanban } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Content } from "@/components/layout/content";
@@ -85,7 +86,10 @@ const COLLAPSED_STORAGE_KEY = "recall:sidebar-collapsed";
 /** The permanent shell every authenticated Recall page renders inside. Mount once above the /app route tree. */
 export function RecallShell() {
   const location = useLocation();
-  const reduceMotion = useReducedMotion();
+  // Page transitions honor the resolved preference: Animations off, Page-transitions off, or OS/user
+  // reduced-motion all suppress the route crossfade.
+  const { pageTransitions } = useResolvedPreferences();
+  const reduceMotion = !pageTransitions;
 
   const isTabletUp = useMediaQuery("(min-width: 768px)");
   const isDesktop = useMediaQuery("(min-width: 1024px)");

@@ -14,12 +14,32 @@
         try {
           var STORAGE_KEY = 'recall-theme'
           var stored = localStorage.getItem(STORAGE_KEY)
-          var preference = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system'
+          var preference =
+            stored === 'light' || stored === 'dark' || stored === 'system' || stored === 'midnight' ? stored : 'system'
           var resolved =
             preference === 'system'
               ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-              : preference
+              : preference === 'midnight'
+                ? 'dark'
+                : preference
           document.documentElement.setAttribute('data-theme', resolved)
+          if (preference === 'midnight') document.documentElement.setAttribute('data-midnight', 'true')
+
+          // Apply saved appearance attributes (accent, radius, font, reduce motion, …) before first
+          // paint so there's no flash. Mirrors settings/apply-preferences.ts; best-effort only.
+          try {
+            var prefs = JSON.parse(localStorage.getItem('recall-preferences') || '{}')
+            var a = prefs.appearance || {}
+            var root = document.documentElement
+            if (a.accentColor) root.setAttribute('data-accent', a.accentColor)
+            if (a.radius) root.setAttribute('data-radius', a.radius)
+            if (a.typography && a.typography.font) root.setAttribute('data-font', a.typography.font)
+            var anim = a.animations || {}
+            if (anim.reduceMotion === true || anim.enabled === false) root.setAttribute('data-reduce-motion', 'true')
+            var a11y = prefs.accessibility || {}
+            if (a11y.highContrast === true) root.setAttribute('data-high-contrast', 'true')
+            if (a11y.alwaysVisibleScrollbars === true) root.setAttribute('data-scrollbars', 'always')
+          } catch (e2) {}
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'dark')
         }

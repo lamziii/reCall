@@ -85,6 +85,9 @@ export interface LiveSessionDoc {
   transcription_model?: string | null
   /** User-safe error when transcription_status === 'failed'. */
   transcription_error?: string | null
+  /** Live chunk progress for long recordings (transcribed in chunks). Persisted so the % survives a
+   *  refresh; cleared (null) on completion. Absent for short single-chunk recordings. */
+  transcription_progress?: { completed: number; total: number } | null
   /** BCP-47-ish language OpenAI detected/used, if any. */
   detected_language?: string | null
   /** Denormalized from the review on analysis-complete (see extractSessionReview) — powers the

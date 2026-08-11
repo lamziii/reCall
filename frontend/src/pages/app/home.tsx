@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Home } from 'lucide-react'
+import { useEffectiveReduceMotion } from '@/settings/use-resolved-preferences'
 import { PageContainer } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'
@@ -21,7 +22,7 @@ import { useHomeDashboardData } from '@/data/home/use-home-dashboard-data'
 export function AppHomePage() {
   const navigate = useNavigate()
   const { state, refetch } = useHomeDashboardData()
-  const reduceMotion = useReducedMotion()
+  const reduceMotion = useEffectiveReduceMotion()
 
   if (state.status === 'loading') {
     return (
