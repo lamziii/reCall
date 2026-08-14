@@ -297,6 +297,31 @@ idempotent (no duplicate invites). Created by the workspace owner during/after o
 - Composite: `workspace_id` (Ascending), `status` (Ascending)
 - Composite: `normalized_email` (Ascending), `status` (Ascending)
 
+### support_requests/{requestId}
+A "Contact support" submission from the in-app Help Center (`/app/help`). Random auto-id (not
+deterministic — repeated submissions are separate requests).
+
+```json
+{
+  "workspace_id": "ws-<uid>",
+  "user_id": "auth-uid",
+  "user_email": "ada@acme.com",
+  "user_name": "Ada Lovelace",
+  "category": "bug | question | billing | feature_request | other",
+  "subject": "Recording stalls after 30 minutes",
+  "message": "Free text from the requester.",
+  "status": "open",
+  "created_at": "2026-08-11T00:00:00Z"
+}
+```
+
+**Field rules & security** (`firestore.rules`):
+- A user may only create a request with `user_id == request.auth.uid` and `status == 'open'`; read
+  is limited to the requester's own documents.
+- No client update/delete — status is managed out of band (Firebase console / a future admin tool).
+- **Email delivery is not configured** — requests are persisted only, same boundary as
+  `workspace_invites`. `onSupportRequestCreated` (`functions/src/support.ts`) is the send seam.
+
 ## Cloud Storage Structure
 
 ### recordings bucket
