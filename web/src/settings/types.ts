@@ -309,6 +309,55 @@ export interface PersonalizationPreferences {
   language: AppLanguage
 }
 
+/* ------------------------------------------------------------------ Notes */
+
+export const NOTES_EDITOR_WIDTH_OPTIONS = opts([
+  { value: 'narrow', label: 'Narrow' },
+  { value: 'default', label: 'Default' },
+  { value: 'wide', label: 'Wide' },
+  { value: 'full', label: 'Full' },
+])
+export type NotesEditorWidth = (typeof NOTES_EDITOR_WIDTH_OPTIONS)[number]['value']
+
+export const NOTES_TEXT_SIZE_OPTIONS = opts([
+  { value: 'small', label: 'Small' },
+  { value: 'default', label: 'Default' },
+  { value: 'large', label: 'Large' },
+])
+export type NotesTextSize = (typeof NOTES_TEXT_SIZE_OPTIONS)[number]['value']
+
+export const NOTES_LINE_HEIGHT_OPTIONS = opts([
+  { value: 'compact', label: 'Compact' },
+  { value: 'comfortable', label: 'Comfortable' },
+  { value: 'relaxed', label: 'Relaxed' },
+])
+export type NotesLineHeight = (typeof NOTES_LINE_HEIGHT_OPTIONS)[number]['value']
+
+export const NOTES_CODE_THEME_OPTIONS = opts([
+  { value: 'system', label: 'System' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'light', label: 'Light' },
+])
+export type NotesCodeTheme = (typeof NOTES_CODE_THEME_OPTIONS)[number]['value']
+
+export const NOTES_TABLE_SIZE_OPTIONS = [2, 3, 4] as const
+export type NotesTableSize = (typeof NOTES_TABLE_SIZE_OPTIONS)[number]
+
+export interface NotesPreferences {
+  editorWidth: NotesEditorWidth
+  textSize: NotesTextSize
+  lineHeight: NotesLineHeight
+  slashCommands: boolean
+  markdownShortcuts: boolean
+  spellcheck: boolean
+  showMeetingTimestamps: boolean
+  showMarkedMoments: boolean
+  codeTheme: NotesCodeTheme
+  showCodeLanguageSelector: boolean
+  showCopyButton: boolean
+  defaultTableSize: NotesTableSize
+}
+
 /* ------------------------------------------------------------------ Experimental */
 
 // Real experimental flags only. Empty for now → Settings shows a clean empty state. Add
@@ -329,6 +378,7 @@ export interface RecallPreferences {
   updatedAt: number
   appearance: AppearancePreferences
   workspace: WorkspacePreferences
+  notes: NotesPreferences
   productivity: ProductivityPreferences
   ai: AiPreferences
   accessibility: AccessibilityPreferences
@@ -340,6 +390,7 @@ export interface RecallPreferences {
 export type SettingsSectionKey =
   | 'appearance'
   | 'workspace'
+  | 'notes'
   | 'productivity'
   | 'ai'
   | 'accessibility'

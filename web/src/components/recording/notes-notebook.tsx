@@ -6,13 +6,15 @@
  * completed Session Notes tab edit — no duplicate state. Type "/" for the block menu.
  */
 import { useNotesEditor } from '@/data/active-session/use-notes-editor'
+import { useNotesEditorOptions } from '@/data/notes/use-notes-editor-options'
 import { RichNotesEditor } from './rich-notes-editor'
 
 export function NotesNotebook() {
   const notes = useNotesEditor()
+  const editorOptions = useNotesEditorOptions()
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-1 flex-col pb-28">
+    <div className="mx-auto flex h-full w-full max-w-2xl flex-1 flex-col">
       <div className="mb-2 flex items-baseline justify-between">
         <h1 className="text-title font-semibold text-foreground">My Notes</h1>
         <span className="text-caption text-subtle-foreground transition-fast" aria-live="polite">
@@ -27,8 +29,9 @@ export function NotesNotebook() {
         onChange={notes.onChange}
         onBlur={notes.onBlur}
         onMarkMoment={notes.onMarkMoment}
+        options={editorOptions}
         autofocus
-        className="min-h-[60vh] flex-1"
+        className="recall-notes-roomy flex-1"
       />
     </div>
   )

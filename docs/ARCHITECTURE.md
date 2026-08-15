@@ -1,10 +1,9 @@
 # Recall — Architecture
 
-> The system as it stands after the Vite → Next.js migration (2026-08-14). The Next.js app lives in
-> `web/`; the original Vite app in `frontend/` is retained as a behavioral reference until the
-> authenticated pipeline is verified end-to-end (see §16). Companion docs: `NEXTJS_MIGRATION.md`
-> (how we got here), `BACKEND_BOUNDARIES.md` (Functions), `ENVIRONMENT.md` (config), `PROJECT_RECAP.md`
-> (product state).
+> The system as it stands after the Vite → Next.js migration (2026-08-14). The Next.js app in `web/`
+> is the sole Recall web application; the original Vite app (`frontend/`) has been removed. Companion
+> docs: `NEXTJS_MIGRATION.md` (how we got here), `BACKEND_BOUNDARIES.md` (Functions),
+> `ENVIRONMENT.md` (config), `PROJECT_RECAP.md` (product state).
 
 ## 1. Application structure
 
@@ -20,7 +19,6 @@ web/
     server/         firebase/admin.ts (trusted server seam) — future domain layer
     styles/         Tailwind v4 tokens + animation CSS
 firebase/           Firestore rules/indexes, Storage rules, Cloud Functions (backend)
-frontend/           original Vite app — reference only, pending removal
 ```
 
 ## 2. App Router structure

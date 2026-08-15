@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams } from '@/lib/router-compat'
+import { useLocation, useNavigate, useParams, useSearchParams } from '@/lib/router-compat'
 import { AlertTriangle, Check, ListChecks, Loader2, Plus, RefreshCw, Sparkles } from 'lucide-react'
 import { PageContainer } from '@/components/layout/page'
 import { Tab, TabList, TabPanel, Tabs } from '@/components/navigation/tabs'
@@ -172,7 +172,12 @@ export function LiveSessionReviewPage() {
   const transcriptionFailed = tStatus === 'failed'
   const transcriptionReady = tStatus === undefined || tStatus === 'none' || tStatus === 'complete'
 
-  const [tab, setTab] = useState('overview')
+  // Honor a deep link like /app/sessions/{id}?tab=notes (used by the Notes Hub for meeting notes).
+  const [searchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const [tab, setTab] = useState(
+    ['overview', 'tasks', 'decisions', 'transcript', 'notes'].includes(requestedTab ?? '') ? (requestedTab as string) : 'overview',
+  )
   const [generating, setGenerating] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [promoting, setPromoting] = useState<Set<number>>(new Set())
