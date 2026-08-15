@@ -21,6 +21,7 @@ import { NotificationsSection } from '@/components/settings/notifications-sectio
 import { SettingsShell, type SettingsNavGroup } from '@/components/settings/settings-shell'
 import { AppearanceSection } from '@/components/settings/sections/appearance-section'
 import { WorkspaceSection } from '@/components/settings/sections/workspace-section'
+import { NotesSection } from '@/components/settings/sections/notes-section'
 import { ProductivitySection } from '@/components/settings/sections/productivity-section'
 import { AiSection } from '@/components/settings/sections/ai-section'
 import { AccessibilitySection } from '@/components/settings/sections/accessibility-section'
@@ -43,6 +44,7 @@ const NAV_GROUPS: SettingsNavGroup[] = [
     items: [
       { key: 'appearance', label: 'Appearance' },
       { key: 'workspace', label: 'Workspace' },
+      { key: 'notes', label: 'Notes' },
       { key: 'productivity', label: 'Productivity' },
       { key: 'ai', label: 'AI' },
       { key: 'accessibility', label: 'Accessibility' },
@@ -81,6 +83,8 @@ export function SettingsContent() {
       return <NotificationsSection />
     case 'workspace':
       return <WorkspaceSection />
+    case 'notes':
+      return <NotesSection />
     case 'productivity':
       return <ProductivitySection />
     case 'ai':

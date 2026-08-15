@@ -194,6 +194,7 @@ export function SettingsShell({
 export const CUSTOMIZATION_SECTIONS: SettingsSectionKey[] = [
   'appearance',
   'workspace',
+  'notes',
   'productivity',
   'ai',
   'accessibility',

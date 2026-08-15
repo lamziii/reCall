@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Calendar, CheckSquare, ClipboardCheck, FolderKanban, Gauge, Home, Mic, Settings, Sparkles, Users, UsersRound } from 'lucide-react'
+import { Calendar, CheckSquare, ClipboardCheck, FolderKanban, Gauge, Home, Mic, NotebookText, Settings, Sparkles, Users, UsersRound } from 'lucide-react'
 
 export const APP_BASE = '/app'
 
@@ -15,6 +15,7 @@ export const MAIN_NAV: NavItem[] = [
   { label: 'Home', to: APP_BASE, icon: Home, end: true },
   { label: 'Recall AI', to: `${APP_BASE}/assistant`, icon: Sparkles },
   { label: 'Sessions', to: `${APP_BASE}/sessions`, icon: Mic },
+  { label: 'Notes', to: `${APP_BASE}/notes`, icon: NotebookText },
   { label: 'Projects', to: `${APP_BASE}/projects`, icon: FolderKanban },
   { label: 'Tasks', to: `${APP_BASE}/tasks`, icon: CheckSquare },
   { label: 'Calendar', to: `${APP_BASE}/calendar`, icon: Calendar },

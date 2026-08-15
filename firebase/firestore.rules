@@ -100,6 +100,41 @@ service cloud.firestore {
     }
 
     // ========================================================================
+    // notes — standalone personal notes (Notes Hub). notes/{noteId}
+    // ========================================================================
+    // AUTHOR-scoped: a user only ever reads/writes their OWN notes. Reads are gated on author_id
+    // alone (a single-field, index-free query: where('author_id','==',uid)); writes ALSO require the
+    // note to belong to a workspace the user is a member of, so a note can never be planted into a
+    // foreign workspace. visibility is reserved for future workspace-shared notes (not exposed yet) —
+    // widen the read rule then, never now. Meeting notes are NOT here (they live on sessions).
+    match /notes/{noteId} {
+      allow read: if request.auth != null && resource.data.author_id == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.author_id == request.auth.uid
+        && isWorkspaceMember(request.resource.data.workspace_id);
+      allow update: if request.auth != null
+        && resource.data.author_id == request.auth.uid
+        && request.resource.data.author_id == request.auth.uid
+        && isWorkspaceMember(resource.data.workspace_id);
+      allow delete: if request.auth != null && resource.data.author_id == request.auth.uid;
+    }
+
+    // ========================================================================
+    // note_folders — one-level folders for organizing notes. note_folders/{folderId}
+    // ========================================================================
+    // Same author-scoped model as notes.
+    match /note_folders/{folderId} {
+      allow read: if request.auth != null && resource.data.author_id == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.author_id == request.auth.uid
+        && isWorkspaceMember(request.resource.data.workspace_id);
+      allow update: if request.auth != null
+        && resource.data.author_id == request.auth.uid
+        && request.resource.data.author_id == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.author_id == request.auth.uid;
+    }
+
+    // ========================================================================
     // notifications
     // ========================================================================
     // Users can read their own notifications; any workspace member can create/update/delete.

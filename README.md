@@ -8,10 +8,9 @@ task board.
 Started as a hackathon 2-page kanban MVP; now a Firebase-backed workspace app with a live
 record → AI review → tasks flow. (The backend was originally Supabase, migrated to Firebase.)
 
-> **Framework migration in progress: Vite → Next.js.** The Next.js App Router app in `web/` is the
-> migration target and the future production app; the original Vite app in `frontend/` is retained as a
-> behavioral reference until the authenticated pipeline is verified end-to-end. See
-> [`docs/NEXTJS_MIGRATION.md`](docs/NEXTJS_MIGRATION.md).
+> **Vite → Next.js migration: COMPLETE.** The Next.js App Router app in `web/` is the sole Recall web
+> application. The original Vite app (`frontend/`) has been removed. See
+> [`docs/NEXTJS_MIGRATION.md`](docs/NEXTJS_MIGRATION.md) for the migration record.
 
 ## Start here
 
@@ -37,10 +36,9 @@ npm run dev                    # http://localhost:3000
 ```
 reCall/
 ├── docs/        architecture, migration, backend, environment, and product docs — start here
-├── web/         Next.js 16 (App Router) app — migration target / future production
-├── frontend/    original React 19 + Vite app — reference only, pending removal after parity
+├── web/         Next.js 16 (App Router) app — the sole Recall web application
 ├── firebase/    Firestore schema/rules/indexes, Storage rules, Cloud Functions (backend)
 ```
 
-(The legacy `api/`, `database/`, and `supabase/` directories — dead Supabase-era scaffolding — were
-removed during the Next.js cutover.)
+(The legacy `api/`, `database/`, and `supabase/` directories — dead Supabase-era scaffolding — and the
+original `frontend/` Vite app were removed once Next.js reached parity.)

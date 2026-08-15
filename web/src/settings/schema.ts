@@ -21,6 +21,11 @@ import {
   LANDING_PAGE_OPTIONS,
   LANGUAGE_OPTIONS,
   LINE_HEIGHT_OPTIONS,
+  NOTES_CODE_THEME_OPTIONS,
+  NOTES_EDITOR_WIDTH_OPTIONS,
+  NOTES_LINE_HEIGHT_OPTIONS,
+  NOTES_TABLE_SIZE_OPTIONS,
+  NOTES_TEXT_SIZE_OPTIONS,
   QUICK_ACTIONS,
   RADIUS_OPTIONS,
   RECENT_COUNT_OPTIONS,
@@ -90,6 +95,7 @@ export function sanitizePreferences(raw: unknown): RecallPreferences {
   const typo = asObj(ap.typography)
   const ws = asObj(r.workspace)
   const collapse = asObj(ws.autoCollapse)
+  const notes = asObj(r.notes)
   const prod = asObj(r.productivity)
   const ai = asObj(r.ai)
   const a11y = asObj(r.accessibility)
@@ -134,6 +140,20 @@ export function sanitizePreferences(raw: unknown): RecallPreferences {
         documents: bool(collapse.documents, d.workspace.autoCollapse.documents),
         timeline: bool(collapse.timeline, d.workspace.autoCollapse.timeline),
       },
+    },
+    notes: {
+      editorWidth: pick(notes.editorWidth, NOTES_EDITOR_WIDTH_OPTIONS, d.notes.editorWidth),
+      textSize: pick(notes.textSize, NOTES_TEXT_SIZE_OPTIONS, d.notes.textSize),
+      lineHeight: pick(notes.lineHeight, NOTES_LINE_HEIGHT_OPTIONS, d.notes.lineHeight),
+      slashCommands: bool(notes.slashCommands, d.notes.slashCommands),
+      markdownShortcuts: bool(notes.markdownShortcuts, d.notes.markdownShortcuts),
+      spellcheck: bool(notes.spellcheck, d.notes.spellcheck),
+      showMeetingTimestamps: bool(notes.showMeetingTimestamps, d.notes.showMeetingTimestamps),
+      showMarkedMoments: bool(notes.showMarkedMoments, d.notes.showMarkedMoments),
+      codeTheme: pick(notes.codeTheme, NOTES_CODE_THEME_OPTIONS, d.notes.codeTheme),
+      showCodeLanguageSelector: bool(notes.showCodeLanguageSelector, d.notes.showCodeLanguageSelector),
+      showCopyButton: bool(notes.showCopyButton, d.notes.showCopyButton),
+      defaultTableSize: pickNumber(notes.defaultTableSize, NOTES_TABLE_SIZE_OPTIONS, d.notes.defaultTableSize),
     },
     productivity: {
       autoExpandLatestSession: bool(prod.autoExpandLatestSession, d.productivity.autoExpandLatestSession),

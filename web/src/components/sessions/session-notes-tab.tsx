@@ -15,6 +15,8 @@ import { useAuth } from '@/lib/auth/auth-context'
 import { RichNotesEditor } from '@/components/recording/rich-notes-editor'
 import { saveSessionNote } from '@/data/active-session/notes-store'
 import { toNotesDoc, type NotesDoc } from '@/data/active-session/notes-doc'
+import { useNotesEditorOptions } from '@/data/notes/use-notes-editor-options'
+import { useRecallPreferences } from '@/settings/settings-context'
 import type { SessionUserNoteDoc } from '@/data/live/types'
 
 const SAVE_DEBOUNCE_MS = 1500
@@ -37,6 +39,8 @@ export function SessionNotesTab({
   const { user } = useAuth()
   const authorId = user?.id ?? 'unknown'
   const note = userNotes?.[authorId]
+  const editorOptions = useNotesEditorOptions()
+  const { preferences } = useRecallPreferences()
 
   // Seed once (migration-on-read: legacy plain-text → doc). Marks preserved on save.
   const initialDoc = useMemo(() => toNotesDoc(note), [sessionId]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -89,20 +93,21 @@ export function SessionNotesTab({
           key={sessionId}
           initialDoc={initialDoc}
           onChange={handleChange}
+          options={editorOptions}
           placeholder="You didn't capture notes during this session. You can add them here.  /  for blocks"
           className="min-h-[240px]"
         />
       </div>
 
-      {moments.length > 0 && (
+      {preferences.notes.showMarkedMoments && moments.length > 0 && (
         <div className="flex flex-col gap-2">
           <Small className="font-medium text-subtle-foreground">Marked moments</Small>
           <ul className="flex flex-col gap-1.5">
             {moments.map((m, i) => (
               <li key={i} className="flex items-center gap-2 text-small text-muted-foreground">
                 <Flag className="size-3.5 shrink-0 text-subtle-foreground" aria-hidden />
-                <span className="tabular-nums text-subtle-foreground">{fmt(m.timestamp_seconds)}</span>
-                <span aria-hidden className="text-subtle-foreground">·</span>
+                {preferences.notes.showMeetingTimestamps && <span className="tabular-nums text-subtle-foreground">{fmt(m.timestamp_seconds)}</span>}
+                {preferences.notes.showMeetingTimestamps && <span aria-hidden className="text-subtle-foreground">·</span>}
                 <span>Marked moment</span>
               </li>
             ))}

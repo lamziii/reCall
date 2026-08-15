@@ -1,9 +1,9 @@
 # Recall — Next.js (App Router) Migration
 
-> **Status: Phase 1 (audit) complete + Phase 2 (foundation) in progress.** This is a
-> *production-preservation* migration, not a rewrite. The Vite app in `frontend/` remains the
-> behavioral source of truth and is **not modified or deleted** until the Next.js app in `web/`
-> reaches verified parity. Written 2026-08-13; verified against the repo at that date.
+> **Status: COMPLETE.** The Next.js app in `web/` reached parity and is now the sole Recall web
+> application; the original Vite app (`frontend/`) has been removed from the repository. This was a
+> *production-preservation* migration, not a rewrite. The sections below are kept as the historical
+> record of how the migration was carried out. Originally written 2026-08-13.
 
 ---
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Outlet, useLocation, useNavigate } from "@/lib/router-compat";
 import { AnimatePresence, motion } from "framer-motion";
 import { useResolvedPreferences } from "@/settings/use-resolved-preferences";
-import { Video, CheckSquare, FolderKanban } from "lucide-react";
+import { Video, CheckSquare, FolderKanban, NotebookText, Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Content } from "@/components/layout/content";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -63,7 +63,11 @@ function ShellCommandMenu({
       group: "Go to",
       onSelect: () => navigate(item.to),
     }));
-    return [...content, ...nav];
+    const actions: CommandItem[] = [
+      { id: "action-new-note", label: "New note", icon: <Plus />, group: "Actions", onSelect: () => navigate("/app/notes/new") },
+      { id: "action-search-notes", label: "Search notes", icon: <NotebookText />, group: "Actions", onSelect: () => navigate("/app/notes") },
+    ];
+    return [...actions, ...content, ...nav];
   }, [entries, navigate]);
 
   const onAskAi = (q: string) => {

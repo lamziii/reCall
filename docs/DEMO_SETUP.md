@@ -38,11 +38,11 @@ Manager. The Functions emulator reads the Anthropic key from `firebase/functions
    ```sh
    cd .. && firebase emulators:start --only functions,firestore,auth,storage
    ```
-9. **Point the frontend at the emulators.** In `frontend/.env.local` set:
+9. **Point the app at the emulators.** In `web/.env.local` set:
    ```
-   VITE_USE_EMULATORS=true
+   NEXT_PUBLIC_USE_EMULATORS=true
    ```
-   Then `cd frontend && npm run dev`. Sign in (the Auth emulator provides a local Google flow),
+   Then `cd web && npm run dev`. Sign in (the Auth emulator provides a local Google flow),
    then **Start Session**.
 10. **Import-transcript test:** Start Session → **Import Transcript** → *Use demo transcript* →
     **Create session** → the review generates via the local function calling Anthropic.
@@ -70,7 +70,7 @@ Manager. The Functions emulator reads the Anthropic key from `firebase/functions
 ## 1. Install dependencies
 
 ```sh
-cd frontend && npm install && cd ..
+cd web && npm install && cd ..
 cd firebase/functions && npm install && cd ../..
 ```
 
@@ -155,25 +155,27 @@ This publishes `firestore.rules`, the composite indexes, `storage.rules`, and th
 `extractSessionReview` function plus the Firestore triggers. The first `functions` deploy binds
 the `ANTHROPIC_API_KEY` secret from step 8.
 
-## 11. Run the frontend locally
+## 11. Run the app locally
 
 ```sh
-cd frontend && npm run dev
+cd web && npm run dev
 ```
 
-Open the printed URL (default http://localhost:5173). Sign in with Google, then **Start Session**
+Open the printed URL (default http://localhost:3000). Sign in with Google, then **Start Session**
 → fill in the info → **Start Recording** (grant mic) → speak → **Stop** → the review is generated
 automatically. The **Import Transcript** link on the same screen is the paste/testing fallback.
 
-## 12. Deploy the frontend to Hosting
+## 12. Deploy
+
+The backend (Firestore rules/indexes, Storage rules, Cloud Functions) deploys from `firebase/`:
 
 ```sh
-cd frontend && npm run build && cd ../firebase
-firebase deploy --only hosting
+cd firebase && firebase deploy --only firestore:rules,firestore:indexes,storage,functions
 ```
 
-Hosting serves `frontend/dist` with an SPA rewrite, so deep links like
-`/app/sessions/<id>` work after refresh. Open `https://<project-id>.web.app`.
+The Next.js app (`web/`) is deployed via its own hosting target (e.g. Vercel or a Next-aware host) —
+it is **not** the retired Firebase Hosting SPA flow. The old `frontend/dist` + SPA-rewrite `hosting`
+block was removed from `firebase/firebase.json` when the Vite app was deleted.
 
 ## 13. Import-transcript test (fastest, no microphone)
 
