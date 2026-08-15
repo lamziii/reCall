@@ -26,7 +26,7 @@ export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle
   const { user } = useAuth()
 
   return (
-    <Sidebar collapsed={collapsed}>
+    <Sidebar collapsed={collapsed} className="recall-sidebar">
       <SidebarHeader className={cn('justify-between', collapsed && 'justify-center')}>
         <a href="/" className="focus-ring flex shrink-0 items-center rounded-md" aria-label="Recall home">
           <Logo size="sm" />

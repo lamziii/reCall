@@ -18,7 +18,7 @@ import { TutorialProvider } from "@/lib/onboarding/use-tutorial";
 import { OnboardingDialog } from "@/components/onboarding/onboarding-dialog";
 import { RecallSidebar } from "./recall-sidebar";
 import { RecallTopbar } from "./recall-topbar";
-import { ALL_NAV_ITEMS } from "./nav-config";
+import { ALL_NAV_ITEMS, APP_BASE } from "./nav-config";
 
 const ENTRY_META: Record<
   SearchEntry["type"],
@@ -91,6 +91,14 @@ export function RecallShell() {
   const { pageTransitions } = useResolvedPreferences();
   const reduceMotion = !pageTransitions;
 
+  // Settings has its own in-page tab navigation (nested route <Outlet/>). Collapse every
+  // /app/settings/* path to one transition key so switching tabs doesn't remount the shared
+  // settings header + nav — only the inner section content swaps.
+  const settingsBase = `${APP_BASE}/settings`;
+  const transitionKey = location.pathname.startsWith(settingsBase)
+    ? settingsBase
+    : location.pathname;
+
   const isTabletUp = useMediaQuery("(min-width: 768px)");
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
@@ -151,7 +159,7 @@ export function RecallShell() {
           <Content>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={location.pathname}
+                key={transitionKey}
                 className="flex h-full flex-1 flex-col"
                 initial={reduceMotion ? undefined : { opacity: 0, y: 8 }}
                 animate={{

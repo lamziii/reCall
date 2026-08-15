@@ -1,0 +1,134 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@import './colors.css';
+@import './typography.css';
+@import './radius.css';
+@import './shadows.css';
+@import './motion.css';
+@import './z-index.css';
+@import './layout.css';
+@import './preferences.css';
+@import '../animations/keyframes.css';
+@import '../tiptap.css';
+
+/*
+ * Light + dark. `data-theme` is set on <html> by the blocking script in
+ * index.html (before first paint) and kept in sync by ThemeProvider
+ * (src/app/theme/theme-provider.tsx). `color-scheme: dark` here is only the
+ * pre-hydration fallback — [data-theme='light']/[data-theme='dark'] in
+ * colors.css set it explicitly once a theme is applied.
+ */
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    /* Paint the overscroll/rubber-band area with the themed background instead of
+     * the UA default (white), which otherwise shows below the page on bounce. */
+    background-color: var(--color-bg);
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-muted);
+    color: var(--color-foreground);
+  }
+
+  /* Thin, unobtrusive scrollbars that match the surface, not the default UA chrome. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-strong);
+    border-radius: var(--radius-full);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /*
+   * Smooth color crossfade when switching theme — background/text/border/
+   * shadow only, never layout. Gated behind [data-theme-ready], which
+   * ThemeProvider adds one frame after mount, so the very first paint never
+   * transitions in from an unstyled or wrong-theme state. The reduced-motion
+   * block above already zeroes this out (transition-duration: 0.01ms !important
+   * applies to every element unconditionally).
+   */
+  [data-theme-ready],
+  [data-theme-ready] *,
+  [data-theme-ready] *::before,
+  [data-theme-ready] *::after {
+    transition:
+      background-color var(--duration-base) var(--ease-standard),
+      border-color var(--duration-base) var(--ease-standard),
+      color var(--duration-base) var(--ease-standard),
+      fill var(--duration-base) var(--ease-standard),
+      stroke var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard);
+  }
+}
+
+@layer utilities {
+  /* Single source for the focus-visible treatment every interactive component shares. */
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow: var(--focus-ring);
+  }
+
+  .transition-fast {
+    transition-duration: var(--duration-fast);
+    transition-timing-function: var(--ease-standard);
+  }
+
+  .transition-base {
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-standard);
+  }
+
+  /*
+   * No official light-mode logo asset exists yet (branding assets are
+   * white-on-transparent only — see assets/branding/README.md). The mark is
+   * pure monochrome + transparency, so inverting it is lossless; swap this
+   * for a real light export if one is ever added and drop the filter.
+   */
+  .theme-invert-on-light {
+    filter: none;
+  }
+
+  [data-theme='light'] .theme-invert-on-light {
+    filter: invert(1);
+  }
+}

@@ -128,7 +128,7 @@ describe('import / export', () => {
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.appearance.accentColor).toBe('rose')
-      expect((result.value.appearance as Record<string, unknown>).evil).toBeUndefined()
+      expect((result.value.appearance as unknown as Record<string, unknown>).evil).toBeUndefined()
     }
   })
 })
