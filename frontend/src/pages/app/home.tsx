@@ -83,7 +83,7 @@ export function AppHomePage() {
           />
         </motion.div>
 
-        <motion.div variants={reduceMotion ? undefined : homeItemVariants} className="grid grid-cols-1 gap-6 lg:grid-cols-[65fr_35fr]">
+        <motion.div variants={reduceMotion ? undefined : homeItemVariants} className="recall-dashboard-row grid grid-cols-1 gap-6 lg:grid-cols-[65fr_35fr]">
           <AttentionCard item={data.primaryAttention} />
           <TodaySchedule sessions={data.todaySchedule} />
         </motion.div>
@@ -92,7 +92,7 @@ export function AppHomePage() {
           <AttentionList items={data.needsAttention} />
         </motion.div>
 
-        <motion.div variants={reduceMotion ? undefined : homeItemVariants} className="grid grid-cols-1 gap-6 lg:grid-cols-[62fr_38fr]">
+        <motion.div variants={reduceMotion ? undefined : homeItemVariants} className="recall-dashboard-row grid grid-cols-1 gap-6 lg:grid-cols-[62fr_38fr]">
           <RecentSessions sessions={data.recentSessions} />
           <ActiveProjects projects={data.activeProjects} />
         </motion.div>
