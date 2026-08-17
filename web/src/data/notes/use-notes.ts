@@ -1,9 +1,14 @@
 'use client'
 
 /**
- * useNotes — the Notes Hub data hook. Merges standalone personal notes (notes-store) with meeting
- * notes adapted from the workspace's sessions (live only) into one NoteListItem[]. Exposes actions
- * that route to the correct backend based on the item's source, so the UI never branches on it.
+ * useNotes — the Notes workspace data hook. Merges standalone personal notes (notes-store) with
+ * meeting notes adapted from the workspace's sessions (live only) into one NoteListItem[]. Exposes
+ * actions that route to the correct backend based on the item's source, so the UI never branches on it.
+ *
+ * `items` excludes trashed notes (the working set); `trashedItems` is the Trash. Meeting notes never
+ * enter the Trash — their content is the Session's, so delete/trash is a no-op for them (the UI hides
+ * the affordance). Manual ordering lives in `sort_order`; the UI computes new orderings with the pure
+ * reorderIds() helper and calls persistOrder to write them.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/lib/auth/auth-context'
@@ -12,9 +17,13 @@ import { isLiveMode } from '@/data/live/data-mode'
 import { subscribeSessions } from '@/data/live/live-store'
 import type { LiveSessionDoc } from '@/data/live/types'
 import {
-  itemsInFolder,
+  activeItems,
+  folderDescendantIds,
   meetingNoteToItem,
+  nextSortOrder,
+  notesInFolder,
   personalNoteToItem,
+  trashedItems,
   type NoteFolderDoc,
   type NoteListItem,
   type PersonalNoteDoc,
@@ -24,27 +33,38 @@ import {
   createNote as storeCreateNote,
   deleteFolder as storeDeleteFolder,
   deleteNote as storeDeleteNote,
-  renameFolder as storeRenameFolder,
   subscribeFolders,
   subscribeNotes,
+  updateFolder as storeUpdateFolder,
   updateMeetingNoteMeta,
   updateNote,
 } from './notes-store'
+import type { FolderPatch } from './notes-store'
 
 function tsToMs(ts: { toMillis?: () => number } | null | undefined, fallback: number): number {
   return ts?.toMillis ? ts.toMillis() : fallback
 }
 
 export interface UseNotesResult {
+  /** Active (non-trashed) notes — personal + meeting. */
   items: NoteListItem[]
+  /** Notes currently in the Trash (personal only). */
+  trashedItems: NoteListItem[]
   folders: NoteFolderDoc[]
   loading: boolean
   createNote: (folderId?: string | null) => Promise<string>
-  deleteNote: (item: NoteListItem) => Promise<void>
   toggleFavorite: (item: NoteListItem) => Promise<void>
   moveToFolder: (item: NoteListItem, folderId: string | null) => Promise<void>
-  createFolder: (name: string) => Promise<string>
-  renameFolder: (id: string, name: string) => Promise<void>
+  setIcon: (item: NoteListItem, icon: string | null) => Promise<void>
+  /** Persist a new ordering (id → sort_order = index). Only personal notes carry manual order. */
+  persistOrder: (orderedIds: string[]) => Promise<void>
+  /** Soft-delete: move a personal note to Trash. No-op for meeting notes. */
+  moveToTrash: (item: NoteListItem) => Promise<void>
+  restore: (item: NoteListItem) => Promise<void>
+  /** Permanent delete from Trash — never touches a Session. */
+  permanentDelete: (item: NoteListItem) => Promise<void>
+  createFolder: (name: string, parentId?: string | null) => Promise<string>
+  updateFolder: (id: string, patch: FolderPatch) => Promise<void>
   deleteFolder: (id: string) => Promise<void>
 }
 
@@ -68,8 +88,6 @@ export function useNotes(): UseNotesResult {
         setNotesReady(true)
       },
       () => {
-        // Personal-notes read unavailable (e.g. rules not yet deployed) — don't hang the hub; still
-        // show meeting notes. Surfaced once for the developer.
         console.error('[Notes] personal notes unavailable — is the notes Firestore rule deployed?')
         setNotes([])
         setNotesReady(true)
@@ -85,7 +103,7 @@ export function useNotes(): UseNotesResult {
     return subscribeSessions(workspaceId, setSessions, () => setSessions([]))
   }, [workspaceId])
 
-  const items = useMemo<NoteListItem[]>(() => {
+  const allItems = useMemo<NoteListItem[]>(() => {
     const personal = notes.map(personalNoteToItem)
     const meeting: NoteListItem[] = []
     for (const s of sessions) {
@@ -109,15 +127,17 @@ export function useNotes(): UseNotesResult {
     return [...personal, ...meeting]
   }, [notes, sessions, authorId])
 
-  const createNote = useCallback(
-    (folderId?: string | null) => storeCreateNote({ workspaceId, authorId, folderId: folderId ?? null }),
-    [workspaceId, authorId],
-  )
+  const items = useMemo(() => activeItems(allItems), [allItems])
+  const trashed = useMemo(() => trashedItems(allItems), [allItems])
 
-  const deleteNote = useCallback(async (item: NoteListItem) => {
-    // Only personal notes are deletable here — a meeting note's content belongs to its Session.
-    if (item.source === 'personal' && item.noteId) await storeDeleteNote(item.noteId)
-  }, [])
+  const createNote = useCallback(
+    (folderId?: string | null) => {
+      const target = folderId ?? null
+      const sortOrder = nextSortOrder(notesInFolder(items, target))
+      return storeCreateNote({ workspaceId, authorId, folderId: target, sortOrder })
+    },
+    [workspaceId, authorId, items],
+  )
 
   const toggleFavorite = useCallback(
     async (item: NoteListItem) => {
@@ -130,38 +150,76 @@ export function useNotes(): UseNotesResult {
 
   const moveToFolder = useCallback(
     async (item: NoteListItem, folderId: string | null) => {
-      if (item.source === 'personal' && item.noteId) await updateNote(item.noteId, { folderId })
-      else if (item.source === 'meeting' && item.sessionId) await updateMeetingNoteMeta(item.sessionId, authorId, { folderId })
+      if (item.source === 'personal' && item.noteId) {
+        const sortOrder = nextSortOrder(notesInFolder(items, folderId))
+        await updateNote(item.noteId, { folderId, sortOrder })
+      } else if (item.source === 'meeting' && item.sessionId) {
+        await updateMeetingNoteMeta(item.sessionId, authorId, { folderId })
+      }
     },
-    [authorId],
+    [authorId, items],
   )
 
+  const setIcon = useCallback(async (item: NoteListItem, icon: string | null) => {
+    if (item.source === 'personal' && item.noteId) await updateNote(item.noteId, { icon })
+  }, [])
+
+  const persistOrder = useCallback(async (orderedIds: string[]) => {
+    // Assign a stepped sort_order so future inserts have room; only personal notes carry order.
+    await Promise.all(orderedIds.map((id, i) => updateNote(id, { sortOrder: i })))
+  }, [])
+
+  const moveToTrash = useCallback(async (item: NoteListItem) => {
+    if (item.source === 'personal' && item.noteId) await updateNote(item.noteId, { trashed: true })
+  }, [])
+
+  const restore = useCallback(async (item: NoteListItem) => {
+    if (item.source === 'personal' && item.noteId) await updateNote(item.noteId, { trashed: false })
+  }, [])
+
+  const permanentDelete = useCallback(async (item: NoteListItem) => {
+    if (item.source === 'personal' && item.noteId) await storeDeleteNote(item.noteId)
+  }, [])
+
   const createFolder = useCallback(
-    (name: string) => storeCreateFolder(workspaceId, authorId, name.trim() || 'New folder', folders.length),
+    (name: string, parentId: string | null = null) => storeCreateFolder(workspaceId, authorId, name.trim() || 'New folder', folders.length, parentId),
     [workspaceId, authorId, folders.length],
   )
 
   const deleteFolder = useCallback(
     async (id: string) => {
-      // Safety: notes survive — clear folder_id on every note in this folder (both sources), THEN
-      // delete the folder. Order matters so a note is never orphaned pointing at a dead folder.
-      const affected = itemsInFolder(items, id)
-      await Promise.all(affected.map((i) => moveToFolder(i, null)))
+      // Safety: nothing is destroyed. Direct child folders reparent to this folder's parent, and every
+      // note inside (both sources) has its folder_id cleared → Uncategorized. THEN the folder is removed.
+      const parentId = folders.find((f) => f.id === id)?.parent_id ?? null
+      const childFolders = folders.filter((f) => f.parent_id === id)
+      const affected = allItems.filter((i) => i.folderId === id)
+      await Promise.all([
+        ...childFolders.map((c) => storeUpdateFolder(c.id, { parentId })),
+        ...affected.map((i) => moveToFolder(i, null)),
+      ])
       await storeDeleteFolder(id)
     },
-    [items, moveToFolder],
+    [folders, allItems, moveToFolder],
   )
 
   return {
     items,
+    trashedItems: trashed,
     folders: [...folders].sort((a, b) => a.sort_order - b.sort_order),
     loading: !notesReady,
     createNote,
-    deleteNote,
     toggleFavorite,
     moveToFolder,
+    setIcon,
+    persistOrder,
+    moveToTrash,
+    restore,
+    permanentDelete,
     createFolder,
-    renameFolder: storeRenameFolder,
+    updateFolder: storeUpdateFolder,
     deleteFolder,
   }
 }
+
+// Re-export for callers that constrain moves; keeps the cycle guard testable + shared.
+export { folderDescendantIds }

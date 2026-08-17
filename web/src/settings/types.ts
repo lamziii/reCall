@@ -343,6 +343,14 @@ export type NotesCodeTheme = (typeof NOTES_CODE_THEME_OPTIONS)[number]['value']
 export const NOTES_TABLE_SIZE_OPTIONS = [2, 3, 4] as const
 export type NotesTableSize = (typeof NOTES_TABLE_SIZE_OPTIONS)[number]
 
+export const NOTES_PAPER_STYLE_OPTIONS = opts([
+  { value: 'blank', label: 'Blank' },
+  { value: 'lined', label: 'Lined' },
+  { value: 'dotted', label: 'Dotted' },
+  { value: 'grid', label: 'Grid' },
+])
+export type NotesPaperStyle = (typeof NOTES_PAPER_STYLE_OPTIONS)[number]['value']
+
 export interface NotesPreferences {
   editorWidth: NotesEditorWidth
   textSize: NotesTextSize
@@ -356,6 +364,8 @@ export interface NotesPreferences {
   showCodeLanguageSelector: boolean
   showCopyButton: boolean
   defaultTableSize: NotesTableSize
+  /** Default page/notebook background for NEW personal notes (existing notes keep their own). */
+  defaultPaperStyle: NotesPaperStyle
 }
 
 /* ------------------------------------------------------------------ Experimental */

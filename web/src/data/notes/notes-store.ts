@@ -27,20 +27,33 @@ import {
 import { getDb } from '@/lib/firebase/firestore'
 import { isLiveMode } from '@/data/live/data-mode'
 import { structuredNotesToPlainText, type NotesDoc } from '@/data/active-session/notes-doc'
-import { emptyPersonalNoteDoc, type NoteFolderDoc, type PersonalNoteDoc } from './note-model'
+import { DEFAULT_PAPER_STYLE, emptyPersonalNoteDoc, type NoteFolderDoc, type PaperStyle, type PersonalNoteDoc } from './note-model'
 
 export interface CreateNoteInput {
   workspaceId: string
   authorId: string
   title?: string
   folderId?: string | null
+  sortOrder?: number
   doc?: NotesDoc
+  paperStyle?: PaperStyle
 }
 export interface NotePatch {
   title?: string
   folderId?: string | null
   favorite?: boolean
+  icon?: string | null
+  sortOrder?: number
+  /** Soft-delete toggle: true → move to Trash (stamps trashed_at_ms), false → restore. */
+  trashed?: boolean
   doc?: NotesDoc
+  paperStyle?: PaperStyle
+}
+export interface FolderPatch {
+  name?: string
+  parentId?: string | null
+  icon?: string | null
+  sortOrder?: number
 }
 
 function newId(prefix: string): string {
@@ -89,6 +102,10 @@ async function liveCreateNote(input: CreateNoteInput): Promise<string> {
     session_id: null,
     folder_id: input.folderId ?? null,
     favorite: false,
+    icon: null,
+    paper_style: input.paperStyle ?? DEFAULT_PAPER_STYLE,
+    sort_order: input.sortOrder ?? now,
+    trashed_at_ms: null,
     visibility: 'private',
     content: structuredNotesToPlainText(body),
     doc: body,
@@ -107,6 +124,10 @@ async function liveUpdateNote(id: string, patch: NotePatch): Promise<void> {
   if (patch.title !== undefined) fields.title = patch.title
   if (patch.folderId !== undefined) fields.folder_id = patch.folderId
   if (patch.favorite !== undefined) fields.favorite = patch.favorite
+  if (patch.icon !== undefined) fields.icon = patch.icon
+  if (patch.paperStyle !== undefined) fields.paper_style = patch.paperStyle
+  if (patch.sortOrder !== undefined) fields.sort_order = patch.sortOrder
+  if (patch.trashed !== undefined) fields.trashed_at_ms = patch.trashed ? Date.now() : null
   if (patch.doc !== undefined) {
     fields.doc = patch.doc
     fields.content = structuredNotesToPlainText(patch.doc)
@@ -123,13 +144,15 @@ async function liveDeleteNote(id: string): Promise<void> {
   await deleteDoc(doc(getDb(), 'notes', id))
 }
 
-async function liveCreateFolder(workspaceId: string, authorId: string, name: string, sortOrder: number): Promise<string> {
+async function liveCreateFolder(workspaceId: string, authorId: string, name: string, sortOrder: number, parentId: string | null): Promise<string> {
   const ref = doc(collection(getDb(), 'note_folders'))
   const now = Date.now()
   await setDoc(ref, {
     workspace_id: workspaceId,
     author_id: authorId,
     name,
+    parent_id: parentId,
+    icon: null,
     sort_order: sortOrder,
     created_at_ms: now,
     updated_at_ms: now,
@@ -139,8 +162,13 @@ async function liveCreateFolder(workspaceId: string, authorId: string, name: str
   return ref.id
 }
 
-async function liveRenameFolder(id: string, name: string): Promise<void> {
-  await updateDoc(doc(getDb(), 'note_folders', id), { name, updated_at_ms: Date.now(), updated_at: serverTimestamp() })
+async function liveUpdateFolder(id: string, patch: FolderPatch): Promise<void> {
+  const fields: Record<string, unknown> = { updated_at_ms: Date.now(), updated_at: serverTimestamp() }
+  if (patch.name !== undefined) fields.name = patch.name
+  if (patch.parentId !== undefined) fields.parent_id = patch.parentId
+  if (patch.icon !== undefined) fields.icon = patch.icon
+  if (patch.sortOrder !== undefined) fields.sort_order = patch.sortOrder
+  await updateDoc(doc(getDb(), 'note_folders', id), fields)
 }
 
 /** Deletes the folder only. Notes keep existing; the caller clears their folder_id (→ Uncategorized). */
@@ -149,10 +177,11 @@ async function liveDeleteFolder(id: string): Promise<void> {
 }
 
 /** Writes folder/favorite metadata back onto a session's author note slot (meeting notes). */
-async function liveUpdateMeetingNoteMeta(sessionId: string, authorId: string, patch: { folderId?: string | null; favorite?: boolean }): Promise<void> {
+async function liveUpdateMeetingNoteMeta(sessionId: string, authorId: string, patch: { folderId?: string | null; favorite?: boolean; paperStyle?: PaperStyle }): Promise<void> {
   const fields: Record<string, unknown> = { updated_at: serverTimestamp() }
   if (patch.folderId !== undefined) fields[`user_notes.${authorId}.folder_id`] = patch.folderId
   if (patch.favorite !== undefined) fields[`user_notes.${authorId}.favorite`] = patch.favorite
+  if (patch.paperStyle !== undefined) fields[`user_notes.${authorId}.paper_style`] = patch.paperStyle
   await updateDoc(doc(getDb(), 'sessions', sessionId), fields)
 }
 
@@ -202,6 +231,10 @@ function localCreateNote(input: CreateNoteInput): string {
     session_id: null,
     folder_id: input.folderId ?? null,
     favorite: false,
+    icon: null,
+    paper_style: input.paperStyle ?? DEFAULT_PAPER_STYLE,
+    sort_order: input.sortOrder ?? now,
+    trashed_at_ms: null,
     visibility: 'private',
     content: structuredNotesToPlainText(body),
     doc: body,
@@ -219,6 +252,10 @@ function localUpdateNote(id: string, patch: NotePatch): void {
     if (patch.title !== undefined) next.title = patch.title
     if (patch.folderId !== undefined) next.folder_id = patch.folderId
     if (patch.favorite !== undefined) next.favorite = patch.favorite
+    if (patch.icon !== undefined) next.icon = patch.icon
+    if (patch.paperStyle !== undefined) next.paper_style = patch.paperStyle
+    if (patch.sortOrder !== undefined) next.sort_order = patch.sortOrder
+    if (patch.trashed !== undefined) next.trashed_at_ms = patch.trashed ? Date.now() : null
     if (patch.doc !== undefined) {
       next.doc = patch.doc
       next.content = structuredNotesToPlainText(patch.doc)
@@ -233,14 +270,22 @@ function localGetNote(id: string): PersonalNoteDoc | null {
 function localDeleteNote(id: string): void {
   lsWrite(LS_NOTES, lsRead<PersonalNoteDoc>(LS_NOTES).filter((n) => n.id !== id))
 }
-function localCreateFolder(workspaceId: string, authorId: string, name: string, sortOrder: number): string {
+function localCreateFolder(workspaceId: string, authorId: string, name: string, sortOrder: number, parentId: string | null): string {
   const now = Date.now()
-  const folder: NoteFolderDoc = { id: newId('folder'), workspace_id: workspaceId, author_id: authorId, name, sort_order: sortOrder, created_at_ms: now, updated_at_ms: now }
+  const folder: NoteFolderDoc = { id: newId('folder'), workspace_id: workspaceId, author_id: authorId, name, parent_id: parentId, icon: null, sort_order: sortOrder, created_at_ms: now, updated_at_ms: now }
   lsWrite(LS_FOLDERS, [...lsRead<NoteFolderDoc>(LS_FOLDERS), folder])
   return folder.id
 }
-function localRenameFolder(id: string, name: string): void {
-  lsWrite(LS_FOLDERS, lsRead<NoteFolderDoc>(LS_FOLDERS).map((f) => (f.id === id ? { ...f, name, updated_at_ms: Date.now() } : f)))
+function localUpdateFolder(id: string, patch: FolderPatch): void {
+  lsWrite(LS_FOLDERS, lsRead<NoteFolderDoc>(LS_FOLDERS).map((f) => {
+    if (f.id !== id) return f
+    const next = { ...f, updated_at_ms: Date.now() }
+    if (patch.name !== undefined) next.name = patch.name
+    if (patch.parentId !== undefined) next.parent_id = patch.parentId
+    if (patch.icon !== undefined) next.icon = patch.icon
+    if (patch.sortOrder !== undefined) next.sort_order = patch.sortOrder
+    return next
+  }))
 }
 function localDeleteFolder(id: string): void {
   lsWrite(LS_FOLDERS, lsRead<NoteFolderDoc>(LS_FOLDERS).filter((f) => f.id !== id))
@@ -269,15 +314,15 @@ export function getNote(id: string): Promise<PersonalNoteDoc | null> {
 export function deleteNote(id: string): Promise<void> {
   return isLiveMode ? liveDeleteNote(id) : Promise.resolve(localDeleteNote(id))
 }
-export function createFolder(workspaceId: string, authorId: string, name: string, sortOrder: number): Promise<string> {
-  return isLiveMode ? liveCreateFolder(workspaceId, authorId, name, sortOrder) : Promise.resolve(localCreateFolder(workspaceId, authorId, name, sortOrder))
+export function createFolder(workspaceId: string, authorId: string, name: string, sortOrder: number, parentId: string | null = null): Promise<string> {
+  return isLiveMode ? liveCreateFolder(workspaceId, authorId, name, sortOrder, parentId) : Promise.resolve(localCreateFolder(workspaceId, authorId, name, sortOrder, parentId))
 }
-export function renameFolder(id: string, name: string): Promise<void> {
-  return isLiveMode ? liveRenameFolder(id, name) : Promise.resolve(localRenameFolder(id, name))
+export function updateFolder(id: string, patch: FolderPatch): Promise<void> {
+  return isLiveMode ? liveUpdateFolder(id, patch) : Promise.resolve(localUpdateFolder(id, patch))
 }
 export function deleteFolder(id: string): Promise<void> {
   return isLiveMode ? liveDeleteFolder(id) : Promise.resolve(localDeleteFolder(id))
 }
-export function updateMeetingNoteMeta(sessionId: string, authorId: string, patch: { folderId?: string | null; favorite?: boolean }): Promise<void> {
+export function updateMeetingNoteMeta(sessionId: string, authorId: string, patch: { folderId?: string | null; favorite?: boolean; paperStyle?: PaperStyle }): Promise<void> {
   return isLiveMode ? liveUpdateMeetingNoteMeta(sessionId, authorId, patch) : Promise.resolve()
 }

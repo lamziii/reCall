@@ -1,6 +1,6 @@
 'use client'
-import { NotesHubPage } from '@/views/app/notes'
+import { NotesIndex } from '@/views/app/notes/notes-index'
 
 export default function Page() {
-  return <NotesHubPage />
+  return <NotesIndex />
 }

@@ -3,6 +3,7 @@ import {
   NOTES_CODE_THEME_OPTIONS,
   NOTES_EDITOR_WIDTH_OPTIONS,
   NOTES_LINE_HEIGHT_OPTIONS,
+  NOTES_PAPER_STYLE_OPTIONS,
   NOTES_TABLE_SIZE_OPTIONS,
   NOTES_TEXT_SIZE_OPTIONS,
 } from '@/settings/types'
@@ -20,6 +21,7 @@ export function NotesSection() {
         <SettingRow id="notes-editor-width" label="Editor width" control={<SettingsSelect label="Editor width" value={n.editorWidth} onChange={(v) => set({ editorWidth: v })} options={NOTES_EDITOR_WIDTH_OPTIONS} />} />
         <SettingRow id="notes-text-size" label="Text size" control={<SettingsSegmented label="Text size" value={n.textSize} onChange={(v) => set({ textSize: v })} options={NOTES_TEXT_SIZE_OPTIONS} />} />
         <SettingRow id="notes-line-height" label="Line height" control={<SettingsSegmented label="Line height" value={n.lineHeight} onChange={(v) => set({ lineHeight: v })} options={NOTES_LINE_HEIGHT_OPTIONS} />} />
+        <SettingRow id="notes-paper-style" label="Default page style" description="Background for new personal notes. Existing notes keep their own." control={<SettingsSelect label="Default page style" value={n.defaultPaperStyle} onChange={(v) => set({ defaultPaperStyle: v })} options={NOTES_PAPER_STYLE_OPTIONS} />} />
       </SettingsSection>
 
       <SettingsSection title="Behavior" description="Editing shortcuts and meeting-note extras.">

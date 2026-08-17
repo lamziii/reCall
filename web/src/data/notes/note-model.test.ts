@@ -1,15 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import {
+  activeItems,
+  buildFolderTree,
   countByFilter,
   displayTitle,
   filterNotes,
+  folderDescendantIds,
   itemsInFolder,
   meetingNoteToItem,
+  nextSortOrder,
   noteBelongsTo,
   notePreview,
+  notesInFolder,
   personalNoteToItem,
+  reorderIds,
   searchNotes,
+  sortByOrder,
   sortNotes,
+  trashedItems,
+  wouldCreateFolderCycle,
+  type NoteFolderDoc,
   type NoteListItem,
   type PersonalNoteDoc,
 } from './note-model'
@@ -32,7 +42,11 @@ const basePersonal: PersonalNoteDoc = {
 }
 
 function item(partial: Partial<NoteListItem>): NoteListItem {
-  return { id: 'x', source: 'personal', title: 'T', plainText: '', folderId: null, favorite: false, createdAtMs: 0, updatedAtMs: 0, ...partial }
+  return { id: 'x', source: 'personal', title: 'T', plainText: '', folderId: null, favorite: false, sortOrder: Infinity, trashed: false, createdAtMs: 0, updatedAtMs: 0, ...partial }
+}
+
+function folder(partial: Partial<NoteFolderDoc> & { id: string }): NoteFolderDoc {
+  return { workspace_id: 'ws1', author_id: 'u1', name: partial.id, parent_id: null, sort_order: 0, created_at_ms: 0, updated_at_ms: 0, ...partial }
 }
 
 describe('displayTitle', () => {
@@ -142,5 +156,85 @@ describe('notePreview', () => {
   it('uses the first non-empty line and truncates', () => {
     expect(notePreview('\n\nhello world\nsecond')).toBe('hello world')
     expect(notePreview('x'.repeat(200)).endsWith('…')).toBe(true)
+  })
+})
+
+describe('trash (soft delete)', () => {
+  const items = [item({ id: 'a', trashed: false }), item({ id: 'b', trashed: true }), item({ id: 'c', trashed: false })]
+  it('partitions active vs trashed without losing any', () => {
+    expect(activeItems(items).map((i) => i.id)).toEqual(['a', 'c'])
+    expect(trashedItems(items).map((i) => i.id)).toEqual(['b'])
+  })
+})
+
+describe('sortByOrder / nextSortOrder', () => {
+  it('orders by sortOrder then updatedAt, and lands new notes at the end', () => {
+    const items = [
+      item({ id: 'end', sortOrder: Infinity, updatedAtMs: 99 }),
+      item({ id: 'first', sortOrder: 0, updatedAtMs: 1 }),
+      item({ id: 'second', sortOrder: 1, updatedAtMs: 1 }),
+    ]
+    expect(sortByOrder(items).map((i) => i.id)).toEqual(['first', 'second', 'end'])
+    expect(nextSortOrder(items)).toBe(2)
+    expect(nextSortOrder([])).toBe(0)
+  })
+})
+
+describe('notesInFolder', () => {
+  it('returns active personal notes in a folder, ordered, excluding trashed + meetings', () => {
+    const items = [
+      item({ id: 'p2', source: 'personal', folderId: 'f1', sortOrder: 1 }),
+      item({ id: 'p1', source: 'personal', folderId: 'f1', sortOrder: 0 }),
+      item({ id: 'gone', source: 'personal', folderId: 'f1', trashed: true }),
+      item({ id: 'm', source: 'meeting', folderId: 'f1' }),
+      item({ id: 'other', source: 'personal', folderId: 'f2' }),
+    ]
+    expect(notesInFolder(items, 'f1').map((i) => i.id)).toEqual(['p1', 'p2'])
+  })
+})
+
+describe('buildFolderTree', () => {
+  it('nests by parent_id, sorts siblings, and surfaces orphans/cycles at the root', () => {
+    const folders = [
+      folder({ id: 'work', sort_order: 0 }),
+      folder({ id: 'product', parent_id: 'work', sort_order: 1 }),
+      folder({ id: 'launch', parent_id: 'work', sort_order: 0 }),
+      folder({ id: 'orphan', parent_id: 'ghost', sort_order: 9 }),
+    ]
+    const tree = buildFolderTree(folders)
+    expect(tree.map((n) => n.folder.id)).toEqual(['work', 'orphan'])
+    expect(tree[0].children.map((n) => n.folder.id)).toEqual(['launch', 'product'])
+  })
+  it('does not infinite-loop on a parent cycle', () => {
+    const folders = [folder({ id: 'a', parent_id: 'b' }), folder({ id: 'b', parent_id: 'a' })]
+    expect(() => buildFolderTree(folders)).not.toThrow()
+  })
+})
+
+describe('folderDescendantIds / wouldCreateFolderCycle', () => {
+  const folders = [
+    folder({ id: 'root' }),
+    folder({ id: 'child', parent_id: 'root' }),
+    folder({ id: 'grand', parent_id: 'child' }),
+    folder({ id: 'sibling' }),
+  ]
+  it('collects the whole subtree', () => {
+    expect(folderDescendantIds(folders, 'root').sort()).toEqual(['child', 'grand'])
+    expect(folderDescendantIds(folders, 'grand')).toEqual([])
+  })
+  it('blocks moving a folder into itself or a descendant, allows valid moves', () => {
+    expect(wouldCreateFolderCycle(folders, 'root', 'root')).toBe(true)
+    expect(wouldCreateFolderCycle(folders, 'root', 'grand')).toBe(true)
+    expect(wouldCreateFolderCycle(folders, 'root', null)).toBe(false)
+    expect(wouldCreateFolderCycle(folders, 'sibling', 'root')).toBe(false)
+  })
+})
+
+describe('reorderIds', () => {
+  it('moves an id to a new index, clamps out-of-range, ignores unknown ids', () => {
+    expect(reorderIds(['a', 'b', 'c'], 'a', 2)).toEqual(['b', 'c', 'a'])
+    expect(reorderIds(['a', 'b', 'c'], 'c', 0)).toEqual(['c', 'a', 'b'])
+    expect(reorderIds(['a', 'b', 'c'], 'a', 99)).toEqual(['b', 'c', 'a'])
+    expect(reorderIds(['a', 'b', 'c'], 'z', 0)).toEqual(['a', 'b', 'c'])
   })
 })

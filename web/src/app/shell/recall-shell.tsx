@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Outlet, useLocation, useNavigate } from "@/lib/router-compat";
 import { AnimatePresence, motion } from "framer-motion";
 import { useResolvedPreferences } from "@/settings/use-resolved-preferences";
-import { Video, CheckSquare, FolderKanban, NotebookText, Plus } from "lucide-react";
+import { Video, CheckSquare, FolderKanban, NotebookText, Plus, PanelLeftOpen, ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Content } from "@/components/layout/content";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -18,6 +18,7 @@ import { TutorialProvider } from "@/lib/onboarding/use-tutorial";
 import { OnboardingDialog } from "@/components/onboarding/onboarding-dialog";
 import { RecallSidebar } from "./recall-sidebar";
 import { RecallTopbar } from "./recall-topbar";
+import { NotesSidebar } from "./notes-sidebar";
 import { ALL_NAV_ITEMS, APP_BASE } from "./nav-config";
 
 const ENTRY_META: Record<
@@ -85,11 +86,36 @@ function ShellCommandMenu({
   );
 }
 
+/** The slim rail shown when the Notes sidebar is collapsed for max writing space: expand, back to
+ *  Recall, and a quick new-note. ⌘N/⌘P bind on the full sidebar, so expand to search. */
+function NotesCollapsedRail({ onExpand, onBack }: { onExpand: () => void; onBack: () => void }) {
+  const navigate = useNavigate();
+  const btn =
+    "focus-ring flex size-9 items-center justify-center rounded-md text-subtle-foreground transition-fast hover:bg-surface-hover hover:text-foreground";
+  return (
+    <aside className="flex h-full w-12 flex-col items-center gap-1 border-r border-border-subtle bg-surface py-2">
+      <button type="button" aria-label="Back to Recall" onClick={onBack} className={btn}>
+        <ArrowLeft className="size-4" />
+      </button>
+      <button type="button" aria-label="Expand notes sidebar" onClick={onExpand} className={btn}>
+        <PanelLeftOpen className="size-4" />
+      </button>
+      <button type="button" aria-label="New note" onClick={() => navigate(`${APP_BASE}/notes/new`)} className={btn}>
+        <Plus className="size-4" />
+      </button>
+    </aside>
+  );
+}
+
 const COLLAPSED_STORAGE_KEY = "recall:sidebar-collapsed";
+// Notes mode keeps its OWN collapse preference so hiding the Notes rail never touches the global
+// Recall sidebar state (or vice-versa).
+const NOTES_COLLAPSED_STORAGE_KEY = "recall:notes-sidebar-collapsed";
 
 /** The permanent shell every authenticated Recall page renders inside. Mount once above the /app route tree. */
 export function RecallShell() {
   const location = useLocation();
+  const navigate = useNavigate();
   // Page transitions honor the resolved preference: Animations off, Page-transitions off, or OS/user
   // reduced-motion all suppress the route crossfade.
   const { pageTransitions } = useResolvedPreferences();
@@ -111,14 +137,25 @@ export function RecallShell() {
   const [userCollapsed, setUserCollapsed] = useState(
     () => localStorage.getItem(COLLAPSED_STORAGE_KEY) === "true",
   );
+  const [notesCollapsed, setNotesCollapsed] = useState(
+    () => localStorage.getItem(NOTES_COLLAPSED_STORAGE_KEY) === "true",
+  );
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+
+  // Notes is a MODE for the SIDEBAR: while under /app/notes the global Recall nav rail is replaced by
+  // the dedicated NotesSidebar (never both at once). The global header stays in every mode.
+  const notesMode = location.pathname.startsWith(`${APP_BASE}/notes`);
 
   useEffect(() => {
     if (isDesktop)
       localStorage.setItem(COLLAPSED_STORAGE_KEY, String(userCollapsed));
   }, [userCollapsed, isDesktop]);
+
+  useEffect(() => {
+    localStorage.setItem(NOTES_COLLAPSED_STORAGE_KEY, String(notesCollapsed));
+  }, [notesCollapsed]);
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -138,7 +175,15 @@ export function RecallShell() {
         <OnboardingDialog />
         <AppShell
           sidebar={
-            isTabletUp ? (
+            !isTabletUp ? (
+              <div className="hidden" />
+            ) : notesMode ? (
+              notesCollapsed ? (
+                <NotesCollapsedRail onExpand={() => setNotesCollapsed(false)} onBack={() => navigate(APP_BASE)} />
+              ) : (
+                <NotesSidebar onCollapse={() => setNotesCollapsed(true)} />
+              )
+            ) : (
               <RecallSidebar
                 collapsed={collapsed}
                 onToggleCollapsed={
@@ -146,10 +191,11 @@ export function RecallShell() {
                 }
                 showCollapseToggle={isDesktop}
               />
-            ) : (
-              <div className="hidden" />
             )
           }
+          // Notes is a MODE for the SIDEBAR only (dedicated NotesSidebar, never the global nav rail).
+          // The global Recall header stays in every mode so theme, Recall AI, notifications, profile,
+          // and the create + menu are always reachable — including while editing a note.
           header={
             <RecallTopbar
               onOpenSearch={() => setSearchOpen(true)}
@@ -192,9 +238,9 @@ export function RecallShell() {
             <SheetContent
               side="left"
               aria-label="Navigation"
-              className="w-[var(--sidebar-width)] max-w-none border-none bg-transparent p-0"
+              className="w-[17.5rem] max-w-none border-none bg-transparent p-0"
             >
-              <RecallSidebar collapsed={false} showCollapseToggle={false} />
+              {notesMode ? <NotesSidebar /> : <RecallSidebar collapsed={false} showCollapseToggle={false} />}
             </SheetContent>
           </Sheet>
         )}
