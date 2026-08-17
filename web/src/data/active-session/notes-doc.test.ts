@@ -106,6 +106,16 @@ describe('structuredNotesToPlainText (AI-readable extraction)', () => {
     expect(structuredNotesToPlainText(doc)).toBe('Item | Owner\nPricing | Sarah')
   })
 
+  it('inline date chip becomes "Date: <formatted>" (tz-safe, never the raw ISO)', () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Deadline ' }, { type: 'date', attrs: { value: '2027-02-23' } }] },
+      ],
+    } as unknown as NotesDoc
+    expect(structuredNotesToPlainText(doc)).toBe('Deadline Date: February 23, 2027')
+  })
+
   it('docIsEmpty', () => {
     expect(docIsEmpty(EMPTY_DOC)).toBe(true)
     expect(docIsEmpty(plainTextToDoc('hi'))).toBe(false)
@@ -121,5 +131,38 @@ describe('moment marks are independent of the doc (preserved across edits)', () 
     expect(structuredNotesToPlainText(doc)).toBe('edited text')
     expect(marks[0].timestamp_seconds).toBe(1122)
     expect(marks[0].kind).toBe('moment')
+  })
+})
+
+describe('structuredNotesToPlainText — advanced blocks (AI extraction)', () => {
+  it('serializes note-links inline via their label', () => {
+    const doc: NotesDoc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'See ' }, { type: 'noteLink', attrs: { noteId: 'n1', label: 'Product Strategy' } }] }] }
+    expect(structuredNotesToPlainText(doc)).toBe('See Product Strategy')
+  })
+
+  it('serializes a chart as title + label:value lines (no binary)', () => {
+    const doc: NotesDoc = { type: 'doc', content: [{ type: 'chart', attrs: { data: { title: 'Revenue', categories: ['Jan', 'Feb', 'Mar'], series: [{ name: 'S1', values: [20, 35, 28] }] } } }] }
+    expect(structuredNotesToPlainText(doc)).toBe('Chart: Revenue\nJan: 20\nFeb: 35\nMar: 28')
+  })
+
+  it('serializes tabs with each tab title + its own content', () => {
+    const tab = (title: string, text: string) => ({ type: 'tab', attrs: { title }, content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] })
+    const doc: NotesDoc = { type: 'doc', content: [{ type: 'tabs', attrs: { active: 0 }, content: [tab('Overview', 'Launch in September.'), tab('Technical', 'API migration required.')] }] }
+    expect(structuredNotesToPlainText(doc)).toBe('Tabs:\n\n[Overview]\nLaunch in September.\n\n[Technical]\nAPI migration required.')
+  })
+
+  it('serializes media as labeled placeholders, never URLs/binary', () => {
+    const doc: NotesDoc = { type: 'doc', content: [
+      { type: 'image', attrs: { caption: 'Architecture diagram', url: 'https://secret.example/x.png', name: 'x.png' } },
+      { type: 'file', attrs: { name: 'spec.pdf', url: 'https://secret.example/spec.pdf' } },
+    ] }
+    const out = structuredNotesToPlainText(doc)
+    expect(out).toBe('[Image: Architecture diagram]\n[File: spec.pdf]')
+    expect(out).not.toContain('secret.example')
+  })
+
+  it('serializes a callout with its icon + inner text', () => {
+    const doc: NotesDoc = { type: 'doc', content: [{ type: 'callout', attrs: { icon: '💡' }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Important' }] }] }] }
+    expect(structuredNotesToPlainText(doc)).toBe('💡 Important')
   })
 })

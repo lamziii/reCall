@@ -57,8 +57,10 @@
 .recall-notes-prose li {
   margin-top: 0.15rem;
 }
+/* Bullet/number markers: a slice of foreground so they read darker in light mode and lighter (more
+ * visible) in dark mode automatically — the flat subtle-gray was too faint. */
 .recall-notes-prose li::marker {
-  color: var(--color-subtle-foreground);
+  color: color-mix(in oklch, var(--color-foreground) 55%, transparent);
 }
 .recall-notes-prose li > p {
   margin: 0;
@@ -416,3 +418,224 @@
 .recall-notes-code-light .recall-codeblock pre code {
   color: oklch(21% 0.006 260);
 }
+
+/* ============================================================================
+   Advanced blocks — chart / note-link / callout / tabs / media / slash menu.
+   ---------------------------------------------------------------------------
+   Chart palette = Recall itself: ONE blue accent + cool neutrals, NO rainbow.
+   Semantic tokens (referencing the shared --color-accent / neutral scale) so
+   charts adapt to light / dark / any future theme automatically. Categories
+   step from Recall blue → softer blue → blue-gray → neutral grays.
+   ============================================================================ */
+:root {
+  --chart-primary: var(--color-accent);            /* Recall blue */
+  --chart-secondary: var(--color-accent-300);      /* softer blue */
+  --chart-tertiary: oklch(64% 0.045 258);          /* blue-gray */
+  --chart-neutral-1: var(--color-neutral-400);     /* medium gray (visible on dark) */
+  --chart-neutral-2: var(--color-neutral-200);     /* near-white */
+  --chart-neutral-3: var(--color-neutral-600);
+  --chart-grid: var(--color-border-subtle);
+  --chart-tooltip-bg: var(--color-surface-raised);
+  --chart-tooltip-border: var(--color-border);
+  --chart-tooltip-text: var(--color-foreground);
+}
+[data-theme='light'] {
+  --chart-primary: var(--color-accent);
+  --chart-secondary: var(--color-accent-400);
+  --chart-tertiary: oklch(58% 0.05 258);           /* blue-gray */
+  --chart-neutral-1: var(--color-neutral-500);     /* medium gray */
+  --chart-neutral-2: var(--color-neutral-700);     /* charcoal */
+  --chart-neutral-3: var(--color-neutral-300);
+}
+
+.recall-chart-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  background: var(--color-surface);
+  padding: 0.75rem 0.875rem;
+}
+.recall-chart-svg { max-height: 260px; }
+.recall-chart-grid { stroke: var(--chart-grid); stroke-width: 1; }
+.recall-chart-axis { fill: var(--color-subtle-foreground); font-size: 10px; }
+.recall-chart-line { stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+.recall-chart-area { opacity: 0.1; }
+.recall-chart-slice { stroke: var(--color-surface); stroke-width: 2; transition: opacity 0.12s ease; }
+.recall-chart-bar { transition: opacity 0.12s ease; }
+.recall-chart-interactive:hover { opacity: 0.82; cursor: default; }
+.recall-chart-tooltip {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 10px));
+  min-width: 3rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--chart-tooltip-bg);
+  border: 1px solid var(--chart-tooltip-border);
+  color: var(--chart-tooltip-text);
+  box-shadow: 0 4px 14px oklch(0% 0 0 / 0.16);
+  line-height: 1.25;
+}
+
+/* Internal note-link chip — reads as a quiet link, not a button. */
+.recall-note-link,
+.recall-notes-prose a.recall-note-link {
+  color: var(--color-foreground);
+  text-decoration: none;
+  background: color-mix(in oklch, var(--color-accent, oklch(60% 0.15 258)) 12%, transparent);
+  cursor: pointer;
+  padding: 0 0.2rem;
+  border-radius: 0.3rem;
+  line-height: 1.4;
+}
+.recall-note-link:hover { background: color-mix(in oklch, var(--color-accent, oklch(60% 0.15 258)) 20%, transparent); }
+
+/* Tabs — a polished Recall surface card, not a flat gray block. Header bar reads as chrome; the
+ * panel is a clean writing surface. Uses theme surface tokens so light/dark/midnight all adapt. */
+.recall-tabs {
+  margin: 0.5rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--color-surface);
+  overflow: hidden;
+  box-shadow: 0 1px 2px oklch(0% 0 0 / 0.05);
+}
+.recall-tabs-bar {
+  padding: 0.3rem 0.4rem;
+  margin-bottom: 0;
+  background: var(--color-surface-raised);
+}
+.recall-tabs-panels { padding: 0.75rem 0.9rem; }
+.recall-tabs-panels > * { min-width: 0; }
+.recall-tab-panel > *:first-child { margin-top: 0; }
+.recall-tab-panel > *:last-child { margin-bottom: 0; }
+
+/* ---- Left-gutter block controls (Tiptap DragHandle) ---------------------------------------------
+ * The extension toggles the element's visibility on hover/focus and sets `position`; we only paint
+ * it. Lives in the page's existing left padding, so the gutter never permanently eats layout space. */
+.recall-block-handle {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding-right: 0.2rem;
+  z-index: 5;
+}
+
+/* Extend the editor's own box left into the page gutter (full note surface only) so hovering the
+ * EMPTY space where the controls live still surfaces them — the DragHandle listens to mousemove on
+ * the editor DOM, and padding is part of that box. Negative margin cancels the visual shift, so text
+ * stays put. Scoped to ≥640px where the page has ≥2.5rem side padding to absorb it. */
+@media (min-width: 640px) {
+  .recall-notes-roomy .recall-notes-prose {
+    padding-left: 2.5rem;
+    margin-left: -2.5rem;
+  }
+}
+
+/* Drop indicator (insertion line) while dragging a block — the accent color/width come from the
+ * StarterKit dropcursor config; round it so it reads as a clean Recall insertion line. */
+.ProseMirror .prosemirror-dropcursor-block,
+.ProseMirror-dropcursor {
+  border-radius: 9999px;
+}
+
+/* Selected block (NodeSelection from the handle, or an atom) — subtle Recall tint, never loud. */
+.recall-notes-prose .ProseMirror-selectednode {
+  outline: 2px solid color-mix(in oklch, var(--color-accent) 45%, transparent);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Notion-style multi-block selection: full-width row highlight (from block-selection-decoration).
+ * Suppress the native glyph-level ::selection inside these rows so the block tint reads clean. */
+.recall-notes-prose .recall-block-selected {
+  background: var(--color-accent-muted);
+  border-radius: 0.25rem;
+}
+.recall-notes-prose .recall-block-selected::selection,
+.recall-notes-prose .recall-block-selected ::selection {
+  background: transparent;
+}
+
+/* Inline date chip */
+.recall-date-chip {
+  background: var(--color-accent-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease;
+}
+.recall-date-chip:hover {
+  background: color-mix(in oklch, var(--color-accent) 22%, transparent);
+}
+
+/* Media + callout spacing */
+.recall-media-block, .recall-chart-block, .recall-callout { margin: 0.5rem 0; }
+.recall-callout > div > .min-w-0 > *:first-child { margin-top: 0; }
+.recall-callout > div > .min-w-0 > *:last-child { margin-bottom: 0; }
+
+/* ---- Page / notebook backgrounds --------------------------------------------------------------
+ * CSS-generated, very subtle, theme-token driven (no images, no beige paper). The mark color is a
+ * low-alpha slice of the foreground so it adapts to light / dark / midnight automatically. Sits
+ * BEHIND content (background-image on the canvas), never captures pointer events; opaque blocks
+ * (code/tables/tabs/callouts/media) cover it, so everything stays readable. Line spacing tracks the
+ * default comfortable line-height (best-effort guidance, not a layout constraint). */
+.recall-paper {
+  --paper-mark: color-mix(in oklch, var(--color-foreground) 8%, transparent);
+  --paper-cell: 1.75rem;
+  /* The vertical distance from the top of the scroll area to the first writing line (breadcrumb +
+   * icon + title). Used to phase the rules so a line lands right under the first text line, then the
+   * matched line-height below keeps every following line on a rule. */
+  --paper-offset: 0.75rem;
+  background-repeat: repeat;
+  background-attachment: local; /* pattern scrolls with the content, not the viewport */
+}
+[data-theme='dark'] .recall-paper {
+  --paper-mark: color-mix(in oklch, var(--color-foreground) 10%, transparent);
+}
+.recall-paper[data-paper='lined'] {
+  background-image: linear-gradient(to bottom, var(--paper-mark) 1px, transparent 1px);
+  background-size: 100% var(--paper-cell);
+  background-position: 0 var(--paper-offset);
+}
+.recall-paper[data-paper='dotted'] {
+  background-image: radial-gradient(var(--paper-mark) 1.1px, transparent 1.2px);
+  background-size: var(--paper-cell) var(--paper-cell);
+}
+.recall-paper[data-paper='grid'] {
+  background-image:
+    linear-gradient(to bottom, var(--paper-mark) 1px, transparent 1px),
+    linear-gradient(to right, var(--paper-mark) 1px, transparent 1px);
+  background-size: var(--paper-cell) var(--paper-cell);
+  background-position: 0 var(--paper-offset);
+}
+
+/* Align the writing rhythm to the paper cell so text sits ON the rules (lined) / rows (grid). Each
+ * paragraph/list line becomes exactly one cell tall and inter-paragraph gaps collapse to the cell, so
+ * once the first line is phased (--paper-offset) every following line stays on a rule. Headings keep
+ * their own size (they simply span a couple of cells, like ruled paper). */
+.recall-paper[data-paper='lined'] .recall-notes-prose p,
+.recall-paper[data-paper='lined'] .recall-notes-prose li,
+.recall-paper[data-paper='grid'] .recall-notes-prose p,
+.recall-paper[data-paper='grid'] .recall-notes-prose li {
+  line-height: var(--paper-cell);
+}
+.recall-paper[data-paper='lined'] .recall-notes-prose > p + p,
+.recall-paper[data-paper='lined'] .recall-notes-prose > ul + p,
+.recall-paper[data-paper='lined'] .recall-notes-prose > p + ul,
+.recall-paper[data-paper='grid'] .recall-notes-prose > p + p,
+.recall-paper[data-paper='grid'] .recall-notes-prose > ul + p,
+.recall-paper[data-paper='grid'] .recall-notes-prose > p + ul {
+  margin-top: 0;
+}
+
+/* Slash menu — subtle, design-system scrollbar that doesn't dominate. */
+.recall-slash-scroll { scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+.recall-slash-scroll::-webkit-scrollbar { width: 8px; }
+.recall-slash-scroll::-webkit-scrollbar-track { background: transparent; }
+.recall-slash-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.recall-slash-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); background-clip: padding-box; }

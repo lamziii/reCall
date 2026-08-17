@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from '@/lib/router-compat'
-import { Bell, Menu, Plus, User } from 'lucide-react'
+import { Bell, CheckSquare, FolderKanban, Menu, Mic, NotebookText, Plus, User } from 'lucide-react'
 import { Header } from '@/components/layout/header'
 import { IconButton } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
@@ -8,9 +8,16 @@ import { NotificationsMenu } from './notifications-menu'
 import { ProfileMenu } from './profile-menu'
 import { ThemeToggle } from '@/app/theme/theme-toggle'
 import { RecallAiTrigger } from '@/components/ai/recall-ai-trigger'
-import { APP_BASE, MAIN_NAV, getActiveNavItem } from './nav-config'
+import { APP_BASE, getActiveNavItem } from './nav-config'
 
-const QUICK_ADD_TARGETS = new Set([`${APP_BASE}/sessions`, `${APP_BASE}/projects`, `${APP_BASE}/tasks`])
+// Global "Create new" actions. New note reuses the standalone-note creation flow (/app/notes/new →
+// createNote → redirect to the real id), same as the Notes sidebar — no separate persistence path.
+const CREATE_ITEMS = [
+  { label: 'New session', to: `${APP_BASE}/sessions`, icon: Mic },
+  { label: 'New note', to: `${APP_BASE}/notes/new`, icon: NotebookText },
+  { label: 'New project', to: `${APP_BASE}/projects`, icon: FolderKanban },
+  { label: 'New task', to: `${APP_BASE}/tasks`, icon: CheckSquare },
+]
 
 export interface RecallTopbarProps {
   onOpenSearch: () => void
@@ -43,9 +50,9 @@ export function RecallTopbar({ onOpenSearch, onOpenMobileNav, showMobileMenuButt
             </DropdownMenuTrigger>
             <DropdownMenuContent width={192} placement="bottom-end">
               <DropdownMenuLabel>Create new</DropdownMenuLabel>
-              {MAIN_NAV.filter((item) => QUICK_ADD_TARGETS.has(item.to)).map((item) => (
+              {CREATE_ITEMS.map((item) => (
                 <DropdownMenuItem key={item.to} icon={<item.icon />} onSelect={() => navigate(item.to)}>
-                  New {item.label.replace(/s$/, '').toLowerCase()}
+                  {item.label}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

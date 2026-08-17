@@ -25,6 +25,7 @@ import {
   NOTES_EDITOR_WIDTH_OPTIONS,
   NOTES_LINE_HEIGHT_OPTIONS,
   NOTES_TABLE_SIZE_OPTIONS,
+  NOTES_PAPER_STYLE_OPTIONS,
   NOTES_TEXT_SIZE_OPTIONS,
   QUICK_ACTIONS,
   RADIUS_OPTIONS,
@@ -154,6 +155,7 @@ export function sanitizePreferences(raw: unknown): RecallPreferences {
       showCodeLanguageSelector: bool(notes.showCodeLanguageSelector, d.notes.showCodeLanguageSelector),
       showCopyButton: bool(notes.showCopyButton, d.notes.showCopyButton),
       defaultTableSize: pickNumber(notes.defaultTableSize, NOTES_TABLE_SIZE_OPTIONS, d.notes.defaultTableSize),
+      defaultPaperStyle: pick(notes.defaultPaperStyle, NOTES_PAPER_STYLE_OPTIONS, d.notes.defaultPaperStyle),
     },
     productivity: {
       autoExpandLatestSession: bool(prod.autoExpandLatestSession, d.productivity.autoExpandLatestSession),

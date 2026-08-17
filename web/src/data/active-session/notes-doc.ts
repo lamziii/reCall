@@ -52,8 +52,27 @@ export function toNotesDoc(input: { doc?: unknown; content?: string | null } | n
 function inlineText(node: PMNode | undefined): string {
   if (!node) return ''
   if (typeof node.text === 'string') return node.text
+  // Internal note links are inline atoms — surface their label so text reads naturally for the AI.
+  if (node.type === 'noteLink') return String(node.attrs?.label ?? '')
+  // Date chips → readable "Date: February 23, 2027" for the AI (never the raw ISO value).
+  if (node.type === 'date') {
+    const value = String(node.attrs?.value ?? '')
+    return value ? `Date: ${formatDateValue(value)}` : ''
+  }
   if (node.content) return node.content.map(inlineText).join('')
   return ''
+}
+
+/** tz-safe "February 23, 2027" (optionally with time) from a stored date value. Pure — no Tiptap. */
+function formatDateValue(value: string): string {
+  const [datePart, timePart] = value.split('T')
+  const [y, m, d] = datePart.split('-').map(Number)
+  if (!y || !m || !d) return value
+  const date = timePart
+    ? new Date(y, m - 1, d, Number(timePart.split(':')[0]) || 0, Number(timePart.split(':')[1]) || 0)
+    : new Date(y, m - 1, d)
+  const day = date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+  return timePart ? `${day} ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}` : day
 }
 
 /**
@@ -90,9 +109,50 @@ function serializeBlock(node: PMNode, depth = 0): string {
       return `${pad}---`
     case 'table':
       return serializeTable(node, pad)
+    case 'callout': {
+      const icon = String(node.attrs?.icon ?? '').trim()
+      const body = (node.content ?? []).map((c) => serializeBlock(c, depth)).filter(Boolean).join('\n')
+      return icon ? `${pad}${icon} ${body.trimStart()}` : `${pad}${body}`
+    }
+    case 'chart':
+      return serializeChart(node, pad)
+    case 'tabs':
+      return serializeTabs(node, pad, depth)
+    case 'tab':
+      return (node.content ?? []).map((c) => serializeBlock(c, depth)).filter(Boolean).join('\n')
+    case 'image':
+    case 'video':
+    case 'audio':
+    case 'file': {
+      // Never emit binary/URLs to the AI — just a labeled placeholder.
+      const label = String(node.attrs?.caption || node.attrs?.name || '').trim()
+      const kind = node.type.charAt(0).toUpperCase() + node.type.slice(1)
+      return `${pad}[${kind}${label ? `: ${label}` : ''}]`
+    }
     default:
       return pad + inlineText(node)
   }
+}
+
+/** "Chart: <title>" then one "Label: value" line per category (first series). */
+function serializeChart(node: PMNode, pad: string): string {
+  const data = (node.attrs?.data ?? {}) as { title?: string; categories?: unknown[]; series?: { values?: unknown[] }[] }
+  const cats = Array.isArray(data.categories) ? data.categories : []
+  const values = Array.isArray(data.series?.[0]?.values) ? data.series![0].values! : []
+  const lines = cats.map((c, i) => `${pad}${String(c)}: ${values[i] ?? 0}`)
+  const title = String(data.title ?? '').trim() || 'Chart'
+  return [`${pad}Chart: ${title}`, ...lines].join('\n')
+}
+
+/** "Tabs:" then, per tab, "[Title]" followed by that tab's serialized content. */
+function serializeTabs(node: PMNode, pad: string, depth: number): string {
+  const tabs = (node.content ?? []).filter((t) => t.type === 'tab')
+  const blocks = tabs.map((t) => {
+    const title = String(t.attrs?.title ?? 'Tab')
+    const body = (t.content ?? []).map((c) => serializeBlock(c, depth)).filter(Boolean).join('\n')
+    return `${pad}[${title}]\n${body}`.trimEnd()
+  })
+  return `${pad}Tabs:\n\n${blocks.join('\n\n')}`
 }
 
 function serializeListItem(li: PMNode, depth: number, marker: string): string {

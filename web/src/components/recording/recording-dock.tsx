@@ -83,6 +83,7 @@ function DockNotesPanel({ onCollapse }: { onCollapse: () => void }) {
         onChange={notes.onChange}
         onBlur={notes.onBlur}
         onMarkMoment={notes.onMarkMoment}
+        openFullHref={notes.sessionId ? `/app/notes/session/${notes.sessionId}` : undefined}
         autofocus
         compact
         placeholder="Capture a thought…  /  for blocks"

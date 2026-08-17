@@ -1,6 +1,6 @@
 'use client'
-import { NoteDetailPage } from '@/views/app/note-detail'
+import { PersonalNotePane } from '@/views/app/notes/personal-note-pane'
 
 export default function Page() {
-  return <NoteDetailPage />
+  return <PersonalNotePane />
 }

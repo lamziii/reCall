@@ -94,6 +94,7 @@ export function SessionNotesTab({
           initialDoc={initialDoc}
           onChange={handleChange}
           options={editorOptions}
+          uploadTarget={{ workspaceId, authorId, noteId: sessionId }}
           placeholder="You didn't capture notes during this session. You can add them here.  /  for blocks"
           className="min-h-[240px]"
         />

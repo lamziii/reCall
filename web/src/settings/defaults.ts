@@ -62,6 +62,7 @@ export const DEFAULT_RECALL_PREFERENCES: RecallPreferences = {
     showCodeLanguageSelector: true,
     showCopyButton: true,
     defaultTableSize: 3,
+    defaultPaperStyle: 'blank',
   },
   productivity: {
     autoExpandLatestSession: false,
