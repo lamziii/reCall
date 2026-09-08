@@ -1,4 +1,4 @@
-import { Calendar, Clock, FolderKanban, Users } from 'lucide-react'
+import { Calendar, Clock, FolderKanban, Users } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { SessionStatus, type SessionStatusValue } from './session-status'
 

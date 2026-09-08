@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { Home, Mic } from 'lucide-react'
+import { Home, Mic } from '@/components/icons'
 import { PageContainer } from '@/components/layout/page'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ErrorState } from '@/components/feedback/error-state'

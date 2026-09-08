@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { Clock } from 'lucide-react'
+import { Clock } from '@/components/icons'
 import { Input, type InputProps } from '@/components/forms/input'
 
 export type TimePickerProps = Omit<InputProps, 'type' | 'leftIcon'>

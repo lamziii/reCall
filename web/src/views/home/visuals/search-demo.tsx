@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Search, HelpCircle } from 'lucide-react'
+import { Search, HelpCircle } from '@/components/icons'
 import { MENTION_ICONS } from '@/components/recall/mention'
 import { DecisionStatus, type DecisionStatusValue } from '@/components/recall/decision-status'
 import { TaskStatus, type TaskStatusValue } from '@/components/recall/task-status'

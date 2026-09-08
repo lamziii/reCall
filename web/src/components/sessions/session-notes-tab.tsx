@@ -9,7 +9,7 @@
  * (migration-on-read via toNotesDoc). Existing 'moment' marks are preserved on edit.
  */
 import { useMemo, useRef, useState } from 'react'
-import { Flag } from 'lucide-react'
+import { Flag } from '@/components/icons'
 import { Small } from '@/components/typography'
 import { useAuth } from '@/lib/auth/auth-context'
 import { RichNotesEditor } from '@/components/recording/rich-notes-editor'

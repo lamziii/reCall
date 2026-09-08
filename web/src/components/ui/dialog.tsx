@@ -1,7 +1,7 @@
 import { cloneElement, createContext, isValidElement, useContext, useEffect, useRef } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X } from '@/components/icons'
 import { useControllableState } from '@/hooks'
 import { cn } from '@/lib/utils'
 

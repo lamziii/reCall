@@ -1,4 +1,4 @@
-import { Plus, Pin, Trash2 } from 'lucide-react'
+import { Plus, Pin, PinSolid, Trash2 } from '@/components/icons'
 import { useRecallAiStore, type AiChat } from '@/lib/ai/recall-ai-provider'
 import { useAiContext } from '@/lib/ai/use-ai-context'
 import { RecallAiThread } from '@/components/ai/recall-ai-thread'
@@ -38,7 +38,7 @@ function ChatRow({
             chat.pinned ? 'opacity-100 text-foreground' : 'opacity-0 group-hover:opacity-100',
           )}
         >
-          <Pin className={cn('size-3.5', chat.pinned && 'fill-current')} />
+          {chat.pinned ? <PinSolid className="size-3.5" /> : <Pin className="size-3.5" />}
         </button>
         <button
           type="button"

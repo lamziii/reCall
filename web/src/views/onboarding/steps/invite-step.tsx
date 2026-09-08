@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X } from '@/components/icons'
 import { Input, Select } from '@/components/forms'
 import { Button, IconButton } from '@/components/ui/button'
 import { Badge } from '@/components/data-display/badge'

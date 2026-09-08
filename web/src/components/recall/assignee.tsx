@@ -1,4 +1,4 @@
-import { User } from 'lucide-react'
+import { User } from '@/components/icons'
 import { Avatar } from '@/components/data-display/avatar'
 import { cn } from '@/lib/utils'
 

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { LogOut, Settings } from 'lucide-react'
+import { LogOut, Settings } from '@/components/icons'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import type { Placement } from '@/lib/utils'
 import { useAuth } from '@/lib/auth/auth-context'

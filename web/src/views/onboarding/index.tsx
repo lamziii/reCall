@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from '@/lib/router-compat'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Caption } from '@/components/typography'
 import { Alert, useToast } from '@/components/feedback'

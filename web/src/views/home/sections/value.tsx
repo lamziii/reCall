@@ -1,4 +1,5 @@
-import { CheckSquare, FileText, FolderKanban, GitBranch, HelpCircle, User, Video } from 'lucide-react'
+import { CheckSquare, FileText, FolderKanban, HelpCircle, User, Video } from '@/components/icons'
+import { GitBranch } from 'lucide-react'
 import { Container } from '@/components/layout/container'
 import { Badge } from '@/components/data-display/badge'
 import { Reveal, Stagger, RevealItem } from '../reveal'

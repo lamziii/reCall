@@ -1,10 +1,11 @@
-import { AtSign, CheckSquare, ChevronDown, ChevronUp, ClipboardCheck, FolderKanban, GitBranch, Mic } from 'lucide-react'
+import { CheckSquare, ChevronDown, ChevronUp, ClipboardCheck, FolderKanban, Mic, type IconComponent } from '@/components/icons'
+import { AtSign, GitBranch } from 'lucide-react'
 import { Card } from '@/components/data-display/card'
 import { IconButton } from '@/components/ui/button'
 import { Small, Caption } from '@/components/typography'
 import type { NotificationType } from '@/data/types'
 
-const TYPE_ICON: Record<NotificationType, typeof Mic> = {
+const TYPE_ICON: Record<NotificationType, IconComponent> = {
   'session-processed': Mic,
   'task-assigned': CheckSquare,
   'decision-approved': GitBranch,

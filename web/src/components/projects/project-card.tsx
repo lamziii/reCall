@@ -1,5 +1,6 @@
 import { useNavigate } from '@/lib/router-compat'
-import { CalendarClock, CheckSquare, FileText, FolderKanban, GitBranch, Layers, Rocket, Target } from 'lucide-react'
+import { CheckSquare, FileText, FolderKanban, Layers, Rocket, Target } from '@/components/icons'
+import { CalendarClock, GitBranch } from 'lucide-react'
 import { Card } from '@/components/data-display/card'
 import { Progress } from '@/components/feedback/progress'
 import { Avatar, AvatarGroup } from '@/components/data-display/avatar'

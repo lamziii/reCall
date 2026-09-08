@@ -5,7 +5,7 @@
  * paper backgrounds, each with a compact preview swatch and a check on the current one. Selecting a
  * style calls onChange immediately (the pane persists it). Shared by personal + meeting note panes.
  */
-import { Check } from 'lucide-react'
+import { Check } from '@/components/icons'
 import { DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { PAPER_STYLES, type PaperStyle } from '@/data/notes/note-model'
 

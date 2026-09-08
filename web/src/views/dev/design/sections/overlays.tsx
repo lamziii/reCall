@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, FileText, Folder, Pencil, Search as SearchIcon, Sparkles, Trash2 } from 'lucide-react'
+import { Copy, FileText, Folder, Pencil, Search as SearchIcon, Sparkles, Trash2 } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

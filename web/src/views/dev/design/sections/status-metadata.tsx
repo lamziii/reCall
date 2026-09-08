@@ -1,4 +1,4 @@
-import { Sparkles, Users, FolderKanban } from 'lucide-react'
+import { Sparkles, Users, FolderKanban } from '@/components/icons'
 import { Badge } from '@/components/data-display/badge'
 import { StatusBadge } from '@/components/data-display/status-badge'
 import { PriorityBadge } from '@/components/data-display/priority-badge'

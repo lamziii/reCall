@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, X } from '@/components/icons'
 import { Input, type InputProps } from './input'
 
 export interface SearchInputProps extends Omit<InputProps, 'leftIcon' | 'rightIcon' | 'type'> {

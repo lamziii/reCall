@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, ListChecks, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, Plus, Trash2 } from '@/components/icons'
+import { ListChecks } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { SegmentedControl, Select, SearchInput } from '@/components/forms'

@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from '@/components/icons'
 import { cn } from '@/lib/utils'
 
 export interface BackButtonProps {

@@ -1,4 +1,4 @@
-import { Calendar, FolderKanban, LayoutGrid, Search as SearchIcon, Settings } from 'lucide-react'
+import { Calendar, FolderKanban, LayoutGrid, Search as SearchIcon, Settings } from '@/components/icons'
 import { Sidebar, SidebarHeader, SidebarSection, SidebarItem, SidebarFooter } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { Panel } from '@/components/layout/panel'

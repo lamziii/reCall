@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { X } from '@/components/icons'
 import { Avatar } from './avatar'
 import { cn } from '@/lib/utils'
 

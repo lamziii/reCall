@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from '@/lib/router-compat'
-import { ExternalLink, MoreHorizontal, Star, Video } from 'lucide-react'
+import { ExternalLink, MoreHorizontal, Star, Video } from '@/components/icons'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'

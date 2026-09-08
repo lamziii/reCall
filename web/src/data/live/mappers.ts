@@ -197,7 +197,7 @@ export function sessionDurationMinutes(session: LiveSessionDoc): number {
   return seconds ? Math.max(1, Math.round(seconds / 60)) : 0
 }
 
-function sessionListItem(session: LiveSessionDoc): SessionListItem {
+export function sessionListItem(session: LiveSessionDoc): SessionListItem {
   const iso = tsToIso(session.created_at)
   const durationMinutes = sessionDurationMinutes(session)
   const status = liveSessionStatus(session)

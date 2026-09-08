@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { CheckSquare, Mic, Plus, Search as SearchIcon } from 'lucide-react'
+import { CheckSquare, Mic, Plus, Search as SearchIcon } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'

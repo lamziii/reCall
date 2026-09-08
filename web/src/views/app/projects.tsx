@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FolderKanban, Plus, Search as SearchIcon, Upload } from 'lucide-react'
+import { FolderKanban, Plus, Search as SearchIcon, Upload } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'
@@ -9,11 +9,15 @@ import { List } from '@/components/data-display/list'
 import { useToast } from '@/components/feedback/toast'
 import { useProjectsListData } from '@/data/projects/use-projects-list-data'
 import { ProjectCard, ProjectRow, ProjectsToolbar } from '@/components/projects'
+import { ProjectCreateDialog } from '@/components/projects/project-create-dialog'
+import { isLiveMode } from '@/data/live/data-mode'
 import type { ProjectSortOption, ProjectStatusFilter, ProjectView } from '@/data/projects/types'
 
 export function ProjectsPage() {
   const { toast } = useToast()
   const { state, refetch } = useProjectsListData()
+  const [createOpen, setCreateOpen] = useState(false)
+  const startCreate = () => (isLiveMode ? setCreateOpen(true) : placeholderAction('New Project'))
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<ProjectStatusFilter>('all')
   const [ownerId, setOwnerId] = useState('all')
@@ -63,7 +67,7 @@ export function ProjectsPage() {
       <Button variant="ghost" leftIcon={<Upload />} onClick={() => placeholderAction('Import')}>
         Import
       </Button>
-      <Button leftIcon={<Plus />} onClick={() => placeholderAction('New Project')}>
+      <Button leftIcon={<Plus />} onClick={startCreate}>
         New Project
       </Button>
     </>
@@ -102,7 +106,7 @@ export function ProjectsPage() {
             description="Projects organize conversations into long-term work."
             action={
               <div className="flex items-center gap-2">
-                <Button onClick={() => placeholderAction('Create Project')}>Create Project</Button>
+                <Button onClick={startCreate}>Create Project</Button>
                 <Button variant="secondary" onClick={() => placeholderAction('Import')}>
                   Import
                 </Button>
@@ -110,6 +114,7 @@ export function ProjectsPage() {
             }
           />
         </div>
+        <ProjectCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
       </PageContainer>
     )
   }
@@ -168,6 +173,7 @@ export function ProjectsPage() {
           ))}
         </List>
       )}
+      <ProjectCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
     </PageContainer>
   )
 }

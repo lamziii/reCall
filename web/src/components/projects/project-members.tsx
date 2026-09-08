@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react'
+import { Users } from '@/components/icons'
 import { List, ListItem } from '@/components/data-display/list'
 import { Avatar } from '@/components/data-display/avatar'
 import { Badge } from '@/components/data-display/badge'

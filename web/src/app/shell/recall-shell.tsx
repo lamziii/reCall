@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Outlet, useLocation, useNavigate } from "@/lib/router-compat";
 import { AnimatePresence, motion } from "framer-motion";
 import { useResolvedPreferences } from "@/settings/use-resolved-preferences";
-import { Video, CheckSquare, FolderKanban, NotebookText, Plus, PanelLeftOpen, ArrowLeft } from "lucide-react";
+import { Video, CheckSquare, FolderKanban, NotebookText, Plus, ArrowLeft } from '@/components/icons'
+import { PanelLeftOpen } from 'lucide-react'
 import { AppShell } from "@/components/layout/app-shell";
 import { Content } from "@/components/layout/content";
 import { Sheet, SheetContent } from "@/components/ui/sheet";

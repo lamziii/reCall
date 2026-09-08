@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Search } from 'lucide-react'
+import { Search } from '@/components/icons'
 import { KeyboardShortcut } from '@/components/ui/keyboard-shortcut'
 import { cn } from '@/lib/utils'
 

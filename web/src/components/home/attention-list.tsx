@@ -5,7 +5,7 @@ import { List, ListItem } from '@/components/data-display/list'
 import { SegmentedControl } from '@/components/forms/segmented-control'
 import { InsightLabel } from '@/components/recall/insight-label'
 import { EmptyState } from '@/components/feedback/empty-state'
-import { CheckSquare, Inbox } from 'lucide-react'
+import { CheckSquare, Inbox } from '@/components/icons'
 import { Caption, Title } from '@/components/typography'
 import type { AttentionItem, AttentionType } from '@/data/home/types'
 

@@ -1,4 +1,5 @@
-import { Maximize2, SquarePen, X } from 'lucide-react'
+import { SquarePen, X } from '@/components/icons'
+import { Maximize2 } from 'lucide-react'
 import { IconButton } from '@/components/ui/button'
 import { RecallAiIcon } from './recall-ai-icon'
 

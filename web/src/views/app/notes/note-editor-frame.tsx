@@ -6,7 +6,7 @@
  * PersonalNotePane and MeetingNotePane supply content + callbacks so both note sources render an
  * identical editing experience. Deliberately minimal — no toolbar (blocks come from `/`).
  */
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight } from '@/components/icons'
 import { RichNotesEditor } from '@/components/recording/rich-notes-editor'
 import { EmojiPopover } from '@/components/notes/emoji-popover'
 import { useNotesEditorOptions, notesWidthClass } from '@/data/notes/use-notes-editor-options'

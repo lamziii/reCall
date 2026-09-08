@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { Calendar } from 'lucide-react'
+import { Calendar } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { List, ListItem } from '@/components/data-display/list'
 import { Avatar, AvatarGroup } from '@/components/data-display/avatar'

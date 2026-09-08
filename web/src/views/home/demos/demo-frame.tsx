@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { LayoutGrid, ListChecks, Mic, FolderKanban, MessageSquare } from 'lucide-react'
+import { LayoutGrid, Mic, FolderKanban, MessageSquare } from '@/components/icons'
+import { ListChecks } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const RAIL_ICONS = [

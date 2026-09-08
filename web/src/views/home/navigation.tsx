@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useNavigate } from '@/lib/router-compat'
-import { Menu } from 'lucide-react'
+import { Menu } from '@/components/icons'
 import { Wordmark } from '@/components/branding/logo'
 import { Button, IconButton } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'

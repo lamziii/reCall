@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp } from '@/components/icons'
 import { IconButton } from '@/components/ui/button'
 import { Switch } from '@/components/forms/switch'
 import { QUICK_ACTIONS, type QuickActionPreference } from '@/settings/types'

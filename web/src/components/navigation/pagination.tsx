@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MoreHorizontal } from '@/components/icons'
 import { cn } from '@/lib/utils'
 
 export interface PaginationProps {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useLocation, useNavigate } from '@/lib/router-compat'
-import { FileText, Mic } from 'lucide-react'
+import { FileText, Mic } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { FormField, Input, Select, Textarea } from '@/components/forms'
 import { Button } from '@/components/ui/button'

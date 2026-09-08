@@ -7,7 +7,7 @@
  */
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { NotebookText, Star, Video } from 'lucide-react'
+import { NotebookText, Star, StarSolid, Video } from '@/components/icons'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { SearchInput } from '@/components/forms/search-input'
 import { Select } from '@/components/forms/select'
@@ -86,7 +86,7 @@ function Row({ item, folder, onOpen, onToggleFavorite, updated }: { item: NoteLi
         <span className="w-24 text-right tabular-nums">{updated}</span>
       </div>
       <button type="button" aria-label={item.favorite ? 'Remove favorite' : 'Add to favorites'} aria-pressed={item.favorite} onClick={onToggleFavorite} className={cn('focus-ring flex size-7 shrink-0 items-center justify-center rounded-md transition-fast hover:bg-surface-hover', item.favorite ? 'text-warning' : 'text-subtle-foreground opacity-0 hover:text-foreground group-hover:opacity-100')}>
-        <Star className={cn('size-4', item.favorite && 'fill-warning')} />
+        {item.favorite ? <StarSolid className="size-4 text-warning" /> : <Star className="size-4" />}
       </button>
     </li>
   )

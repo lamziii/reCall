@@ -11,7 +11,7 @@
 import { Node } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps, type Editor } from '@tiptap/react'
 import { useRef, useState } from 'react'
-import { BarChart3, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { BarChart3, Pencil, Plus, Trash2, X } from '@/components/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useEditorSurface } from './editor-surface'
 import { cn } from '@/lib/utils'

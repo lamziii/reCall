@@ -9,14 +9,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Editor } from '@tiptap/react'
-import {
-  ArrowDownToLine,
-  ArrowLeftToLine,
-  ArrowRightToLine,
-  ArrowUpToLine,
-  MoreHorizontal,
-  Trash2,
-} from 'lucide-react'
+import { MoreHorizontal, Trash2 } from '@/components/icons'
+import { ArrowDownToLine, ArrowLeftToLine, ArrowRightToLine, ArrowUpToLine } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Anchor {

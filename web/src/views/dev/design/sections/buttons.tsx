@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Download, Plus, Trash2, ChevronRight, Archive } from 'lucide-react'
+import { Copy, Download, Plus, Trash2, ChevronRight, Archive } from '@/components/icons'
 import { Button, IconButton } from '@/components/ui/button'
 import { ButtonGroup, SplitButton } from '@/components/buttons'
 import { PlaygroundSection, PlaygroundRow } from '../playground-section'

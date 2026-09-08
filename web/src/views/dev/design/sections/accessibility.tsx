@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react'
+import { Check } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { ConfidenceIndicator } from '@/components/recall/confidence-indicator'
 import { DueDate } from '@/components/recall/due-date'

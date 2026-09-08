@@ -1,4 +1,4 @@
-import { Mic, Upload } from 'lucide-react'
+import { Mic, Upload } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Caption, H2, Small } from '@/components/typography'
 import { greetingForHour } from '@/data/home/home-dashboard-service'

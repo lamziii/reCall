@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { LayoutGrid, List as ListIcon, Kanban } from 'lucide-react'
+import { LayoutGrid, List as ListIcon } from '@/components/icons'
+import { Kanban } from 'lucide-react'
 import { Select } from '@/components/forms/select'
 import { Combobox } from '@/components/forms/combobox'
 import { Checkbox } from '@/components/forms/checkbox'

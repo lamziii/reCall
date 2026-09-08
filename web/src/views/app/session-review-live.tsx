@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from '@/lib/router-compat'
-import { AlertTriangle, Check, ListChecks, Loader2, Plus, RefreshCw, Sparkles } from 'lucide-react'
+import { AlertTriangle, Check, Plus, RefreshCw, Sparkles } from '@/components/icons'
+import { ListChecks, Loader2 } from 'lucide-react'
 import { PageContainer } from '@/components/layout/page'
 import { Tab, TabList, TabPanel, Tabs } from '@/components/navigation/tabs'
 import { Skeleton } from '@/components/feedback/skeleton'
+import { ShimmerText } from '@/components/feedback/shimmer-text'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
 import { Button } from '@/components/ui/button'
@@ -40,7 +42,9 @@ function ProcessingPanel() {
     <div className="mx-auto flex max-w-md flex-col items-center gap-6 py-20 text-center" aria-live="polite">
       <Sparkles className="size-6 animate-pulse text-foreground" aria-hidden />
       <div className="flex flex-col gap-1">
-        <p className="text-title font-medium text-foreground">Organizing this session…</p>
+        <p className="text-title font-medium">
+          <ShimmerText>Organizing this session…</ShimmerText>
+        </p>
         <Small className="text-muted-foreground">Recall is reading the transcript and structuring the review.</Small>
       </div>
       <ul className="flex w-full flex-col gap-2 text-left">
@@ -84,8 +88,8 @@ function TranscriptionStatusPanel({
     <div className="mx-auto flex max-w-xl flex-col items-center gap-6 py-16 text-center" aria-live="polite">
       <Loader2 className="size-6 animate-spin text-foreground" aria-hidden />
       <div className="flex flex-col gap-1">
-        <p className="text-title font-medium text-foreground">
-          {stageLabel ?? 'Transcribing…'}
+        <p className="text-title font-medium">
+          <ShimmerText>{stageLabel ?? 'Transcribing…'}</ShimmerText>
           {progressPercent !== null && <span className="ml-2 tabular-nums text-muted-foreground">{progressPercent}%</span>}
         </p>
         <Small className="text-muted-foreground">

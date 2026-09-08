@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from '@/lib/router-compat'
-import { Search } from 'lucide-react'
+import { Search } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { PageContainer } from '@/components/layout/page'
 import { Select } from '@/components/forms/select'

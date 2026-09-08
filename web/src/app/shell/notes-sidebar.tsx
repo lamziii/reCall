@@ -14,23 +14,8 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from '@/lib/router-compat'
-import {
-  ChevronDown,
-  ChevronRight,
-  FilePlus2,
-  FolderPlus,
-  MoreHorizontal,
-  NotebookText,
-  Pencil,
-  Plus,
-  Search,
-  Star,
-  Trash2,
-  Video,
-  ArrowLeft,
-  PanelLeftClose,
-  Check,
-} from 'lucide-react'
+import { ChevronDown, ChevronRight, MoreHorizontal, NotebookText, Pencil, Plus, Search, Star, StarSolid, Trash2, Video, ArrowLeft, Check } from '@/components/icons'
+import { FilePlus2, FolderPlus, PanelLeftClose } from 'lucide-react'
 import { useNotes } from '@/data/notes/use-notes'
 import {
   buildFolderTree,
@@ -511,7 +496,7 @@ function NoteLeaf({
           {icon ?? (item.source === 'meeting' ? <Video className="size-3.5" /> : <NotebookText className="size-3.5" />)}
         </span>
         <span className="min-w-0 flex-1 truncate">{displayTitle(item.title)}</span>
-        {item.favorite && <Star className="size-3 shrink-0 fill-warning text-warning" aria-label="Favorite" />}
+        {item.favorite && <StarSolid className="size-3 shrink-0 text-warning" aria-label="Favorite" />}
       </button>
 
       <DropdownMenu>

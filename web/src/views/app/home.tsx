@@ -1,13 +1,13 @@
 import { useNavigate } from '@/lib/router-compat'
 import { motion } from 'framer-motion'
-import { Home } from 'lucide-react'
+import { Home } from '@/components/icons'
 import { useEffectiveReduceMotion } from '@/settings/use-resolved-preferences'
 import { PageContainer } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'
 import {
   HomeHeader,
-  AttentionCard,
+  QuickStart,
   TodaySchedule,
   AttentionList,
   RecentSessions,
@@ -84,7 +84,7 @@ export function AppHomePage() {
         </motion.div>
 
         <motion.div variants={reduceMotion ? undefined : homeItemVariants} className="recall-dashboard-row grid grid-cols-1 gap-6 lg:grid-cols-[65fr_35fr]">
-          <AttentionCard item={data.primaryAttention} />
+          <QuickStart />
           <TodaySchedule sessions={data.todaySchedule} />
         </motion.div>
 

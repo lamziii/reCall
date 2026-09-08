@@ -12,7 +12,7 @@
 import { Node, InputRule } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps, type Editor } from '@tiptap/react'
 import { useState } from 'react'
-import { CalendarDays } from 'lucide-react'
+import { CalendarDays } from '@/components/icons'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 

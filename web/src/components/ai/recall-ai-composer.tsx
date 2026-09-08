@@ -1,5 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
-import { ArrowUp, Square, Mic, Loader2 } from 'lucide-react'
+import { ArrowUp, SquareSolid, Mic } from '@/components/icons'
+import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useVoiceInput } from '@/lib/ai/use-voice-input'
 
@@ -90,7 +91,7 @@ export function RecallAiComposer({
               {transcribing ? (
                 <Loader2 className="size-4.5 animate-spin" />
               ) : recording ? (
-                <Square className="size-3.5 fill-current" />
+                <SquareSolid className="size-3.5" />
               ) : (
                 <Mic className="size-4.5" />
               )}
@@ -104,7 +105,7 @@ export function RecallAiComposer({
               aria-label="Stop generating"
               className="focus-ring flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-bg transition-fast hover:opacity-80 active:scale-95"
             >
-              <Square className="size-3.5 fill-current" />
+              <SquareSolid className="size-3.5" />
             </button>
           ) : (
             <button

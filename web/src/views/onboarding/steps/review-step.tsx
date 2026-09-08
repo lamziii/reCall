@@ -1,4 +1,4 @@
-import { Pencil } from 'lucide-react'
+import { Pencil } from '@/components/icons'
 import { Body, Caption, Label, Small } from '@/components/typography'
 import { Button } from '@/components/ui/button'
 import { PLANS } from '@/data/plans'

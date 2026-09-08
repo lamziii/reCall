@@ -1,6 +1,6 @@
 import { forwardRef, useId } from 'react'
 import type { InputHTMLAttributes, ReactNode } from 'react'
-import { Check, Minus } from 'lucide-react'
+import { Minus } from '@/components/icons'
 import { cn, mergeRefs } from '@/lib/utils'
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -37,10 +37,18 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               'peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring/40',
             )}
           >
-            <Check
-              className="absolute size-3 text-accent-foreground opacity-0 [.peer:checked~span_&]:opacity-100 [.peer:indeterminate~span_&]:opacity-0"
-              strokeWidth={3}
-            />
+            {/* Stroked checkmark that draws itself in on check (transitions.dev checkbox-check).
+                Hidden while unchecked/indeterminate via stroke-dashoffset — see t-check-path in keyframes.css. */}
+            <svg viewBox="0 0 12 12" fill="none" aria-hidden className="absolute size-3 text-accent-foreground">
+              <path
+                d="M2.5 6.5 5 9l4.5-5.5"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="t-check-path [.peer:indeterminate~span_&]:hidden"
+              />
+            </svg>
             <Minus
               className="absolute size-3 text-accent-foreground opacity-0 [.peer:indeterminate~span_&]:opacity-100"
               strokeWidth={3}

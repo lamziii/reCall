@@ -13,7 +13,8 @@
  * No transcript, no navigation, no dashboard widgets.
  */
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronUp, Flag, Maximize2, PictureInPicture2, Square } from 'lucide-react'
+import { ChevronDown, ChevronUp, Flag, SquareSolid } from '@/components/icons'
+import { Maximize2, PictureInPicture2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useActiveSession } from '@/data/active-session/active-session-context'
 import { usePipCompanion } from '@/data/active-session/pip-companion'
@@ -201,7 +202,7 @@ export function RecordingDock() {
           aria-label="End session"
           className="focus-ring flex items-center gap-1.5 rounded-full bg-danger px-3 py-1.5 text-small font-medium text-white transition-fast hover:opacity-90 disabled:opacity-60"
         >
-          <Square className="size-3.5 fill-current" />
+          <SquareSolid className="size-3.5" />
           End
         </button>
       </div>

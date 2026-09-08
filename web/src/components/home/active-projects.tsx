@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { FolderKanban } from 'lucide-react'
+import { FolderKanban } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { List, ListItem } from '@/components/data-display/list'
 import { Progress } from '@/components/feedback/progress'

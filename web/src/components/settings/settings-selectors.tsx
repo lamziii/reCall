@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Check } from 'lucide-react'
+import { Check } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import type { PreferenceOption } from '@/settings/types'
 

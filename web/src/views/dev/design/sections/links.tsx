@@ -1,4 +1,4 @@
-import { ArrowRight, FileText } from 'lucide-react'
+import { ArrowRight, FileText } from '@/components/icons'
 import { Link, ExternalLink, InlineLink, NavLink } from '@/components/links'
 import { Body } from '@/components/typography'
 import { PlaygroundSection, PlaygroundRow } from '../playground-section'

@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight } from '@/components/icons'
 import { Container } from '@/components/layout/container'
 import { Button } from '@/components/ui/button'
 import { BodyLarge } from '@/components/typography'

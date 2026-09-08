@@ -14,7 +14,7 @@ import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent, type NodeViewP
 import { Fragment } from '@tiptap/pm/model'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { ChevronLeft, ChevronRight, MoreHorizontal, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MoreHorizontal, Plus, Trash2 } from '@/components/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useEditorSurface } from './editor-surface'
 import { cn } from '@/lib/utils'

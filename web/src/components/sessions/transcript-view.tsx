@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare } from '@/components/icons'
 import { SearchInput } from '@/components/forms/search-input'
 import { TranscriptSpeaker } from '@/components/recall/transcript-speaker'
 import { EmptyState } from '@/components/feedback/empty-state'

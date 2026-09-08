@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react'
+import { Check, X } from '@/components/icons'
 import { cn } from '@/lib/utils'
 
 export type StepStatus = 'completed' | 'current' | 'pending' | 'error'

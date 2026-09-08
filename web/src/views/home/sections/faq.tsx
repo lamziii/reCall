@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Plus } from 'lucide-react'
+import { Plus } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { SectionShell } from '../section-shell'
 

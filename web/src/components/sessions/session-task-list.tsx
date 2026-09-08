@@ -1,4 +1,4 @@
-import { CheckSquare } from 'lucide-react'
+import { CheckSquare } from '@/components/icons'
 import { Select } from '@/components/forms/select'
 import { PriorityBadge } from '@/components/data-display/priority-badge'
 import { Assignee } from '@/components/recall/assignee'

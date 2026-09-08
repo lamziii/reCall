@@ -6,7 +6,7 @@
  * never touches a Session). Deleting permanently is the only hard delete in Notes.
  */
 import { useState } from 'react'
-import { RotateCcw, Trash2, NotebookText } from 'lucide-react'
+import { RotateCcw, Trash2, NotebookText } from '@/components/icons'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useNotes } from '@/data/notes/use-notes'

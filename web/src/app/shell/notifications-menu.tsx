@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { Bell } from 'lucide-react'
+import { Bell } from '@/components/icons'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import type { Placement } from '@/lib/utils'
 import { EmptyState } from '@/components/feedback/empty-state'

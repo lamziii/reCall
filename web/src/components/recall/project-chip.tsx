@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { FolderKanban, X } from 'lucide-react'
+import { FolderKanban, X } from '@/components/icons'
 import { cn } from '@/lib/utils'
 
 export interface ProjectChipProps {

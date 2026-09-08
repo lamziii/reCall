@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { Switch } from '@/components/forms/switch'
 import { Select } from '@/components/forms/select'

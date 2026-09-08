@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Mic } from 'lucide-react'
+import { Mic } from '@/components/icons'
 import { EmptyState } from '@/components/feedback/empty-state'
 import { TranscriptSpeaker } from '@/components/recall/transcript-speaker'
 import type { FinalizedSegment } from '@/data/recording/recording-types'

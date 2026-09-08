@@ -1,6 +1,8 @@
 import { createContext, useContext, useId, useRef } from 'react'
 import type { ReactNode } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useControllableState } from '@/hooks'
+import { DURATION, EASE_STANDARD } from '@/styles/animations/presets'
 import { cn } from '@/lib/utils'
 
 interface TabsContextValue {
@@ -68,6 +70,7 @@ export function TabList({ children, className }: { children: ReactNode; classNam
 export function Tab({ value, children }: { value: string; children: ReactNode }) {
   const { value: active, setValue, baseId } = useTabsContext('Tab')
   const isActive = active === value
+  const reduce = useReducedMotion()
 
   return (
     <button
@@ -84,7 +87,15 @@ export function Tab({ value, children }: { value: string; children: ReactNode })
       )}
     >
       {children}
-      {isActive && <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-accent" />}
+      {/* Shared-layout underline: framer slides the one active indicator between tabs (transitions.dev
+          tabs-sliding). layoutId is scoped per TabList via baseId. Snaps instantly under reduced motion. */}
+      {isActive && (
+        <motion.span
+          layoutId={`${baseId}-tab-underline`}
+          className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-accent"
+          transition={{ duration: reduce ? 0 : DURATION.base, ease: EASE_STANDARD }}
+        />
+      )}
     </button>
   )
 }

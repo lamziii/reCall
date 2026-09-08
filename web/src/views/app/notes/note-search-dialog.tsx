@@ -6,7 +6,7 @@
  * the editor. Deliberately not a full search page (YAGNI); results are the workspace's own notes.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { NotebookText, Video } from 'lucide-react'
+import { NotebookText, Video } from '@/components/icons'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { SearchInput } from '@/components/forms/search-input'
 import { displayTitle, notePreview, searchNotes, sortNotes, type NoteListItem } from '@/data/notes/note-model'

@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { CheckSquare, FolderKanban, Mic } from 'lucide-react'
+import { CheckSquare, FolderKanban, Mic } from '@/components/icons'
 import { Card } from '@/components/data-display/card'
 import { Avatar } from '@/components/data-display/avatar'
 import { StatusDot, type StatusDotState } from '@/components/data-display/status-dot'

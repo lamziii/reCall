@@ -1,5 +1,6 @@
 import { useNavigate } from '@/lib/router-compat'
-import { AtSign, Bell, CheckCheck, CheckSquare, ClipboardCheck, FolderKanban, GitBranch, Mic } from 'lucide-react'
+import { Bell, CheckCheck, CheckSquare, ClipboardCheck, FolderKanban, Mic, type IconComponent } from '@/components/icons'
+import { AtSign, GitBranch } from 'lucide-react'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/data-display/card'
@@ -12,7 +13,7 @@ import type { NotificationGroupKey, NotificationListItem } from '@/data/notifica
 import type { NotificationType } from '@/data/types'
 import { cn } from '@/lib/utils'
 
-const TYPE_ICON: Record<NotificationType, typeof Bell> = {
+const TYPE_ICON: Record<NotificationType, IconComponent> = {
   'session-processed': Mic,
   'task-assigned': CheckSquare,
   'decision-approved': GitBranch,

@@ -1,4 +1,5 @@
-import { Check, Monitor, Moon, MoonStar, Sun } from 'lucide-react'
+import { Check } from '@/components/icons'
+import { Monitor, Moon, MoonStar, Sun } from 'lucide-react'
 import { IconButton } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import type { ThemePreference } from './theme-provider'

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ArrowUpDown } from 'lucide-react'
+import { ArrowUpDown } from '@/components/icons'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table'
 import { cn } from '@/lib/utils'
 

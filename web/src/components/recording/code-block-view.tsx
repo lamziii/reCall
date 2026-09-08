@@ -6,8 +6,7 @@
  */
 import { createContext, useContext, useState } from 'react'
 import { NodeViewContent, NodeViewWrapper, type NodeViewProps } from '@tiptap/react'
-import { Check, Copy } from 'lucide-react'
-
+import { Check, Copy } from '@/components/icons'
 /** Editor-level toggles for the code block chrome (driven by Notes preferences). Defaults show both. */
 export const CodeBlockChromeContext = createContext<{ showLanguageSelector: boolean; showCopyButton: boolean }>({
   showLanguageSelector: true,

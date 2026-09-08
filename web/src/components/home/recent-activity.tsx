@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { Sparkle } from 'lucide-react'
+import { Sparkle } from '@/components/icons'
 import { List, ListItem } from '@/components/data-display/list'
 import { Avatar } from '@/components/data-display/avatar'
 import { EmptyState } from '@/components/feedback/empty-state'

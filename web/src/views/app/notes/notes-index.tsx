@@ -7,7 +7,7 @@
  */
 import { useEffect, useRef } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { NotebookText, Plus } from 'lucide-react'
+import { NotebookText, Plus } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useNotes } from '@/data/notes/use-notes'
 import { sortNotes } from '@/data/notes/note-model'

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Sparkles, CornerDownLeft } from 'lucide-react'
+import { Sparkles } from '@/components/icons'
+import { CornerDownLeft } from 'lucide-react'
 import { SearchShell } from '@/components/ui/search-shell'
 import { KeyboardShortcut } from '@/components/ui/keyboard-shortcut'
 import { useControllableState } from '@/hooks'

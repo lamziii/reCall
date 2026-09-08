@@ -5,8 +5,7 @@
  * show what a block looks like before inserting it (Notion-style hover preview). Keyed by slash item
  * title; a title with no entry simply shows no preview panel.
  */
-import { CalendarDays } from 'lucide-react'
-
+import { CalendarDays } from '@/components/icons'
 const Line = ({ w = '100%' }: { w?: string }) => <div className="h-1.5 rounded-full bg-border-strong/70" style={{ width: w }} />
 
 function TodoPreview() {

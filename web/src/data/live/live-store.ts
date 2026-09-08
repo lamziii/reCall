@@ -28,6 +28,9 @@ export interface CreateSessionInput {
   title: string
   transcript: string
   sessionType?: string
+  /** Real project link (projects/{id}). Persisted as `project_id`; pair with projectName for the
+   *  denormalized display label so the Sessions list needn't join projects. */
+  projectId?: string | null
   projectName?: string | null
   participants?: string[]
   notes?: string | null
@@ -54,6 +57,7 @@ export async function createSession(input: CreateSessionInput): Promise<string> 
     status: 'completed' as const,
     session_type: input.sessionType ?? 'Meeting',
     transcript: input.transcript,
+    project_id: input.projectId ?? null,
     project_name: input.projectName ?? null,
     participants: input.participants ?? [],
     notes: input.notes ?? null,

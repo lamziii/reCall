@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { MoreHorizontal, Plus } from 'lucide-react'
+import { MoreHorizontal, Plus } from '@/components/icons'
 import { BackButton } from '@/components/navigation/back-button'
 import { Button, IconButton } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'

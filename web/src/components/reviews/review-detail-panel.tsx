@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { Mic } from 'lucide-react'
+import { Mic } from '@/components/icons'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { ConfidenceIndicator } from '@/components/recall/confidence-indicator'

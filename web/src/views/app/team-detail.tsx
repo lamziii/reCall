@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from '@/lib/router-compat'
-import { AlertTriangle, FolderKanban, Users } from 'lucide-react'
+import { AlertTriangle, FolderKanban, Users } from '@/components/icons'
 import { PageContainer } from '@/components/layout/page'
 import { Tab, TabList, TabPanel, Tabs } from '@/components/navigation/tabs'
 import { Skeleton } from '@/components/feedback/skeleton'

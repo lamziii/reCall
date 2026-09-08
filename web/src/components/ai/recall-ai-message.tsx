@@ -1,4 +1,4 @@
-import { RotateCw } from 'lucide-react'
+import { RotateCw } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RecallAiMarkdown } from './recall-ai-markdown'
 import { RecallAiSources } from './recall-ai-sources'

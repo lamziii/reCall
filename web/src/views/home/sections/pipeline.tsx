@@ -1,4 +1,5 @@
-import { AudioLines, Sparkles, Network } from 'lucide-react'
+import { Sparkles } from '@/components/icons'
+import { AudioLines, Network } from 'lucide-react'
 import { SectionShell } from '../section-shell'
 import { Stagger, RevealItem } from '../reveal'
 

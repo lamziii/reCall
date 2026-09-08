@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Calendar, FolderKanban, LayoutGrid } from 'lucide-react'
+import { Calendar, FolderKanban, LayoutGrid } from '@/components/icons'
 import { Tabs, TabList, Tab, TabPanel } from '@/components/navigation/tabs'
 import { Breadcrumb } from '@/components/navigation/breadcrumb'
 import { Pagination } from '@/components/navigation/pagination'

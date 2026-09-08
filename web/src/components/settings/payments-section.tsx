@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { CreditCard, Receipt } from 'lucide-react'
+import { CreditCard, Receipt } from '@/components/icons'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/data-display/card'
 import { Button } from '@/components/ui/button'
 import { Label, Small, Caption } from '@/components/typography'

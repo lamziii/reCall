@@ -1,4 +1,5 @@
-import { CheckSquare, FileText, GitBranch } from 'lucide-react'
+import { CheckSquare, FileText } from '@/components/icons'
+import { GitBranch } from 'lucide-react'
 import { Timeline, TimelineItem } from '@/components/data-display/timeline'
 import { EmptyState } from '@/components/feedback/empty-state'
 import type { ProjectTimelineItem } from '@/data/projects/types'

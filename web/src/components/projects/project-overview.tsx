@@ -1,4 +1,4 @@
-import { FileText, Mic } from 'lucide-react'
+import { FileText, Mic } from '@/components/icons'
 import { Divider } from '@/components/data-display/divider'
 import { List } from '@/components/data-display/list'
 import { Avatar } from '@/components/data-display/avatar'

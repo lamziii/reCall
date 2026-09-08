@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mic } from 'lucide-react'
+import { Mic } from '@/components/icons'
 import { FormField } from '@/components/forms/form-field'
 import { Input } from '@/components/forms/input'
 import { Select } from '@/components/forms/select'

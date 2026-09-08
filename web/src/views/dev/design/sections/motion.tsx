@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw } from '@/components/icons'
 import { Button, IconButton } from '@/components/ui/button'
 import { fade, slideUp, scaleIn, staggerContainer, staggerItem, hoverLift } from '@/styles/animations'
 import { PlaygroundSection, PlaygroundRow } from '../playground-section'

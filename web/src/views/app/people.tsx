@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Search as SearchIcon, Users, X } from 'lucide-react'
+import { Search as SearchIcon, Users, X } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { ChevronRight, Mic, Search as SearchIcon, Upload } from 'lucide-react'
+import { ChevronRight, Mic, Search as SearchIcon, Upload } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'

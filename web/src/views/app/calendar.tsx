@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { AlertCircle, CalendarClock, CalendarDays, CalendarPlus, CalendarRange, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
+import { AlertCircle, CalendarDays, ChevronLeft, ChevronRight, Clock } from '@/components/icons'
+import { CalendarClock, CalendarPlus, CalendarRange } from 'lucide-react'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Surface } from '@/components/layout/surface'
 import { Button, IconButton } from '@/components/ui/button'

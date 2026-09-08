@@ -1,4 +1,4 @@
-import { LayoutGrid, List as ListIcon, X } from 'lucide-react'
+import { LayoutGrid, List as ListIcon, X } from '@/components/icons'
 import { SearchInput } from '@/components/forms/search-input'
 import { Select } from '@/components/forms/select'
 import { Button } from '@/components/ui/button'

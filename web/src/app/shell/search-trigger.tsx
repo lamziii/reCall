@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { Search } from '@/components/icons'
 import { KeyboardShortcut } from '@/components/ui/keyboard-shortcut'
 import { cn } from '@/lib/utils'
 

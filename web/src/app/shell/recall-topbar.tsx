@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from '@/lib/router-compat'
-import { Bell, CheckSquare, FolderKanban, Menu, Mic, NotebookText, Plus, User } from 'lucide-react'
+import { Bell, CheckSquare, FolderKanban, Menu, Mic, NotebookText, Plus, User } from '@/components/icons'
 import { Header } from '@/components/layout/header'
 import { IconButton } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu'

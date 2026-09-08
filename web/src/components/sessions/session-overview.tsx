@@ -1,4 +1,4 @@
-import { FileText } from 'lucide-react'
+import { FileText } from '@/components/icons'
 import { Divider } from '@/components/data-display/divider'
 import { Timeline, TimelineItem } from '@/components/data-display/timeline'
 import { TimestampLink } from '@/components/recall/timestamp-link'

@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { FolderKanban, Mic } from 'lucide-react'
+import { FolderKanban, Mic } from '@/components/icons'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Select } from '@/components/forms/select'
 import { PriorityBadge } from '@/components/data-display/priority-badge'

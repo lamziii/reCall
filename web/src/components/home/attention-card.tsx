@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { FileText } from 'lucide-react'
+import { FileText } from '@/components/icons'
 import { Surface } from '@/components/layout/surface'
 import { Button } from '@/components/ui/button'
 import { Body, Caption, Title } from '@/components/typography'

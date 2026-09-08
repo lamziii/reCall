@@ -87,6 +87,31 @@
         { "fieldPath": "normalized_email", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "waitlistQuestions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "active", "order": "ASCENDING" },
+        { "fieldPath": "order", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "waitlistApplicants",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "rankTier", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "waitlistApplicants",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "rankTier", "order": "ASCENDING" },
+        { "fieldPath": "verifiedAt", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

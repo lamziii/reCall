@@ -1,4 +1,4 @@
-import { Mic } from 'lucide-react'
+import { Mic } from '@/components/icons'
 import { BackButton } from '@/components/navigation/back-button'
 import { Caption, Title } from '@/components/typography'
 import { RecordingStatus } from './recording-status'

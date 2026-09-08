@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ClipboardCheck, Search as SearchIcon } from 'lucide-react'
+import { ClipboardCheck, Search as SearchIcon } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'

@@ -1,8 +1,9 @@
-import { Circle, Loader2, Pause } from 'lucide-react'
+import { Pause, type IconComponent } from '@/components/icons'
+import { Circle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { RecordingStatus as RecordingStatusValue } from '@/data/recording/recording-types'
 
-const CONFIG: Record<RecordingStatusValue, { label: string; icon: typeof Circle; className: string; pulse?: boolean }> = {
+const CONFIG: Record<RecordingStatusValue, { label: string; icon: IconComponent; className: string; pulse?: boolean }> = {
   idle: { label: 'Idle', icon: Circle, className: 'text-subtle-foreground' },
   'requesting-permission': { label: 'Requesting microphone access…', icon: Loader2, className: 'text-muted-foreground' },
   recording: { label: 'Recording', icon: Circle, className: 'text-danger', pulse: true },

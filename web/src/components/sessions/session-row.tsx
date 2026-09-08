@@ -1,5 +1,6 @@
 import { useNavigate } from '@/lib/router-compat'
-import { CheckSquare, GitBranch } from 'lucide-react'
+import { CheckSquare } from '@/components/icons'
+import { GitBranch } from 'lucide-react'
 import { ListItem } from '@/components/data-display/list'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarGroup } from '@/components/data-display/avatar'

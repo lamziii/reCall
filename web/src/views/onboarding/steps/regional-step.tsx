@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Clock } from 'lucide-react'
+import { Clock } from '@/components/icons'
 import { Combobox, FormField, Select, SegmentedControl } from '@/components/forms'
 import { Body, Caption, Small } from '@/components/typography'
 import { Button } from '@/components/ui/button'

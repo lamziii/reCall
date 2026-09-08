@@ -149,3 +149,44 @@ export interface LiveTaskDoc {
   created_at?: Timestamp | null
   updated_at?: Timestamp | null
 }
+
+// ---- Projects ------------------------------------------------------------------------------------
+// The persistent organizational layer above individual sessions. Related entities (sessions, tasks,
+// notes, …) carry `project_id` — we deliberately do NOT store id arrays on the project, so a
+// project page queries its entities by project_id. Workspace-scoped (`workspace_id`) with an
+// `owner_id`; a future Workspace/Teams layer sits above via workspace_id + a projects/{id}/members
+// subcollection, with zero change to this doc.
+
+export type ProjectStatus = 'active' | 'completed' | 'archived'
+export type ProjectType = 'general' | 'software' | 'design' | 'research' | 'client' | 'other'
+
+/** A single technology on a (software) project. Structured, not a comma-joined string, so it can
+ *  feed Recall AI context later. Custom entries are allowed (no fixed catalog required). */
+export interface TechStackItem {
+  id: string
+  name: string
+  slug?: string
+  category?: string
+  icon?: string
+}
+
+/** projects/{projectId}. snake_case matches the repo's Firestore convention. */
+export interface LiveProjectDoc {
+  id: string
+  workspace_id: string
+  owner_id: string
+  name: string
+  description?: string | null
+  /** Emoji/icon fallback when no logo image is set. */
+  icon?: string | null
+  /** Storage download URLs for optional visual identity (uploaded via project-media). */
+  logo_url?: string | null
+  banner_url?: string | null
+  type: ProjectType
+  status: ProjectStatus
+  tech_stack?: TechStackItem[]
+  /** Epoch ms when archived, else null. */
+  archived_at?: number | null
+  created_at?: Timestamp | null
+  updated_at?: Timestamp | null
+}

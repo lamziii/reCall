@@ -1,4 +1,4 @@
-import { Clock, FileText, CheckCircle2 } from 'lucide-react'
+import { Clock, FileText, CheckCircle2 } from '@/components/icons'
 import { StatusBadge } from '@/components/data-display/status-badge'
 import { Badge } from '@/components/data-display/badge'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, CardActions } from '@/components/data-display/card'

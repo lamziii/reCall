@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
-import { Clock, CreditCard, Gauge, Mic, MessageSquare } from "lucide-react";
+import { Clock, CreditCard, Mic, MessageSquare } from '@/components/icons'
+import { Gauge } from 'lucide-react'
 import { PageContainer, PageHeader } from "@/components/layout/page";
 import {
   Card,

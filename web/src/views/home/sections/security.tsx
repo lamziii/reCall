@@ -1,4 +1,5 @@
-import { Lock, EyeOff, KeyRound, Globe, ShieldCheck, Database } from 'lucide-react'
+import { Lock, EyeOff, KeyRound, Globe, Database } from '@/components/icons'
+import { ShieldCheck } from 'lucide-react'
 import { SectionShell } from '../section-shell'
 import { Stagger, RevealItem } from '../reveal'
 

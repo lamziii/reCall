@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
-import { CheckSquare, FileText, FolderKanban, GitBranch, User, Video } from 'lucide-react'
+import { CheckSquare, FileText, FolderKanban, User, Video, type IconComponent } from '@/components/icons'
+import { GitBranch } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export type MentionType = 'person' | 'project' | 'task' | 'decision' | 'document' | 'session'
 
-export const MENTION_ICONS: Record<MentionType, typeof User> = {
+export const MENTION_ICONS: Record<MentionType, IconComponent> = {
   person: User,
   project: FolderKanban,
   task: CheckSquare,

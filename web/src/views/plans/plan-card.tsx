@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { Check, Minus } from 'lucide-react'
+import { Check, Minus } from '@/components/icons'
 import { Surface } from '@/components/layout/surface'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Caption, Small, Title } from '@/components/typography'

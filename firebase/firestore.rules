@@ -188,5 +188,35 @@ service cloud.firestore {
     match /development_taskboard_meta/{docId} {
       allow read, create, update: if request.auth != null;
     }
+
+    // ========================================================================
+    // waitlist* — Recall Early Access waitlist (separate app: recall-waitlist repo, same
+    // Firebase project). See recall-waitlist/docs/waitlist.md § Firestore security.
+    // ========================================================================
+    // Deny-all for direct client access. ALL waitlist reads/writes go through the waitlist
+    // Next.js app's server via the Admin SDK, which bypasses Security Rules entirely — the
+    // browser's only legitimate Firebase touchpoint for the waitlist is Auth (email-link
+    // sign-in), never Firestore. This is deliberately the strongest, simplest posture: no
+    // per-field read rules to get subtly wrong and leak applicant PII or referral/scoring data.
+    // Does not affect any rule above — additive only.
+    match /waitlistApplicants/{applicantId} {
+      allow read, write: if false;
+
+      match /answers/{questionId} {
+        allow read, write: if false;
+      }
+    }
+
+    match /waitlistReferrals/{referralId} {
+      allow read, write: if false;
+    }
+
+    match /waitlistQuestions/{questionId} {
+      allow read, write: if false;
+    }
+
+    match /waitlistEvents/{eventId} {
+      allow read, write: if false;
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { useNavigate } from '@/lib/router-compat'
-import { FolderKanban, Mic, Users } from 'lucide-react'
+import { FolderKanban, Mic, Users } from '@/components/icons'
 import { Card } from '@/components/data-display/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarGroup } from '@/components/data-display/avatar'

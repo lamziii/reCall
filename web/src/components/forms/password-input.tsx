@@ -1,5 +1,5 @@
 import { forwardRef, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from '@/components/icons'
 import { Input, type InputProps } from './input'
 import { cn } from '@/lib/utils'
 

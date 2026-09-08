@@ -1,4 +1,4 @@
-import { Flag } from 'lucide-react'
+import { Flag, FlagSolid } from '@/components/icons'
 import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
@@ -24,7 +24,7 @@ export function PriorityIndicator({ priority, className }: PriorityIndicatorProp
   return (
     <Tooltip content={label}>
       <span tabIndex={0} aria-label={label} className={cn('focus-ring inline-flex items-center justify-center rounded-sm', className)}>
-        <Flag className={cn('size-3.5', color)} fill={priority === 'none' ? 'none' : 'currentColor'} />
+        {priority === 'none' ? <Flag className={cn('size-3.5', color)} /> : <FlagSolid className={cn('size-3.5', color)} />}
       </span>
     </Tooltip>
   )

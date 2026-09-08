@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from '@/components/icons'
 import { useAuth } from '@/lib/auth/auth-context'
 import { isDemoMode } from './data-mode'
 import { bootstrapWorkspace } from './workspace-bootstrap'

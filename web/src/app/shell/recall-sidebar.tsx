@@ -1,5 +1,6 @@
 import { useNavigate } from '@/lib/router-compat'
-import { Bell, CircleQuestionMark, PanelLeftClose, PanelLeftOpen, Settings, User } from 'lucide-react'
+import { Bell, BellSolid, CircleQuestionMark, CircleQuestionMarkSolid, Settings, SettingsSolid, User, UserSolid } from '@/components/icons'
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { Sidebar, SidebarHeader, SidebarSection, SidebarItem, SidebarButtonItem, SidebarFooter } from '@/components/layout/sidebar'
 import { Logo } from '@/components/branding/logo'
 import { IconButton } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { ProfileMenu } from './profile-menu'
 import { APP_BASE, MAIN_NAV, WORKSPACE_NAV } from './nav-config'
 import { useWorkspaceName } from '@/data/live/use-workspace-name'
 import { useAuth } from '@/lib/auth/auth-context'
+import { useRecallPreferences } from '@/settings'
 import { cn } from '@/lib/utils'
 
 export interface RecallSidebarProps {
@@ -24,6 +26,9 @@ export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle
   const navigate = useNavigate()
   const workspaceName = useWorkspaceName()
   const { user } = useAuth()
+  // Sidebar icon-style preference: outline shows the pack's line icons, filled/duotone the solid ones.
+  const { preferences } = useRecallPreferences()
+  const solid = preferences.appearance.sidebarIconStyle !== 'outline'
 
   return (
     <Sidebar collapsed={collapsed} className="recall-sidebar">
@@ -58,32 +63,38 @@ export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         <SidebarSection label="Main">
-          {MAIN_NAV.map((item) => (
-            <SidebarItem key={item.to} to={item.to} end={item.end} icon={<item.icon />}>
-              {item.label}
-            </SidebarItem>
-          ))}
+          {MAIN_NAV.map((item) => {
+            const Icon = solid ? item.iconSolid : item.icon
+            return (
+              <SidebarItem key={item.to} to={item.to} end={item.end} icon={<Icon />}>
+                {item.label}
+              </SidebarItem>
+            )
+          })}
         </SidebarSection>
 
         <SidebarSection label="Workspace">
-          {WORKSPACE_NAV.map((item) => (
-            <SidebarItem key={item.to} to={item.to} icon={<item.icon />}>
-              {item.label}
-            </SidebarItem>
-          ))}
+          {WORKSPACE_NAV.map((item) => {
+            const Icon = solid ? item.iconSolid : item.icon
+            return (
+              <SidebarItem key={item.to} to={item.to} icon={<Icon />}>
+                {item.label}
+              </SidebarItem>
+            )
+          })}
 
-          <NotificationsMenu placement="right" trigger={<SidebarButtonItem icon={<Bell />}>Notifications</SidebarButtonItem>} />
+          <NotificationsMenu placement="right" trigger={<SidebarButtonItem icon={solid ? <BellSolid /> : <Bell />}>Notifications</SidebarButtonItem>} />
         </SidebarSection>
       </div>
 
       <SidebarFooter>
-        <SidebarItem to={`${APP_BASE}/settings`} icon={<Settings />}>
+        <SidebarItem to={`${APP_BASE}/settings`} icon={solid ? <SettingsSolid /> : <Settings />}>
           Settings
         </SidebarItem>
 
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <SidebarButtonItem icon={<CircleQuestionMark />}>Help</SidebarButtonItem>
+            <SidebarButtonItem icon={solid ? <CircleQuestionMarkSolid /> : <CircleQuestionMark />}>Help</SidebarButtonItem>
           </DropdownMenuTrigger>
           <DropdownMenuContent width={200} placement="right">
             <DropdownMenuLabel>Help</DropdownMenuLabel>
@@ -92,7 +103,7 @@ export function RecallSidebar({ collapsed, onToggleCollapsed, showCollapseToggle
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <ProfileMenu placement="right" trigger={<SidebarButtonItem icon={<User />}>Profile</SidebarButtonItem>} />
+        <ProfileMenu placement="right" trigger={<SidebarButtonItem icon={solid ? <UserSolid /> : <User />}>Profile</SidebarButtonItem>} />
       </SidebarFooter>
     </Sidebar>
   )

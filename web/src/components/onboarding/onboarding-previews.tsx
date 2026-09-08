@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
-import { GitBranch, CheckSquare, HelpCircle, Search, Video, FolderKanban, Square, MousePointer2, ArrowRight } from 'lucide-react'
+import { CheckSquare, HelpCircle, Search, Video, FolderKanban, SquareSolid, ArrowRight, type IconComponent } from '@/components/icons'
+import { GitBranch, MousePointer2 } from 'lucide-react'
 import { StatusBadge } from '@/components/data-display/status-badge'
 import { cn } from '@/lib/utils'
 import type { PlaceholderKind } from '@/lib/onboarding/tutorial-config'
@@ -20,7 +21,7 @@ function Cursor({ className }: { className?: string }) {
   )
 }
 
-function Chip({ icon: Icon, label, tone }: { icon: typeof GitBranch; label: string; tone: string }) {
+function Chip({ icon: Icon, label, tone }: { icon: IconComponent; label: string; tone: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2 py-1 text-caption font-medium text-foreground">
       <Icon className={cn('size-3', tone)} />
@@ -77,7 +78,7 @@ function RecordPreview() {
           tabIndex={-1}
           className="pointer-events-none flex w-full items-center justify-center gap-2 rounded-md bg-danger px-3 py-2 text-small font-medium text-danger-foreground"
         >
-          <Square className="size-3.5 fill-current" />
+          <SquareSolid className="size-3.5" />
           Stop recording
         </button>
       </div>

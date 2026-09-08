@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Copy, Archive, Trash2 } from 'lucide-react'
+import { Copy, Archive, Trash2 } from '@/components/icons'
 import { Button, IconButton } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/buttons'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/data-display/table'

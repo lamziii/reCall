@@ -8,7 +8,7 @@
  * waveform · Mark moment / End. No navigation, no app shell, no transcript.
  */
 import { useEffect, useRef, useState } from 'react'
-import { Flag, Square } from 'lucide-react'
+import { Flag, SquareSolid } from '@/components/icons'
 import { useActiveSession } from '@/data/active-session/active-session-context'
 import { useNotesEditor } from '@/data/active-session/use-notes-editor'
 import { RichNotesEditor } from './rich-notes-editor'
@@ -106,7 +106,7 @@ export function MeetingCompanion({ onClose }: { onClose: () => void }) {
             aria-label="End session"
             className="focus-ring ml-auto flex items-center gap-1.5 rounded-full bg-danger px-3 py-1.5 text-caption font-medium text-white transition-fast hover:opacity-90 disabled:opacity-60"
           >
-            <Square className="size-3 fill-current" />
+            <SquareSolid className="size-3" />
             End
           </button>
         </div>

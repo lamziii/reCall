@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams } from '@/lib/router-compat'
-import { Database, PlayCircle, RotateCcw } from 'lucide-react'
+import { Database, PlayCircle, RotateCcw } from '@/components/icons'
 import { Label, Small } from '@/components/typography'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'

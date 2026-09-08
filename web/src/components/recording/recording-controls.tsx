@@ -1,4 +1,4 @@
-import { Pause, Play, Square } from 'lucide-react'
+import { Pause, Play, SquareSolid } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import type { RecordingStatus } from '@/data/recording/recording-types'
 
@@ -26,7 +26,7 @@ export function RecordingControls({ status, onPause, onResume, onStop, className
             Pause
           </Button>
         )}
-        <Button variant="outline" leftIcon={<Square className="fill-current" />} onClick={onStop} disabled={busy} aria-label="Stop recording">
+        <Button variant="outline" leftIcon={<SquareSolid />} onClick={onStop} disabled={busy} aria-label="Stop recording">
           Stop recording
         </Button>
       </div>

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Download, Upload } from 'lucide-react'
+import { Download, Upload } from '@/components/icons'
 import { useToast } from '@/components/feedback'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useRecallPreferences } from '@/settings/settings-context'

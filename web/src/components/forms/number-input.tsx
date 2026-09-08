@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp } from '@/components/icons'
 import { inputVariants } from './input'
 import { cn } from '@/lib/utils'
 

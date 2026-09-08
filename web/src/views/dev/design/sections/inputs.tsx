@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail } from 'lucide-react'
+import { Mail } from '@/components/icons'
 import { Input } from '@/components/forms/input'
 import { SearchInput } from '@/components/forms/search-input'
 import { PasswordInput } from '@/components/forms/password-input'

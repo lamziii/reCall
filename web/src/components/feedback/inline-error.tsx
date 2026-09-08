@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle } from '@/components/icons'
 import { cn } from '@/lib/utils'
 
 export function InlineError({ children, className }: { children: ReactNode; className?: string }) {

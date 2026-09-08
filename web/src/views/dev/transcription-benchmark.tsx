@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { AlertTriangle, Clock, DollarSign, Languages, Upload, Users } from 'lucide-react'
+import { AlertTriangle, Clock, DollarSign, Languages, Upload, Users } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/data-display/card'
 import { Badge } from '@/components/data-display/badge'

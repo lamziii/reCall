@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Inbox } from 'lucide-react'
+import { Inbox } from '@/components/icons'
 import { Progress } from '@/components/feedback/progress'
 import { Spinner } from '@/components/feedback/spinner'
 import { LoadingDots } from '@/components/feedback/loading-dots'

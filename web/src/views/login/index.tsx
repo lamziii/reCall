@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from '@/lib/router-compat'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from '@/components/icons'
 import { Wordmark, GoogleIcon } from '@/components/branding'
 import { Button } from '@/components/ui/button'
 import { Alert, useToast } from '@/components/feedback'

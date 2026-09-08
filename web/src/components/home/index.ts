@@ -1,5 +1,6 @@
 export * from './home-header'
 export * from './attention-card'
+export * from './quick-start'
 export * from './today-schedule'
 export * from './attention-list'
 export * from './recent-sessions'

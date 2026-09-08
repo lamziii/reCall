@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react'
+import { Users } from '@/components/icons'
 import { PageContainer, PageHeader } from '@/components/layout/page'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/feedback/empty-state'

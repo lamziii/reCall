@@ -275,16 +275,13 @@
     0 0 8px oklch(0% 0 0 / 0.08);
 }
 
-/* ---- Sidebar icon style ---- Lucide icons are stroked outlines by default. Filled adds a soft
-   currentColor fill; Duotone tints the fill with the accent for a two-tone look. Scoped to the
-   sidebar nav so the rest of the app's icons keep their outline style. */
-[data-icon-style='filled'] .recall-sidebar svg {
-  fill: currentColor;
-  fill-opacity: 0.16;
-}
+/* ---- Sidebar icon style ---- The icon pack is fill-based (paths use fill=currentColor), so
+   Outline vs Filled is chosen by swapping the line/solid SVG variant in RecallSidebar — a CSS
+   fill-opacity trick (which suited Lucide's stroke+fill icons) would just make these translucent.
+   Duotone tints the solid icons with the accent color via currentColor. Scoped to the sidebar nav
+   so the rest of the app keeps its line icons. */
 [data-icon-style='duotone'] .recall-sidebar svg {
-  fill: var(--color-accent);
-  fill-opacity: 0.28;
+  color: var(--color-accent);
 }
 
 /* ---- Dashboard layout ---- The home dashboard's two split rows follow this. Mixed keeps the

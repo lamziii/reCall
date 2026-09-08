@@ -9,6 +9,67 @@
   }
 }
 
+/* ---- Shimmer "working" text ---- The shared motion language for AI / processing states: a bright
+   band sweeps across muted copy so a status line reads as alive without a spinner. Adapted from
+   transitions.dev (shimmer-text), wired to Recall's color tokens. The global reduce-motion block
+   (index.css + preferences.css) already zeroes the animation; the OS guard below is a second net. */
+.t-shimmer {
+  position: relative;
+  display: inline-block;
+  color: var(--color-muted-foreground);
+}
+.t-shimmer::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 40%,
+    var(--color-foreground) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 400% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: t-shimmer 2s linear infinite;
+}
+@keyframes t-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+/* ---- Checkbox stroke-draw ---- The box fills, then the checkmark draws itself in, so ticking a box
+   feels earned. Adapted from transitions.dev (checkbox-check); driven by the native peer input's
+   :checked state. dasharray 12 fully covers the ~10.6px path so offset 0 = fully drawn. */
+.t-check-path {
+  stroke-dasharray: 12;
+  stroke-dashoffset: 12;
+  transition: stroke-dashoffset var(--duration-fast) var(--ease-standard);
+}
+.peer:checked ~ span .t-check-path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--duration-slow) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-shimmer::before {
+    animation: none !important;
+  }
+  .t-check-path {
+    transition: none !important;
+  }
+}
+
 /* Hero dashboard screenshot: slow perimeter light + static ambient glow. */
 @property --halo-angle {
   syntax: '<angle>';
